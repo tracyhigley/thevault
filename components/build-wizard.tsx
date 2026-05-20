@@ -8,6 +8,8 @@ import { formatEndOfDay12h, parseTimeOnDate } from "@/lib/daily-plan";
 import { saveDayInputsPartial, applyAtmBoxBudgets } from "@/lib/actions";
 import { markPreferTodayOverDropLanding } from "@/lib/vault-nav-client";
 import { DropTriageRow } from "@/components/drop-triage-row";
+import { EditableText } from "@/components/editable-text";
+import { NewCounterItemRow } from "@/components/new-counter-item-row";
 import { TodayToggle } from "./today-toggle";
 import type { DayInputs, Item } from "@/lib/types";
 import type { Box, EnergyType } from "@/lib/categories";
@@ -103,6 +105,7 @@ export function BuildWizard({
         )}
         {step === 3 && (
           <ReviewStep
+            boxes={boxes}
             stressors={stressors}
             timeSensitive={timeSensitive}
             mustDo={mustDo}
@@ -293,12 +296,14 @@ function DropStep({
 
 // Step 3: Counter review.
 function ReviewStep({
+  boxes,
   stressors,
   timeSensitive,
   mustDo,
   otherAdmin,
   onNext,
 }: {
+  boxes: Box[];
   stressors: Item[];
   timeSensitive: Item[];
   mustDo: Item[];
@@ -312,12 +317,15 @@ function ReviewStep({
       title="What's already on the counter?"
       hint={
         total === 0
-          ? "Nothing pulled up. Today is yours."
-          : "Tap + TODAY on the ones you want to schedule. Anything you don't add stays in the Counter for another day."
+          ? "Nothing on the Counter yet — add items below, or continue with an empty plan."
+          : "Edit titles and minutes as needed. Tap + TODAY on what you want scheduled; add more items anytime before you continue."
       }
       submitLabel="ON TO THE ATM →"
       onSubmit={onNext}
     >
+      <div className="mb-4">
+        <NewCounterItemRow boxes={boxes} />
+      </div>
       <Group label="Stressors" tone="rust">
         {stressors.length === 0 ? <Empty /> : stressors.map((it) => <Row key={it.id} item={it} />)}
       </Group>
@@ -348,17 +356,26 @@ function Row({ item }: { item: Item }) {
           {item.area}
         </span>
       )}
-      <span
+      <EditableText
+        itemId={item.id}
+        field="title"
+        initial={item.title}
         className={clsx(
-          "vault-task-title min-w-0 flex-1 truncate",
+          "vault-task-title min-w-0 flex-1",
           onToday ? "text-ink" : "text-ink-mute",
         )}
-        title={item.title}
-      >
-        {item.title}
-      </span>
-      <span className="w-16 shrink-0 whitespace-nowrap text-right font-mono text-[11px] text-ink-mute">
-        {item.minutes ?? "—"} min
+        placeholder="(no title)"
+      />
+      <span className="flex shrink-0 items-baseline justify-end gap-1 whitespace-nowrap font-mono text-[11px] text-ink-mute tabular-nums">
+        <EditableText
+          itemId={item.id}
+          field="minutes"
+          initial={item.minutes}
+          className="min-w-[3.25rem] w-16 max-w-[4.5rem] bg-transparent px-0 text-right text-[11px] tabular-nums"
+          numeric
+          placeholder="—"
+        />
+        <span>min</span>
       </span>
       <TodayToggle itemId={item.id} on={onToday} size="sm" />
     </div>
