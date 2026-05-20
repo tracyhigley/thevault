@@ -209,6 +209,31 @@ describe("buildSchedule", () => {
     expect(new Date(blocks[0].start).getMinutes()).toBe(30);
   });
 
+  it("when starting the plan day before the configured window, first block uses next quarter from now", () => {
+    const classified = classify([
+      baseItem({ urgent: false, must: true, minutes: 30, title: "Early" }),
+    ]);
+    const now = new Date(2026, 4, 1, 8, 7, 0);
+    const blocks = buildSchedule({ classified, atmPicks: [], inputs, now });
+    expect(new Date(blocks[0].start).getHours()).toBe(8);
+    expect(new Date(blocks[0].start).getMinutes()).toBe(15);
+  });
+
+  it("each following block starts on a quarter-hour boundary", () => {
+    const classified = classify([
+      baseItem({ urgent: false, must: true, minutes: 25, title: "A" }),
+      baseItem({ urgent: false, must: true, minutes: 20, title: "B", todayOrder: 2 }),
+    ]);
+    const now = new Date(2026, 4, 1, 10, 0, 0);
+    const blocks = buildSchedule({ classified, atmPicks: [], inputs, now });
+    expect(blocks).toHaveLength(2);
+    const aEnd = new Date(blocks[0].end);
+    const bStart = new Date(blocks[1].start);
+    expect(bStart.getHours()).toBe(10);
+    expect(bStart.getMinutes()).toBe(30);
+    expect(aEnd.getMinutes() % 15).toBe(10);
+  });
+
   it("ignores `now` when it's a different day (e.g. building tonight for tomorrow)", () => {
     const classified = classify([
       baseItem({ urgent: false, must: true, minutes: 30, title: "M1" }),

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState, useTransition } from "react";
 import {
+  ceilToNextQuarterHourLocal,
   dayScheduleWindow,
   type ScheduledBlock,
 } from "@/lib/daily-plan";
@@ -64,7 +65,7 @@ function buildBlocksFromTodayOrder(
   );
 
   let q = 0;
-  let cursor = new Date(dayStart);
+  let cursor = ceilToNextQuarterHourLocal(dayStart);
 
   for (const p of pinned) {
     const pStart = pinById.get(p.id)!;
@@ -72,11 +73,12 @@ function buildBlocksFromTodayOrder(
     // Fill open time before this pinned block with non-pinned tasks
     // in today-order, but only when they fit fully.
     while (q < queue.length) {
+      cursor = ceilToNextQuarterHourLocal(cursor);
       const it = queue[q];
       const minutes = it.minutes ?? 0;
-      const endMs = cursor.getTime() + minutes * 60_000;
-      if (endMs > pStart.getTime()) break;
       const start = new Date(cursor);
+      const endMs = start.getTime() + minutes * 60_000;
+      if (endMs > pStart.getTime()) break;
       const end = new Date(endMs);
       blocks.push({
         itemId: it.id,
@@ -88,7 +90,7 @@ function buildBlocksFromTodayOrder(
         pinned: false,
         area: it.area ?? it.category,
       });
-      cursor = end;
+      cursor = ceilToNextQuarterHourLocal(end);
       q += 1;
     }
 
@@ -104,12 +106,15 @@ function buildBlocksFromTodayOrder(
       pinned: true,
       area: p.area ?? p.category,
     });
-    cursor = new Date(Math.max(cursor.getTime(), pEnd.getTime()));
+    cursor = ceilToNextQuarterHourLocal(
+      new Date(Math.max(cursor.getTime(), pEnd.getTime())),
+    );
   }
 
   while (q < queue.length) {
     const it = queue[q++];
     const minutes = it.minutes ?? 0;
+    cursor = ceilToNextQuarterHourLocal(cursor);
     const start = new Date(cursor);
     const end = new Date(start.getTime() + minutes * 60_000);
     blocks.push({
@@ -122,7 +127,7 @@ function buildBlocksFromTodayOrder(
       pinned: false,
       area: it.area ?? it.category,
     });
-    cursor = end;
+    cursor = ceilToNextQuarterHourLocal(end);
   }
 
   return blocks;

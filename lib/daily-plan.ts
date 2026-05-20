@@ -150,28 +150,25 @@ export function ceilToNextQuarterHourLocal(d: Date): Date {
   return new Date(start.getTime() + up);
 }
 
-/** Working window for the docket header — not the first task’s start (pins can move that later). */
+/** Working window for the docket header and the first schedulable slot. */
 export function dayScheduleWindow(
   inputs: DayInputs,
   now?: Date,
 ): { dayStart: Date; endOfDay: Date } {
   const endOfDay = parseTimeOnDate(inputs.endOfDay, inputs.date);
-  const configuredStart = new Date(
-    endOfDay.getTime() - inputs.hoursAvailable * 60 * 60_000,
-  );
   const nowOnDate = now ?? new Date();
+  const planDay = parseTimeOnDate("12:00", inputs.date);
 
   let dayStart: Date;
-  if (
-    nowOnDate > configuredStart &&
-    sameLocalDate(nowOnDate, configuredStart)
-  ) {
+  if (sameLocalDate(nowOnDate, planDay)) {
+    // Same calendar day as the plan — first block starts at the next quarter-hour from now.
     dayStart = ceilToNextQuarterHourLocal(nowOnDate);
-    if (dayStart.getTime() <= configuredStart.getTime()) {
-      dayStart = configuredStart;
-    }
   } else {
-    dayStart = configuredStart;
+    // Building ahead (e.g. tonight for tomorrow) — anchor from configured window.
+    const configuredStart = new Date(
+      endOfDay.getTime() - inputs.hoursAvailable * 60 * 60_000,
+    );
+    dayStart = ceilToNextQuarterHourLocal(configuredStart);
   }
 
   if (dayStart.getTime() > endOfDay.getTime()) {
@@ -266,7 +263,7 @@ function appendBlocks(
   cursor: Date,
   forceBucket?: ScheduledBlock["bucket"],
 ): Date {
-  let c = new Date(cursor);
+  let c = ceilToNextQuarterHourLocal(cursor);
   for (const it of items) {
     const minutes = it.minutes ?? 0;
     if (minutes <= 0) continue;
@@ -285,7 +282,7 @@ function appendBlocks(
       pinned: it.pinned,
       area: it.area ?? it.category,
     });
-    c = end;
+    c = ceilToNextQuarterHourLocal(end);
   }
   return c;
 }
