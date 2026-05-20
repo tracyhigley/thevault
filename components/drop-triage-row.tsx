@@ -31,9 +31,7 @@ export function DropTriageRow({
   const [boxKey, setBoxKey] = useState<string>(
     item.area ?? item.category ?? "",
   );
-  const [dest, setDest] = useState<Destination>(
-    item.urgent || item.must || item.should ? "COUNTER" : "ATM",
-  );
+  const [dest, setDest] = useState<Destination>("COUNTER");
   const [minutes, setMinutes] = useState<string>(
     item.minutes != null ? String(item.minutes) : "",
   );
