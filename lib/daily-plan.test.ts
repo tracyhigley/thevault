@@ -3,7 +3,7 @@ import {
   classify,
   pickAtmCandidates,
   buildSchedule,
-  ceilToNextQuarterHourLocal,
+  ceilToNextFiveMinuteLocal,
   formatEndOfDay12h,
   parseTimeOnDate,
   thresholdCallout,
@@ -188,7 +188,7 @@ describe("buildSchedule", () => {
     expect(blocks[0].title).toBe("Q1");
   });
 
-  it("when rebuilding mid-day, first block aligns to now if now is already on a quarter-hour", () => {
+  it("when rebuilding mid-day, first block aligns to now if now is already on a 5-minute mark", () => {
     const classified = classify([
       baseItem({ urgent: false, must: true, minutes: 30, title: "M1" }),
     ]);
@@ -199,27 +199,27 @@ describe("buildSchedule", () => {
     expect(new Date(blocks[0].start).getMinutes()).toBe(0);
   });
 
-  it("when rebuilding mid-day, first block starts at the next quarter-hour after now", () => {
+  it("when rebuilding mid-day, first block starts at the next 5-minute mark after now", () => {
     const classified = classify([
       baseItem({ urgent: false, must: true, minutes: 30, title: "M1" }),
     ]);
     const now = new Date(2026, 4, 1, 11, 18, 0);
     const blocks = buildSchedule({ classified, atmPicks: [], inputs, now });
     expect(new Date(blocks[0].start).getHours()).toBe(11);
-    expect(new Date(blocks[0].start).getMinutes()).toBe(30);
+    expect(new Date(blocks[0].start).getMinutes()).toBe(20);
   });
 
-  it("when starting the plan day before the configured window, first block uses next quarter from now", () => {
+  it("when starting the plan day before the configured window, first block uses next 5-minute mark from now", () => {
     const classified = classify([
       baseItem({ urgent: false, must: true, minutes: 30, title: "Early" }),
     ]);
     const now = new Date(2026, 4, 1, 8, 7, 0);
     const blocks = buildSchedule({ classified, atmPicks: [], inputs, now });
     expect(new Date(blocks[0].start).getHours()).toBe(8);
-    expect(new Date(blocks[0].start).getMinutes()).toBe(15);
+    expect(new Date(blocks[0].start).getMinutes()).toBe(10);
   });
 
-  it("each following block starts on a quarter-hour boundary", () => {
+  it("each following block starts on a 5-minute boundary", () => {
     const classified = classify([
       baseItem({ urgent: false, must: true, minutes: 25, title: "A" }),
       baseItem({ urgent: false, must: true, minutes: 20, title: "B", todayOrder: 2 }),
@@ -227,11 +227,10 @@ describe("buildSchedule", () => {
     const now = new Date(2026, 4, 1, 10, 0, 0);
     const blocks = buildSchedule({ classified, atmPicks: [], inputs, now });
     expect(blocks).toHaveLength(2);
-    const aEnd = new Date(blocks[0].end);
     const bStart = new Date(blocks[1].start);
     expect(bStart.getHours()).toBe(10);
-    expect(bStart.getMinutes()).toBe(30);
-    expect(aEnd.getMinutes() % 15).toBe(10);
+    expect(bStart.getMinutes()).toBe(25);
+    expect(bStart.getMinutes() % 5).toBe(0);
   });
 
   it("ignores `now` when it's a different day (e.g. building tonight for tomorrow)", () => {
@@ -270,19 +269,19 @@ describe("formatEndOfDay12h", () => {
   });
 });
 
-describe("ceilToNextQuarterHourLocal", () => {
-  it("keeps exact quarter boundaries", () => {
+describe("ceilToNextFiveMinuteLocal", () => {
+  it("keeps exact 5-minute boundaries", () => {
     const d = new Date(2026, 4, 1, 14, 30, 0);
-    const out = ceilToNextQuarterHourLocal(d);
+    const out = ceilToNextFiveMinuteLocal(d);
     expect(out.getHours()).toBe(14);
     expect(out.getMinutes()).toBe(30);
   });
 
-  it("rounds up between quarter hours (e.g. 2:18 → 2:30)", () => {
+  it("rounds up between 5-minute marks (e.g. 2:18 → 2:20)", () => {
     const d = new Date(2026, 4, 1, 14, 18, 0);
-    const out = ceilToNextQuarterHourLocal(d);
+    const out = ceilToNextFiveMinuteLocal(d);
     expect(out.getHours()).toBe(14);
-    expect(out.getMinutes()).toBe(30);
+    expect(out.getMinutes()).toBe(20);
   });
 });
 

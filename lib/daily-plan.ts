@@ -132,8 +132,10 @@ export type BuildScheduleArgs = {
   now?: Date;
 };
 
-/** Next quarter-hour boundary at or after `d`, in the machine's local calendar (browser / Node TZ). */
-export function ceilToNextQuarterHourLocal(d: Date): Date {
+const SCHEDULE_SLOT_MS = 5 * 60 * 1000;
+
+/** Next 5-minute boundary at or after `d`, in the machine's local calendar (browser / Node TZ). */
+export function ceilToNextFiveMinuteLocal(d: Date): Date {
   const z = new Date(d);
   const start = new Date(
     z.getFullYear(),
@@ -145,8 +147,7 @@ export function ceilToNextQuarterHourLocal(d: Date): Date {
     0,
   );
   const elapsed = z.getTime() - start.getTime();
-  const q = 15 * 60 * 1000;
-  const up = Math.ceil(elapsed / q) * q;
+  const up = Math.ceil(elapsed / SCHEDULE_SLOT_MS) * SCHEDULE_SLOT_MS;
   return new Date(start.getTime() + up);
 }
 
@@ -161,14 +162,14 @@ export function dayScheduleWindow(
 
   let dayStart: Date;
   if (sameLocalDate(nowOnDate, planDay)) {
-    // Same calendar day as the plan — first block starts at the next quarter-hour from now.
-    dayStart = ceilToNextQuarterHourLocal(nowOnDate);
+    // Same calendar day as the plan — first block starts at the next 5-minute mark from now.
+    dayStart = ceilToNextFiveMinuteLocal(nowOnDate);
   } else {
     // Building ahead (e.g. tonight for tomorrow) — anchor from configured window.
     const configuredStart = new Date(
       endOfDay.getTime() - inputs.hoursAvailable * 60 * 60_000,
     );
-    dayStart = ceilToNextQuarterHourLocal(configuredStart);
+    dayStart = ceilToNextFiveMinuteLocal(configuredStart);
   }
 
   if (dayStart.getTime() > endOfDay.getTime()) {
@@ -263,7 +264,7 @@ function appendBlocks(
   cursor: Date,
   forceBucket?: ScheduledBlock["bucket"],
 ): Date {
-  let c = ceilToNextQuarterHourLocal(cursor);
+  let c = ceilToNextFiveMinuteLocal(cursor);
   for (const it of items) {
     const minutes = it.minutes ?? 0;
     if (minutes <= 0) continue;
@@ -282,7 +283,7 @@ function appendBlocks(
       pinned: it.pinned,
       area: it.area ?? it.category,
     });
-    c = ceilToNextQuarterHourLocal(end);
+    c = ceilToNextFiveMinuteLocal(end);
   }
   return c;
 }
