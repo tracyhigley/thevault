@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { getDocuments } from "@/lib/categories";
 import { BoxCard } from "@/components/box-card";
 import {
@@ -19,6 +19,7 @@ export default async function DocumentsFolderPage({
   params: Promise<{ folder: string }>;
 }) {
   const { folder } = await params;
+  if (folder === "books") redirect("/documents/folders/read-watch");
   if (!VALID_FOLDERS.has(folder as DocumentFolderKey)) notFound();
 
   const folderKey = folder as DocumentFolderKey;

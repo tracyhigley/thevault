@@ -10,6 +10,7 @@
 // Boxes, documents, and energies all live in `settings` JSONB so they're
 // editable from the Settings UI. No defaults — vaults start empty.
 
+import { normalizeDocumentFolderKey } from "@/lib/document-folders";
 import { supabaseServer } from "./supabase/server";
 
 export type Box = {
@@ -82,7 +83,7 @@ export async function getEnergies(): Promise<EnergyType[]> {
 }
 
 // Documents are text-first storage categories (Notes, Measurements, Read &
-// Research, Health Ideas…) — separately configured from Boxes. Same shape;
+// Watch, Health Ideas…) — separately configured from Boxes. Same shape;
 // kept distinct so the Vault page can render them in their own section and
 // route them through /documents/<slug> instead of /vault/<slug>.
 export type DocumentType = {
@@ -92,7 +93,7 @@ export type DocumentType = {
   meta?: string;
   folder?:
     | "health"
-    | "books"
+    | "read-watch"
     | "misc"
     | "ecom-ecoship"
     | "friends-family"
@@ -103,27 +104,11 @@ export type DocumentType = {
     | "travel";
 };
 
-const DOCUMENT_FOLDER_KEYS = new Set([
-  "health",
-  "books",
-  "misc",
-  "ecom-ecoship",
-  "friends-family",
-  "home-garden",
-  "stonewater-books",
-  "leisure",
-  "writing",
-  "travel",
-]);
-
 function normalizeDocument(raw: any): DocumentType | null {
   const n = normalize(raw);
   if (!n) return null;
   const folderRaw = typeof raw?.folder === "string" ? raw.folder.toLowerCase() : undefined;
-  const folder =
-    folderRaw && DOCUMENT_FOLDER_KEYS.has(folderRaw)
-      ? (folderRaw as DocumentType["folder"])
-      : undefined;
+  const folder = normalizeDocumentFolderKey(folderRaw);
   return { ...n, folder };
 }
 

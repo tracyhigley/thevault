@@ -7,7 +7,10 @@ import { parse } from "date-fns";
 import { fromZonedTime } from "date-fns-tz";
 import { parseTimeOnDate } from "@/lib/daily-plan";
 import { supabaseServer, supabaseAdmin } from "@/lib/supabase/server";
-import { DOCUMENT_FOLDERS } from "@/lib/document-folders";
+import {
+  DOCUMENT_FOLDERS,
+  normalizeDocumentFolderKey,
+} from "@/lib/document-folders";
 import {
   getDocuments,
   RESERVED_BOX_KEYS,
@@ -757,6 +760,7 @@ const DocumentConfig = BoxConfig.extend({
   folder: z
     .enum([
       "health",
+      "read-watch",
       "books",
       "misc",
       "ecom-ecoship",
@@ -794,7 +798,11 @@ export async function saveDocumentConfig(
   if (!vaultId) throw new Error("No vault");
   const prevDocs = await getDocuments();
   const prevKeys = new Set(prevDocs.map((d) => d.key));
-  const parsed = documents.map((d) => DocumentConfig.parse(d));
+  const parsed = documents.map((d) => {
+    const row = DocumentConfig.parse(d);
+    const folder = normalizeDocumentFolderKey(row.folder);
+    return folder === row.folder ? row : { ...row, folder };
+  });
   const nextKeys = new Set(parsed.map((d) => d.key));
 
   const { data: row } = await sb

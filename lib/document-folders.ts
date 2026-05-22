@@ -2,7 +2,7 @@ import type { DocumentType } from "@/lib/categories";
 
 export type DocumentFolderKey =
   | "health"
-  | "books"
+  | "read-watch"
   | "misc"
   | "ecom-ecoship"
   | "friends-family"
@@ -14,7 +14,7 @@ export type DocumentFolderKey =
 
 export const DOCUMENT_FOLDERS: { key: DocumentFolderKey; label: string }[] = [
   { key: "health", label: "HEALTH" },
-  { key: "books", label: "BOOKS" },
+  { key: "read-watch", label: "READ & WATCH" },
   { key: "misc", label: "MISC" },
   { key: "ecom-ecoship", label: "ECOM & ECOSHIP" },
   { key: "friends-family", label: "FRIENDS & FAMILY" },
@@ -25,8 +25,30 @@ export const DOCUMENT_FOLDERS: { key: DocumentFolderKey; label: string }[] = [
   { key: "travel", label: "TRAVEL" },
 ];
 
+/** Legacy folder keys still stored in settings JSONB. */
+const DOCUMENT_FOLDER_ALIASES: Record<string, DocumentFolderKey> = {
+  books: "read-watch",
+};
+
+const DOCUMENT_FOLDER_KEY_SET = new Set(
+  DOCUMENT_FOLDERS.map((f) => f.key),
+);
+
+export function normalizeDocumentFolderKey(
+  raw: string | undefined,
+): DocumentFolderKey | undefined {
+  if (!raw) return undefined;
+  const key = raw.toLowerCase();
+  const aliased = DOCUMENT_FOLDER_ALIASES[key];
+  if (aliased) return aliased;
+  if (DOCUMENT_FOLDER_KEY_SET.has(key as DocumentFolderKey)) {
+    return key as DocumentFolderKey;
+  }
+  return undefined;
+}
+
 export function folderForDocument(doc: DocumentType): DocumentFolderKey {
-  return doc.folder ?? "misc";
+  return normalizeDocumentFolderKey(doc.folder) ?? "misc";
 }
 
 export function groupDocumentsByFolder(
@@ -34,7 +56,7 @@ export function groupDocumentsByFolder(
 ): Record<DocumentFolderKey, DocumentType[]> {
   const grouped: Record<DocumentFolderKey, DocumentType[]> = {
     health: [],
-    books: [],
+    "read-watch": [],
     misc: [],
     "ecom-ecoship": [],
     "friends-family": [],
