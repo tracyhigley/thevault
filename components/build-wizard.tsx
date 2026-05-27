@@ -462,12 +462,6 @@ function AtmStep({
         .filter((category): category is string => Boolean(category)),
     ),
   );
-  const [selected, setSelected] = useState<string[]>(categories.slice(0, 1));
-  /** % of ATM pool to the first selected box when two are chosen (0–100). */
-  const [splitPct, setSplitPct] = useState(50);
-  /** % of ATM pool for the lone selected box (0–100). */
-  const [singleUsePct, setSingleUsePct] = useState(100);
-
   const dayBudgetHours = Math.max(0, inputs.hoursAvailable);
   const windowMinutes = roundHoursToMinutes(dayBudgetHours);
   const counterOnTodayItems = counterItems.filter(
@@ -481,6 +475,14 @@ function AtmStep({
   /** Time left for ATM after Counter items marked “on Today” in step 3. */
   const atmPoolHours = Math.max(0, dayBudgetHours - counterOnTodayHours);
   const counterExceedsWindow = counterOnTodayMinutes > windowMinutes;
+
+  const [selected, setSelected] = useState<string[]>(() =>
+    counterExceedsWindow ? [] : categories.slice(0, 1),
+  );
+  /** % of ATM pool to the first selected box when two are chosen (0–100). */
+  const [splitPct, setSplitPct] = useState(50);
+  /** % of ATM pool for the lone selected box (0–100). */
+  const [singleUsePct, setSingleUsePct] = useState(100);
 
   function toggleCategory(category: string) {
     setSelected((prev) => {
@@ -540,21 +542,14 @@ function AtmStep({
     atmPoolHours > 0 ? Math.round((totalAllocated / atmPoolHours) * 100) : 0;
 
   function submit() {
-    if (selected.length === 0) {
-      toast.error("Pick at least one ATM box.");
-      return;
-    }
     const payload = selected.map((category) => ({
       category,
       hours: hoursBudgetFor(category),
     }));
-    if (!payload.some((p) => p.hours > 0)) {
-      toast.error("Set at least one box budget above 0 hours.");
-      return;
-    }
+    const withBudget = payload.filter((p) => p.hours > 0);
     startTransition(async () => {
       try {
-        await applyAtmBoxBudgets(payload);
+        await applyAtmBoxBudgets(withBudget);
         onFinish();
       } catch (e: any) {
         toast.error(e?.message ?? "Couldn't apply ATM box budgets.");
@@ -596,7 +591,8 @@ function AtmStep({
           {counterExceedsWindow && (
             <p className="rounded-sm border border-rust/40 bg-rust/5 px-3 py-2 text-[12px] text-ink-dim">
               Counter on Today is longer than your day window. ATM budget is 0
-              until you take items off Today or move your end time (step 1).
+              until you take items off Today or move your end time (step 1). You
+              can still build the day without picking ATM boxes.
             </p>
           )}
 
