@@ -1,5 +1,6 @@
 "use client";
 import clsx from "clsx";
+import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { setItemState, softDeleteItem } from "@/lib/actions";
@@ -41,6 +42,7 @@ export function ScheduleBlock({
   block: ScheduledBlock;
   state?: "upcoming" | "active" | "done" | "skipped" | "overrun";
 }) {
+  const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [menuOpen, setMenuOpen] = useState(false);
   const [cooldownUntil, setCooldownUntil] = useState(0);
@@ -147,6 +149,7 @@ export function ScheduleBlock({
               onClick={() =>
                 startTransition(async () => {
                   await setItemState(block.itemId, "skipped");
+                  router.refresh();
                 })
               }
             >

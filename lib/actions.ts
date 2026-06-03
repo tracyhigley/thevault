@@ -41,8 +41,10 @@ type DailyAnchorSpec = {
   tag: string;
   title: string;
   minutes: number;
-  start: Date;
   order: number;
+  /** When true, locks scheduled_start at `start`. When false, only today_order is set. */
+  pinned?: boolean;
+  start?: Date;
 };
 
 async function upsertDailyAnchor(
@@ -54,16 +56,22 @@ async function upsertDailyAnchor(
   },
 ) {
   const { vaultId, userId, spec } = opts;
-  const end = new Date(spec.start.getTime() + spec.minutes * 60_000);
+  const pinned = spec.pinned ?? true;
+  const scheduledStart =
+    pinned && spec.start ? spec.start.toISOString() : null;
+  const scheduledEnd =
+    pinned && spec.start
+      ? new Date(spec.start.getTime() + spec.minutes * 60_000).toISOString()
+      : null;
 
   const patch = {
     box: "COUNTER",
     title: spec.title,
     minutes: spec.minutes,
     today_order: spec.order,
-    pinned: true,
-    scheduled_start: spec.start.toISOString(),
-    scheduled_end: end.toISOString(),
+    pinned,
+    scheduled_start: scheduledStart,
+    scheduled_end: scheduledEnd,
     urgent: false,
     must: false,
     should: false,
@@ -208,15 +216,10 @@ export async function saveDayInputsPartial(
     ignoreDuplicates: false,
   });
 
-  // Daily Anchors: auto-place Morning Workout at current reference time and
-  // Lunch at local noon. Run this whenever step 1 is saved so rebuilding the
-  // day updates anchors even if a day_inputs row already exists.
+  // Daily Anchors: Morning Workout always on Today (unpinned); Lunch pinned at
+  // local noon. Run whenever step 1 is saved so rebuilding updates anchors.
   if (parsed.end_of_day !== undefined || parsed.hours_available !== undefined) {
     try {
-      const dayEnd = parseTimeOnDate(mergedEnd, parsed.date);
-      const dayStart = new Date(
-        dayEnd.getTime() - Math.round(hoursVal * 60) * 60_000,
-      );
       await upsertDailyAnchor(sb, {
         vaultId,
         userId: user.id,
@@ -224,11 +227,8 @@ export async function saveDayInputsPartial(
           tag: "__daily_anchor__:morning-workout",
           title: "Morning Workout",
           minutes: 45,
-          start:
-            parsed.reference_now && !Number.isNaN(Date.parse(parsed.reference_now))
-              ? new Date(parsed.reference_now)
-              : dayStart,
           order: 1,
+          pinned: false,
         },
       });
       const lunchStart =
@@ -283,12 +283,20 @@ export async function setItemState(
       patch.today_order = (max?.today_order ?? 0) + 1;
     }
   }
+  if (state === "skipped") {
+    // Skipping removes the item from today's plan — Counter/ATM toggles should
+    // no longer show it as selected for today.
+    patch.today_order = null;
+  }
   if (state === "active") patch.actual_start = new Date().toISOString();
   if (state === "done" || state === "skipped" || state === "overrun") {
     patch.actual_end = new Date().toISOString();
   }
   await sb.from("items").update(patch).eq("id", itemId);
   revalidatePath("/");
+  revalidatePath("/counter");
+  revalidatePath("/atm");
+  revalidatePath("/build");
 }
 
 export async function toggleDone(itemId: string, currentlyDone: boolean) {
@@ -531,15 +539,20 @@ export async function reorderAtmItems(itemIds: string[]) {
 export async function setTodayPlan(itemId: string, on: boolean) {
   const { sb } = await requireUser();
   if (on) {
-    const { data: max } = await sb
-      .from("items")
-      .select("today_order")
-      .not("today_order", "is", null)
-      .order("today_order", { ascending: false })
-      .limit(1)
-      .maybeSingle();
+    const [{ data: max }, { data: cur }] = await Promise.all([
+      sb
+        .from("items")
+        .select("today_order")
+        .not("today_order", "is", null)
+        .order("today_order", { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+      sb.from("items").select("state").eq("id", itemId).maybeSingle(),
+    ]);
     const next = (max?.today_order ?? 0) + 1;
-    await sb.from("items").update({ today_order: next }).eq("id", itemId);
+    const patch: Record<string, unknown> = { today_order: next };
+    if (cur?.state === "skipped") patch.state = "upcoming";
+    await sb.from("items").update(patch).eq("id", itemId);
   } else {
     await sb.from("items").update({ today_order: null }).eq("id", itemId);
   }

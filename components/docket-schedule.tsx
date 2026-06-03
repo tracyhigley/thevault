@@ -11,7 +11,12 @@ import {
 } from "@/lib/daily-plan";
 import type { DayInputs, Item } from "@/lib/types";
 import { ScheduleWithNowLine } from "@/components/now-line";
-import { hardDeleteDoneTodayItems, reorderItems, setItemState } from "@/lib/actions";
+import {
+  hardDeleteDoneTodayItems,
+  reorderItems,
+  setItemState,
+  setTodayPlan,
+} from "@/lib/actions";
 import {
   DndContext,
   PointerSensor,
@@ -175,10 +180,8 @@ export function DocketSchedule({
   const skippedTodayItems = useMemo(
     () =>
       [...counterItems, ...atmItems]
-        .filter(
-          (i) => (i.todayOrder ?? null) !== null && (i.state ?? "upcoming") === "skipped",
-        )
-        .sort((a, b) => (a.todayOrder ?? 0) - (b.todayOrder ?? 0)),
+        .filter((i) => (i.state ?? "upcoming") === "skipped")
+        .sort((a, b) => a.title.localeCompare(b.title)),
     [counterItems, atmItems],
   );
 
@@ -433,7 +436,7 @@ export function DocketSchedule({
                     onClick={() => {
                       startTransition(async () => {
                         try {
-                          await setItemState(it.id, "upcoming");
+                          await setTodayPlan(it.id, true);
                           toast.success("Moved back to Today.");
                           router.refresh();
                         } catch (e: any) {
