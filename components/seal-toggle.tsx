@@ -4,8 +4,9 @@ import { useRouter } from "next/navigation";
 import clsx from "clsx";
 import { setSealed } from "@/lib/actions";
 
-// Lock-icon button. Click sets the seal state and navigates to /sealed with
-// `?just=sealed` so the ceremonial dial plays the close animation.
+// Lock-icon button. When open, click just navigates to /sealed — the actual
+// seal happens when the person clicks "LIGHTS OUT" there, which plays the
+// fade-to-dark. When already sealed, click unseals and heads home directly.
 
 export function SealToggle({ sealed }: { sealed: boolean }) {
   const router = useRouter();
@@ -13,13 +14,15 @@ export function SealToggle({ sealed }: { sealed: boolean }) {
 
   return (
     <button
-      title={sealed ? "Unseal vault" : "Seal vault"}
+      title={sealed ? "Unseal" : "Go to lights-out screen"}
       onClick={() => {
-        const next = !sealed;
+        if (!sealed) {
+          router.push("/sealed");
+          return;
+        }
         startTransition(async () => {
-          await setSealed(next);
-          if (next) router.push("/sealed?just=sealed");
-          else router.push("/?just=unsealed");
+          await setSealed(false);
+          router.push("/?just=unsealed");
         });
       }}
       className={clsx(
