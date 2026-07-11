@@ -37,7 +37,6 @@ lib/
   supabase/         Server + client helpers
   types.ts          Domain types
 scripts/
-  migrate-from-sheet.ts   Sheet → Supabase resync (clean by default)
   apple-shortcut.md       Action Button setup recipe
 supabase/migrations/      SQL schema (run in order)
 docs/SPEC.md              Original app spec (historical)
@@ -47,10 +46,9 @@ docs/SPEC.md              Original app spec (historical)
 
 1. **Supabase** — create a project, run every migration in `supabase/migrations/` in order, drop the URL / anon key / service-role key into `.env.local`.
 2. **Sign in once** at the deployed URL to seed the `auth.users` row, grab the uid.
-3. **Migrate the Sheet** — `npm run migrate:sheet <userId>`. Clean resync by default, no duplicates on re-run.
-4. **Review settings** — `/settings/boxes`, `/settings/documents`, `/settings/energies` — rename labels as needed.
-5. **Configure the day** — `/settings` for default hours / end-of-day.
-6. **Connect devices** — `/settings/connect` walks through iPhone Siri, Mac dock, and the bookmarklet.
+3. **Review settings** — `/settings/boxes`, `/settings/documents`, `/settings/energies` — rename labels as needed.
+4. **Configure the day** — `/settings` for default hours / end-of-day.
+5. **Connect devices** — `/settings/connect` walks through iPhone Siri, Mac dock, and the bookmarklet.
 
 ## Tests
 

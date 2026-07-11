@@ -29,8 +29,6 @@ When the user says something to you, **assume they're describing the goal in pla
 | "Why is it doing X?" | Investigate, then explain in plain English. **Don't paste stack traces.** |
 | "Add a new box" | The user adds boxes themselves in **Settings → Boxes**. If they're asking for code support, point them there. Boxes are user-configured data, never hardcoded. |
 | "Add a new category" / "It's missing X on the menu" | Same — they edit it in **Settings → Boxes**. The ATM page categories are box keys; Settings is the source of truth. |
-| "Resync from my sheet" / "Pull in everything fresh" | Run `npm run migrate:sheet <userId>`. The script wipes and re-imports — no duplicates. Captures and day-level settings are preserved. |
-| "I want to add to my sheet without overwriting" | Run with the additive flag: `npx tsx scripts/migrate-from-sheet.ts <userId> --no-clean`. |
 | "Add to today" (about an item) | Sets `today_order` on the item. The Counter page and the wizard's Step 5 review have a `+ TODAY` toggle for this. |
 | "Pick this for today" (about an ATM item) | Same — the ATM page calls it "Withdraw"; same `today_order` mechanic. |
 | "Move this to 3pm" / "Pin this at X" | Set `pinned: true` and `scheduledStart` to that time. Schedule auto-flows around pinned blocks. |
@@ -111,7 +109,6 @@ lib/
   shortcuts.tsx           Keyboard shortcut hook + cheat-sheet registry
   types.ts                Domain types
 scripts/
-  migrate-from-sheet.ts   Sheet → Supabase resync (clean by default)
   apple-shortcut.md       Action Button setup recipe
 supabase/migrations/      SQL schema (run in order)
 docs/
@@ -141,10 +138,7 @@ docs/
 6. **Done doesn't delete.**
    - Marking a schedule block done sets `state: 'done'` and toasts "Still safe in your vault." Items stay in their box. Don't change this behavior.
 
-7. **The migration script is a clean resync by default.**
-   - `tsx scripts/migrate-from-sheet.ts <userId>` wipes and re-imports — no duplicates. `--no-clean` for the rare additive case. Captures and day-level settings (`default_hours`, `default_end_of_day`, `stressor_anchor_minutes`) are preserved.
-
-8. **No "Tracy"-style copy or hardcoded data.**
+7. **No "Tracy"-style copy or hardcoded data.**
    - The app should work for any user out of the box. Box keys, documents, energies, day defaults are all configurable per-vault.
 
 ---
@@ -218,17 +212,9 @@ Changing this logic requires a deliberate, named change. Don't tweak for cosmeti
 
 1. Create Supabase project; run every migration in `supabase/migrations/` in order.
 2. User signs in once at the deployed URL — captures their `auth.uid`.
-3. Run `npm run migrate:sheet <their-uid>` to import their sheet (or skip; they can start fresh).
-4. They review **Settings → Boxes / Documents / Energies**, rename labels.
-5. They set **Settings → General** (default hours, end of day).
-6. They walk through **Settings → Connect** to wire iPhone Siri / Mac dock / bookmarklet.
-
-### Re-syncing the sheet later
-
-```bash
-npm run migrate:sheet <userId>             # clean resync (no duplicates)
-npm run migrate:sheet <userId> --no-clean  # additive
-```
+3. They review **Settings → Boxes / Documents / Energies**, rename labels.
+4. They set **Settings → General** (default hours, end of day).
+5. They walk through **Settings → Connect** to wire iPhone Siri / Mac dock / bookmarklet.
 
 ### Tests / build
 
@@ -341,7 +327,6 @@ Every `useShortcut` call with a `label` auto-registers in the cheat sheet (`?` k
 - **Dev server returning 500 after a clean restart** — clear `.next/` (`rm -rf .next`) and restart. Turbopack's incremental cache can desync after backslash-deep edits.
 - **A change works locally but not in deployed Vercel build** — usually a missing migration the user hasn't run in their Supabase project. Check `supabase/migrations/` for any new files vs. what's been run.
 - **iOS Safari standalone detection** — uses both `window.matchMedia('(display-mode: standalone)').matches` AND iOS-specific `(navigator as any).standalone`. The `connect-device-cards.tsx` component does both.
-- **Migration script + duplicates** — the script is **clean resync by default**. If the user asks "why do I have two of everything," they likely re-ran with `--no-clean` or with an old version. Re-run without the flag.
 - **Captures vs items** — the `captures` table holds raw deposit history; `items` are the actual rows. `captures.item_id` is `on delete set null`, so wiping items leaves capture history intact (this is intentional for audit).
 - **`getAllItems()` returns everything, not just storage** — when displaying a count, filter out counter-station boxes (`DROP`, `ATM`, `COUNTER`, `DOCKET`) unless you specifically mean "every row."
 
