@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import clsx from "clsx";
 import { toast } from "sonner";
-import { VaultDial } from "./vault-dial";
+import { DraftingLamp } from "./drafting-lamp";
 import { depositText } from "@/lib/actions";
 import { markPreferTodayOverDropLanding } from "@/lib/vault-nav-client";
 
@@ -75,22 +75,23 @@ export function SealedScreen({
   }
 
   return (
-    <div className="sealed-vault-scheme relative min-h-[100vh] overflow-hidden bg-vault-bg text-ink">
+    <div className="sealed-blueprint-scheme relative min-h-[100vh] overflow-hidden bg-vault-bg text-ink">
       {/* Subtle vignette */}
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(224,185,99,0.06),_transparent_70%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(143,165,99,0.06),_transparent_70%)]" />
 
       {/* Minimal sealed-mode header */}
       <header className="relative z-10 flex items-center justify-between px-6 py-5 md:px-10">
         <Link href="/" className="flex items-center gap-2.5">
           <svg width="20" height="20" viewBox="0 0 22 22" fill="none">
-            <circle cx="11" cy="11" r="9.5" stroke="#B5853A" strokeWidth="1.4" />
-            <circle cx="11" cy="11" r="4" stroke="#B5853A" strokeWidth="1.4" />
+            <rect x="1.5" y="1.5" width="19" height="19" rx="4" stroke="#8FA563" strokeWidth="1.4" />
+            <path d="M6 14 L6 6 L14 6" stroke="#8FA563" strokeWidth="1.2" fill="none" />
+            <circle cx="14.5" cy="14.5" r="1.6" fill="#8FA563" />
           </svg>
-          <span className="serif-h text-[20px] text-ink/70">The Vault</span>
+          <span className="serif-h text-[20px] text-ink/70">The Blueprint</span>
         </Link>
         <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center gap-2 font-mono text-[11px] tracking-[0.24em] text-ink-mute">
-          <ClosedLockTiny />
-          <span>{sealed ? "SEALED" : "OPEN"}</span>
+          <LampGlyphTiny lit={!sealed} />
+          <span>{sealed ? "FILED" : "DRAFTING"}</span>
           <span>·</span>
           <span>{time}</span>
         </div>
@@ -101,7 +102,7 @@ export function SealedScreen({
 
       {/* Center stage */}
       <div className="relative z-10 mx-auto flex max-w-[640px] flex-col items-center px-4 pb-16 pt-8 md:pt-12">
-        <VaultDial sealed={sealed} animate={animate} size={420} ceremonyDark />
+        <DraftingLamp sealed={sealed} animate={animate} size={420} />
 
         <div
           className={clsx(
@@ -110,23 +111,23 @@ export function SealedScreen({
           )}
         >
           <span className="eyebrow text-ink-mute">
-            {sealed ? "— The Vault is closed —" : "— The Vault is open —"}
+            {sealed ? "— Lights out at the board —" : "— Still at the drafting table —"}
           </span>
           <h1 className="serif-h mt-3 text-[32px] leading-[1.15] text-ink md:text-[44px]">
             {sealed ? (
               <>
-                Everything&rsquo;s safe.
+                The plans are filed.
                 <br />
-                You can stop carrying it.
+                You can put the pencil down.
               </>
             ) : (
-              <>Ready to close up?</>
+              <>Ready to call it a day?</>
             )}
           </h1>
           <p className="mt-5 max-w-[460px] text-ink-dim">
             {sealed
-              ? `${itemCount} items in storage. You don’t need to do anything until tomorrow.`
-              : `${itemCount} items in storage. Sealing closes today's surfaces. The deposit slot still works.`}
+              ? `${itemCount} items on file. Nothing needs your attention until tomorrow's first line.`
+              : `${itemCount} items on the board. Filing rolls up today's sheets. The drop slot still works.`}
           </p>
 
           {/* Deposit slot — works while sealed */}
@@ -140,7 +141,7 @@ export function SealedScreen({
                 <input
                   value={text}
                   onChange={(e) => setText(e.target.value)}
-                  placeholder="Deposit slot still works while sealed…"
+                  placeholder="Add a line to the blueprint…"
                   autoComplete="off"
                   enterKeyHint="send"
                   disabled={depositPending}
@@ -151,11 +152,11 @@ export function SealedScreen({
                   disabled={depositPending || !text.trim()}
                   className="shrink-0 rounded-sm border border-brass/50 bg-brass/15 px-3 py-1.5 font-mono text-[10px] tracking-[0.18em] text-brass hover:bg-brass/25 disabled:pointer-events-none disabled:opacity-40"
                 >
-                  {depositPending ? "…" : "DEPOSIT"}
+                  {depositPending ? "…" : "FILE"}
                 </button>
               </form>
               <p className="mt-2 hidden text-center font-mono text-[10px] tracking-[0.2em] text-ink-mute md:block">
-                ⌘K opens the mail slot anywhere.
+                ⌘K opens the drop slot anywhere.
               </p>
             </div>
           )}
@@ -169,7 +170,7 @@ export function SealedScreen({
                 className="brass-button flex items-center gap-2 px-6 py-3 font-mono text-[10px] tracking-[0.24em] text-[#2a1c08] disabled:opacity-50"
               >
                 <span aria-hidden>↑</span>
-                OPEN VAULT NOW
+                TURN THE LIGHTS BACK ON
               </button>
             ) : (
               <>
@@ -179,7 +180,7 @@ export function SealedScreen({
                   className="brass-button flex items-center gap-2 px-6 py-3 font-mono text-[10px] tracking-[0.24em] text-[#2a1c08] disabled:opacity-50"
                 >
                   <span aria-hidden>↓</span>
-                  SEAL THE VAULT
+                  LIGHTS OUT
                 </button>
                 <Link
                   href="/"
@@ -207,23 +208,19 @@ function formatNow() {
   return `${h}:${m.toString().padStart(2, "0")} ${ampm}`;
 }
 
-function ClosedLockTiny() {
+function LampGlyphTiny({ lit }: { lit: boolean }) {
   return (
-    <svg width="11" height="13" viewBox="0 0 14 16" fill="none">
+    <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
       <path
-        d="M3 7V4.5C3 2.567 4.567 1 6.5 1S10 2.567 10 4.5V7"
+        d="M2 2 L9 5 L4 7 Z"
         stroke="currentColor"
-        strokeWidth="1.4"
+        strokeWidth="1.2"
+        fill={lit ? "currentColor" : "none"}
+        fillOpacity={lit ? 0.35 : 0}
       />
-      <rect
-        x="1.5"
-        y="7"
-        width="11"
-        height="8"
-        rx="1.5"
-        stroke="currentColor"
-        strokeWidth="1.4"
-      />
+      <circle cx="4.5" cy="6" r={lit ? 1.4 : 0.9} fill="currentColor" />
+      <line x1="4.5" y1="7.4" x2="4.5" y2="12.5" stroke="currentColor" strokeWidth="1.1" />
+      <line x1="2" y1="12.5" x2="7" y2="12.5" stroke="currentColor" strokeWidth="1.1" />
     </svg>
   );
 }
