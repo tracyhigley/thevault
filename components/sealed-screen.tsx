@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import clsx from "clsx";
 import { toast } from "sonner";
-import { DraftingLamp } from "./drafting-lamp";
+import { DraftingScene } from "./drafting-scene";
 import { depositText } from "@/lib/actions";
 import { markPreferTodayOverDropLanding } from "@/lib/vault-nav-client";
 
@@ -102,7 +102,7 @@ export function SealedScreen({
 
       {/* Center stage */}
       <div className="relative z-10 mx-auto flex max-w-[640px] flex-col items-center px-4 pb-16 pt-8 md:pt-12">
-        <DraftingLamp sealed={sealed} animate={animate} size={420} />
+        <DraftingScene sealed={sealed} animate={animate} maxWidth={560} />
 
         <div
           className={clsx(
