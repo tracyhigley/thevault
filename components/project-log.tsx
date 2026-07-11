@@ -5,7 +5,7 @@
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { addProjectLog } from "@/lib/plan-actions";
-import type { ProjectLogEntry } from "@/lib/projects";
+import type { ProjectLogEntry } from "@/lib/project-phases";
 
 function todayLocal(): string {
   const d = new Date();

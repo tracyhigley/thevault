@@ -2,24 +2,10 @@
 // projects" — separate from items, deliberately outside the daily engine.
 
 import { supabaseServer } from "./supabase/server";
+import type { ProjectPhase, ProjectLogEntry } from "./project-phases";
 
-export type ProjectPhase = "idea" | "planning" | "building" | "complete";
-
-export const PHASES: { key: ProjectPhase; label: string }[] = [
-  { key: "idea", label: "Idea" },
-  { key: "planning", label: "Planning" },
-  { key: "building", label: "Under construction" },
-  { key: "complete", label: "Complete" },
-];
-
-export function phaseLabel(phase: ProjectPhase): string {
-  return PHASES.find((p) => p.key === phase)?.label ?? phase;
-}
-
-export type ProjectLogEntry = {
-  date: string; // YYYY-MM-DD
-  text: string;
-};
+export { PHASES, phaseLabel } from "./project-phases";
+export type { ProjectPhase, ProjectLogEntry } from "./project-phases";
 
 export type Project = {
   id: string;

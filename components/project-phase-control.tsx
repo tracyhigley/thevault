@@ -6,7 +6,7 @@ import { useTransition } from "react";
 import { toast } from "sonner";
 import clsx from "clsx";
 import { setProjectPhase } from "@/lib/plan-actions";
-import { PHASES, type ProjectPhase } from "@/lib/projects";
+import { PHASES, type ProjectPhase } from "@/lib/project-phases";
 
 export function ProjectPhaseControl({
   projectId,
