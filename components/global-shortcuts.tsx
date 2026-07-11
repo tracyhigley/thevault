@@ -23,6 +23,7 @@ export function GlobalShortcuts() {
   useShortcut("g a", go("/atm"), { label: "ATM", group: "Navigate" });
   useShortcut("g e", go("/documents"), { label: "DOCUMENTS", group: "Navigate" });
   useShortcut("g k", go("/calendar"), { label: "Calendar", group: "Navigate" });
+  useShortcut("g p", go("/plan"), { label: "Master Plan", group: "Navigate" });
   useShortcut("g s", go("/settings"), { label: "Settings", group: "Navigate" });
   useShortcut("g b", go("/build?step=1"), { label: "Build day", group: "Navigate" });
 

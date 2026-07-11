@@ -53,6 +53,12 @@ function buildItems(fiftyFdHref: string): NavItem[] {
       match: (p) => p.startsWith("/calendar"),
     },
     {
+      href: "/plan",
+      label: "Plan",
+      hint: "g p",
+      match: (p) => p.startsWith("/plan"),
+    },
+    {
       href: "/settings",
       label: "Settings",
       hint: "g s",

@@ -82,6 +82,28 @@ export async function getEnergies(): Promise<EnergyType[]> {
     .filter((e): e is EnergyType => e !== null);
 }
 
+// Buildings are the Master Plan's life domains (The Library, The Press, …) —
+// same shape as boxes, separately configured so the planning layer never
+// reshapes the daily engine's categories. A building can point at related
+// box keys later; for now the link is by convention only.
+export type Building = Box;
+
+export async function getBuildings(): Promise<Building[]> {
+  const sb = await supabaseServer();
+  const { data } = await sb
+    .from("settings")
+    .select("buildings")
+    .maybeSingle();
+  const raw = (data?.buildings as any[]) ?? null;
+  if (!raw || !Array.isArray(raw)) return [];
+  return raw.map(normalize).filter((b): b is Building => b !== null);
+}
+
+// Convert a BUILDING_KEY → slug-case for URLs (mirrors the vault hub).
+export function buildingSlug(key: string): string {
+  return key.toLowerCase().replace(/_/g, "-").replace(/\//g, "-");
+}
+
 // Documents are text-first storage categories (Notes, Measurements, Read &
 // Watch, Health Ideas…) — separately configured from Boxes. Same shape;
 // kept distinct so the Vault page can render them in their own section and
