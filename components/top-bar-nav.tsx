@@ -44,22 +44,6 @@ function buildItems(fiftyFdHref: string): NavItem[] {
       button: true,
     },
     {
-      href: "/documents",
-      label: "DOCUMENTS",
-      hint: "g e",
-      match: (p) =>
-        p === "/documents" ||
-        (p.startsWith("/documents/") && !p.startsWith(fiftyFdHref)),
-      button: true,
-    },
-    {
-      href: "/calendar",
-      label: "CALENDAR",
-      hint: "g k",
-      match: (p) => p.startsWith("/calendar"),
-      button: true,
-    },
-    {
       href: "/project-plans",
       label: "PROJECT PLANS",
       hint: "g p",
@@ -84,18 +68,27 @@ function buildItems(fiftyFdHref: string): NavItem[] {
       button: true,
     },
     {
+      href: "/documents",
+      label: "DOCUMENTS",
+      hint: "g e",
+      match: (p) =>
+        p === "/documents" ||
+        (p.startsWith("/documents/") && !p.startsWith(fiftyFdHref)),
+      button: true,
+    },
+    {
+      href: "/calendar",
+      label: "CALENDAR",
+      hint: "g k",
+      match: (p) => p.startsWith("/calendar"),
+      button: true,
+    },
+    {
       href: "/settings",
       label: "SETTINGS",
       hint: "g s",
       match: (p) => p.startsWith("/settings"),
       button: true,
-    },
-    {
-      href: fiftyFdHref,
-      label: "50FD",
-      hint: "",
-      title: "Next Steps in all areas: 50 First Dates Tape",
-      match: (p) => p === fiftyFdHref || p.startsWith(`${fiftyFdHref}/`),
     },
   ];
 }
