@@ -56,9 +56,9 @@ export async function TopBar() {
         <Link
           href="/deposit"
           className="rounded-sm border border-gold/40 px-3 py-1.5 font-mono text-[10px] tracking-[0.18em] text-gold hover:bg-gold/10"
-          title="Deposit"
+          title="Add a field note"
         >
-          + DEPOSIT
+          + ADD
         </Link>
         <SealToggle sealed={sealed} />
         <form action="/auth/signout" method="post">

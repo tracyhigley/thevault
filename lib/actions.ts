@@ -935,9 +935,9 @@ export async function setSealed(sealed: boolean) {
   revalidatePath("/", "layout");
 }
 
-// ─── Capture (real session — used by /deposit Mail Slot) ───────────────────
+// ─── Capture (real session — used by the /deposit Add-a-field-note page) ───
 
-export async function depositText(text: string, source: string = "mailslot") {
+export async function addFieldNote(text: string, source: string = "mailslot") {
   const trimmed = text.trim();
   if (!trimmed) return;
   const { sb, user } = await requireUser();

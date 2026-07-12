@@ -32,7 +32,7 @@ export function CaptureTokenRow({ token }: { token: string | null }) {
         <div>
           <div className="text-ink">Bearer token</div>
           <div className="text-[13px] text-ink-dim">
-            Used by the iPhone Shortcut to deposit. Treat like a password.
+            Used by the iPhone Shortcut to add field notes. Treat like a password.
           </div>
         </div>
         <div className="flex items-center gap-2">

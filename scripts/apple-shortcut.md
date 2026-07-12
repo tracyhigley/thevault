@@ -1,10 +1,10 @@
-# Apple Shortcut: Deposit to The Vault
+# Apple Shortcut: Add to Field Notes
 
 A 30-second setup for the Action Button on iPhone.
 
 ## Once
 
-1. Open **Shortcuts** app → **+** → name it `Deposit to Vault`.
+1. Open **Shortcuts** app → **+** → name it `Add to Field Notes`.
 2. Add these actions in order:
    1. **Dictate Text** — language: English (US). Stop on tap.
    2. **Get Contents of URL**
@@ -17,13 +17,13 @@ A 30-second setup for the Action Button on iPhone.
          - `text` → (Magic Variable: Dictated Text)
          - `source` → `shortcut`
          - `userId` → `YOUR_USER_ID`
-   3. **Show Notification** — text: `Deposited.`
+   3. **Show Notification** — text: `Added.`
 3. Save.
-4. **Settings → Action Button → Shortcut → Deposit to Vault.**
+4. **Settings → Action Button → Shortcut → Add to Field Notes.**
 
 ## Daily
 
-Press the Action Button. Talk. Done. Item lands in **The Drop**.
+Press the Action Button. Talk. Done. Item lands in **Field Notes**.
 
 ## Variables to fill in
 
@@ -33,4 +33,4 @@ Press the Action Button. Talk. Done. Item lands in **The Drop**.
 
 ## Siri variant
 
-Same Shortcut works with “Hey Siri, deposit to vault” — Siri runs the Shortcut.
+Same Shortcut works with “Hey Siri, add to field notes” — Siri runs the Shortcut.

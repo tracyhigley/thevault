@@ -13,7 +13,7 @@
 //
 // Inputs / textareas / contenteditable are skipped automatically so typing
 // "u" in a textarea doesn't fire the urgent toggle. Mod-combos still fire
-// even while focused in a field (so ⌘K still opens the mail slot).
+// even while focused in a field (so ⌘K still opens quick-add).
 
 "use client";
 

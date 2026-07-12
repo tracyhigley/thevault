@@ -5,7 +5,7 @@ import Link from "next/link";
 import clsx from "clsx";
 import { toast } from "sonner";
 import { DraftingScene } from "./drafting-scene";
-import { depositText } from "@/lib/actions";
+import { addFieldNote } from "@/lib/actions";
 import { markPreferTodayOverDropLanding } from "@/lib/vault-nav-client";
 
 export function SealedScreen({
@@ -24,7 +24,7 @@ export function SealedScreen({
   const router = useRouter();
   const [time, setTime] = useState(() => formatNow());
   const [text, setText] = useState("");
-  const [depositPending, setDepositPending] = useState(false);
+  const [addPending, setAddPending] = useState(false);
   const [pending, startTransition] = useTransition();
   const [sealMessageVisible, setSealMessageVisible] = useState(!animate);
 
@@ -43,20 +43,20 @@ export function SealedScreen({
     return () => clearTimeout(t);
   }, [animate]);
 
-  async function deposit(e: React.FormEvent) {
+  async function addNote(e: React.FormEvent) {
     e.preventDefault();
     const t = text.trim();
     if (!t) return;
-    setDepositPending(true);
+    setAddPending(true);
     try {
-      await depositText(t, "sealed");
-      toast.success("Deposited.");
+      await addFieldNote(t, "sealed");
+      toast.success("Added.");
       setText("");
       router.refresh();
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : "Couldn't save.");
     } finally {
-      setDepositPending(false);
+      setAddPending(false);
     }
   }
 
@@ -127,36 +127,36 @@ export function SealedScreen({
           <p className="mt-5 max-w-[460px] text-ink-dim">
             {sealed
               ? `${itemCount} items on file. Nothing needs your attention until tomorrow's first line.`
-              : `${itemCount} items on the board. Filing rolls up today's sheets. The mail slot still works.`}
+              : `${itemCount} items on the board. Filing rolls up today's sheets. Adding field notes still works.`}
           </p>
 
-          {/* Deposit slot — works while sealed */}
+          {/* Add a field note — works while sealed */}
           {sealed && (
             <div className="mt-8 w-full max-w-[520px]">
               <form
-                onSubmit={(e) => void deposit(e)}
+                onSubmit={(e) => void addNote(e)}
                 className="flex items-center gap-2 rounded-sm border border-vault-line bg-vault-panel/40 px-4 py-2"
               >
-                <MailSlotIcon />
+                <QuickAddIcon />
                 <input
                   value={text}
                   onChange={(e) => setText(e.target.value)}
                   placeholder="Add a line to the blueprint…"
                   autoComplete="off"
                   enterKeyHint="send"
-                  disabled={depositPending}
+                  disabled={addPending}
                   className="min-w-0 flex-1 bg-transparent text-[13px] text-ink outline-none placeholder:text-ink-mute disabled:opacity-60"
                 />
                 <button
                   type="submit"
-                  disabled={depositPending || !text.trim()}
+                  disabled={addPending || !text.trim()}
                   className="shrink-0 rounded-sm border border-brass/50 bg-brass/15 px-3 py-1.5 font-mono text-[10px] tracking-[0.18em] text-brass hover:bg-brass/25 disabled:pointer-events-none disabled:opacity-40"
                 >
-                  {depositPending ? "…" : "FILE"}
+                  {addPending ? "…" : "FILE"}
                 </button>
               </form>
               <p className="mt-2 hidden text-center font-mono text-[10px] tracking-[0.2em] text-ink-mute md:block">
-                ⌘K opens the mail slot anywhere.
+                ⌘K adds a field note from anywhere.
               </p>
             </div>
           )}
@@ -225,7 +225,7 @@ function LampGlyphTiny({ lit }: { lit: boolean }) {
   );
 }
 
-function MailSlotIcon() {
+function QuickAddIcon() {
   return (
     <svg
       width="14"

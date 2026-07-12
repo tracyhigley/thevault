@@ -102,9 +102,9 @@ export default async function DropPage() {
       <p className="mt-6 text-[11px] text-ink-mute">
         New captures land here from the iPhone Shortcut, Siri, or the{" "}
         <Link href="/deposit" className="text-brass underline">
-          Mail Slot
-        </Link>
-        . Edit boxes and energies under{" "}
+          Add a Field Note
+        </Link>{" "}
+        page. Edit boxes and energies under{" "}
         <Link href="/settings/boxes" className="text-brass underline">
           Settings
         </Link>

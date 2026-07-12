@@ -29,12 +29,12 @@ export function GlobalShortcuts() {
   useShortcut("g s", go("/settings"), { label: "Settings", group: "Navigate" });
   useShortcut("g b", go("/build?step=1"), { label: "Build day", group: "Navigate" });
 
-  // Quick-deposit (n) opens the same surface as ⌘K. CmdK component listens
+  // Quick-add (n) opens the same surface as ⌘K. CmdK component listens
   // for a custom event so this stays decoupled.
   useShortcut(
     "n",
     () => window.dispatchEvent(new CustomEvent("vault:open-cmdk")),
-    { label: "Quick deposit (mail slot)", group: "Capture" },
+    { label: "Quick add (Field Notes)", group: "Capture" },
   );
 
   return null;

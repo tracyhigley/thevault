@@ -538,15 +538,15 @@ curl -s -X POST '${apiUrl}' \\
 }
 
 function BookmarkletCard({ baseUrl }: { baseUrl: string }) {
-  // A click-and-drag bookmarklet that opens the mail slot pre-filled with the
-  // current page's selection / URL.
+  // A click-and-drag bookmarklet that opens the Field Notes quick-add page
+  // pre-filled with the current page's selection / URL.
   const code = `javascript:(function(){var s=window.getSelection&&String(window.getSelection())||'';var t=encodeURIComponent((s?s+' — ':'')+document.title+' '+location.href);location.href='${baseUrl}/deposit?t='+t;})();`;
 
   return (
     <Card
       badge="Anywhere · Bookmarklet"
       title="Drag to your bookmark bar."
-      subtitle="One click on any page deposits the title + URL (or selected text) into Field Notes."
+      subtitle="One click on any page adds the title + URL (or selected text) to Field Notes."
     >
       <p className="text-[13px] text-ink-dim">
         Drag the gold button below onto your bookmarks bar. It works in any

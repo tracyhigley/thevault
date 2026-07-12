@@ -34,9 +34,9 @@ When the user says something to you, **assume they're describing the goal in pla
 | "Move this to 3pm" / "Pin this at X" | Set `pinned: true` and `scheduledStart` to that time. Schedule auto-flows around pinned blocks. |
 | "Done" / "Cross it off" | Mark `state: 'done'`. The schedule block toasts "Done. Still safe in your vault." — the item stays in its box. |
 | "Skip this" / "Not doing this today" | Mark `state: 'skipped'`. The block stays visible but dimmed; remaining schedule shifts. |
-| "Close the vault" / "Seal it" | Transition to the Sealed state (`/sealed`). Hides daily surfaces; deposit slot stays active. Doesn't change data. |
+| "Close the vault" / "Seal it" | Transition to the Sealed state (`/sealed`). Hides daily surfaces; adding field notes stays active. Doesn't change data. |
 | "Open the vault" / "Unseal it" | Exit Sealed, return to Today. |
-| "Deposit X" / "Drop in vault" | Create an item with `box: 'DROP'`, `title: 'X'`. The user can dictate this from Siri, the bookmarklet, the mail slot (⌘K), or the deposit page. |
+| "Add X to field notes" | Create an item with `box: 'DROP'`, `title: 'X'`. The user can dictate this from Siri, the bookmarklet, ⌘K, or the /deposit page. |
 | "Move X to Y" | Update the item's `box` field. Triage from Drop sets destination + box at the same time. |
 
 ---
@@ -99,7 +99,7 @@ app/
     members/              Vault membership (invite / role / remove)
     connect/              iPhone + Mac setup walkthrough
   api/capture/            Bearer-auth POST endpoint for shortcuts
-  deposit/                /deposit?t=… mail-slot landing for the bookmarklet
+  deposit/                /deposit?t=… quick-add landing for the bookmarklet
 components/               UI (one file per concept)
 lib/
   actions.ts              Every Server Action
@@ -246,13 +246,13 @@ The user's words are deliberate; map them back to code precisely.
 | **A document** | A user-configured text-first category (`settings.documents`). Routed to `/documents/<slug>`. |
 | **An energy** | A user-configured tag on ATM items (`settings.energies`) — Creative, Prob-Solv, etc. |
 | **Build the day** / **build today** | The morning wizard at `/build` (5–6 questions). Persists to `day_inputs`. |
-| **Seal it** / **close the vault** | Set `settings.sealed = true`. The Sealed page hides daily surfaces; deposit slot stays open. |
-| **Deposit** / **drop in vault** | Create an item in `box: 'DROP'`. Surfaces: ⌘K mail slot, `/deposit`, Siri Shortcut, bookmarklet. |
+| **Seal it** / **close the vault** | Set `settings.sealed = true`. The Sealed page hides daily surfaces; adding field notes stays open. |
+| **Add a field note** | Create an item in `box: 'DROP'`. Surfaces: ⌘K, `/deposit`, Siri Shortcut, bookmarklet. |
 | **+ TODAY** / **on today's plan** | Sets `today_order` (rank). Default is null (not on today). Universal flag for both Counter and ATM. |
 | **Withdraw** | ATM-specific phrasing for the same `today_order` toggle. |
 | **Stressor** | An item with both `urgent` and `must` set. |
 | **What's heavy** | Wizard step 5 — the counter-items review. Where she opts in via `+ TODAY`. |
-| **The mail slot** | The ⌘K capture popup, available everywhere. |
+| **Quick-add (⌘K)** | The capture popup, available everywhere. |
 | **Mark done** | Set `state: 'done'` on a schedule block. Item stays in its box. |
 
 If she uses a word that isn't in this table, **mirror it back to her** — don't invent new app terminology.
@@ -327,7 +327,7 @@ Every `useShortcut` call with a `label` auto-registers in the cheat sheet (`?` k
 - **Dev server returning 500 after a clean restart** — clear `.next/` (`rm -rf .next`) and restart. Turbopack's incremental cache can desync after backslash-deep edits.
 - **A change works locally but not in deployed Vercel build** — usually a missing migration the user hasn't run in their Supabase project. Check `supabase/migrations/` for any new files vs. what's been run.
 - **iOS Safari standalone detection** — uses both `window.matchMedia('(display-mode: standalone)').matches` AND iOS-specific `(navigator as any).standalone`. The `connect-device-cards.tsx` component does both.
-- **Captures vs items** — the `captures` table holds raw deposit history; `items` are the actual rows. `captures.item_id` is `on delete set null`, so wiping items leaves capture history intact (this is intentional for audit).
+- **Captures vs items** — the `captures` table holds raw capture history; `items` are the actual rows. `captures.item_id` is `on delete set null`, so wiping items leaves capture history intact (this is intentional for audit).
 - **`getAllItems()` returns everything, not just storage** — when displaying a count, filter out counter-station boxes (`DROP`, `ATM`, `COUNTER`, `DOCKET`) unless you specifically mean "every row."
 
 ---

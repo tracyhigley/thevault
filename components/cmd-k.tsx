@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { depositText } from "@/lib/actions";
+import { addFieldNote } from "@/lib/actions";
 import { useShortcut } from "@/lib/shortcuts";
 import { Kbd } from "./kbd";
 
@@ -14,7 +14,7 @@ export function CmdK() {
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
 
   useShortcut("mod+k", () => setOpen((v) => !v), {
-    label: "Open mail slot",
+    label: "Add a field note",
     group: "Capture",
     options: { allowInInputs: true },
   });
@@ -23,7 +23,7 @@ export function CmdK() {
     options: { enabled: open, allowInInputs: true },
   });
 
-  // `n` from anywhere also opens the mail slot.
+  // `n` from anywhere also opens quick-add.
   useEffect(() => {
     const onOpen = () => setOpen(true);
     window.addEventListener("vault:open-cmdk", onOpen);
@@ -39,8 +39,8 @@ export function CmdK() {
     if (!t) return;
     setPending(true);
     try {
-      await depositText(t, "cmdk");
-      toast.success("Deposited.");
+      await addFieldNote(t, "cmdk");
+      toast.success("Added.");
       setText("");
       setOpen(false);
       router.refresh();
@@ -60,7 +60,7 @@ export function CmdK() {
       }}
     >
       <div className="mt-32 w-full max-w-[600px] rounded-sm border border-brass/40 bg-vault-panel/95 p-5 shadow-2xl">
-        <div className="eyebrow">— Mail slot · ⌘K —</div>
+        <div className="eyebrow">— Add a Field Note · ⌘K —</div>
         <textarea
           ref={inputRef}
           rows={2}
@@ -81,7 +81,7 @@ export function CmdK() {
               "saving…"
             ) : (
               <>
-                <Kbd keys="enter" size="xs" /> deposit
+                <Kbd keys="enter" size="xs" /> add
                 <span className="opacity-50">·</span>
                 <Kbd keys="escape" size="xs" /> close
               </>
@@ -93,7 +93,7 @@ export function CmdK() {
             disabled={pending}
             className="brass-button px-4 py-1.5 text-[10px] tracking-[0.24em] disabled:opacity-50"
           >
-            DEPOSIT
+            ADD
           </button>
         </div>
       </div>

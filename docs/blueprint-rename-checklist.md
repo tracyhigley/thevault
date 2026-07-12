@@ -36,14 +36,16 @@ These are the biggest, most-referenced terms. Note: your `SPEC.md` names these D
 | 3.3 | "Energies" | Settings → Energies, `energies-editor.tsx` — also generic, probably fine as-is | |
 | 3.4 | "The Vault" as the storage interior itself (browse view) | `/vault` route/page — separate from "The Vault" as whole-app name (§1.1); these two uses currently share one word | |
 
-## 4. Capture ("mail slot" system)
+## 4. Capture ("mail slot" system) — ✅ done
 
 | # | Current | Where it lives | New wording |
 |---|---|---|---|
-| 4.1 | "Deposit" (verb, button label) | `/deposit` page, ⌘K modal, capture button labels, `lib/actions.ts` comment | |
-| 4.2 | "Mail slot" | ⌘K modal (`cmd-k.tsx`), `/deposit` eyebrow text, `sealed-screen.tsx`, `shortcuts.tsx`, `global-shortcuts.tsx`, AGENTS.md glossary | |
-| 4.3 | "Drop in Vault" | Bookmarklet/Shortcut label text, Raycast script title (`connect-device-cards.tsx`) — several literal copies of this exact phrase for different devices | |
-| 4.4 | "Deposit slot" | Sealed-screen placeholder text ("Deposit slot still works while sealed…") | |
+| 4.1 | "Deposit" (verb, button label) | `/deposit` page, ⌘K modal, capture button labels, `lib/actions.ts` comment | **Add** — button reads ADD, function renamed `depositText` → `addFieldNote` |
+| 4.2 | "Mail slot" | ⌘K modal (`cmd-k.tsx`), `/deposit` eyebrow text, `sealed-screen.tsx`, `shortcuts.tsx`, `global-shortcuts.tsx`, AGENTS.md glossary | Dropped the separate object metaphor — surfaces are just called "Field Notes" / "quick-add" now |
+| 4.3 | "Drop in Vault" | Bookmarklet/Shortcut label text, Raycast script title (`connect-device-cards.tsx`) — several literal copies of this exact phrase for different devices | **Add to Field Notes** (already shipped from the Field Notes rework; `scripts/apple-shortcut.md` brought in line) |
+| 4.4 | "Deposit slot" | Sealed-screen placeholder text ("Deposit slot still works while sealed…") | "Adding field notes still works" |
+
+Route `/deposit` and internal values (box key `DROP`, `source: "mailslot"` enum) left unchanged — renaming those risks breaking already-installed bookmarklets/Shortcuts and is covered by §10 anyway.
 
 ## 5. Morning ritual
 

@@ -2,17 +2,17 @@
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
-import { depositText } from "@/lib/actions";
+import { addFieldNote } from "@/lib/actions";
 
-export default function DepositPage() {
+export default function AddFieldNotePage() {
   return (
     <Suspense fallback={null}>
-      <DepositInner />
+      <AddFieldNoteInner />
     </Suspense>
   );
 }
 
-function DepositInner() {
+function AddFieldNoteInner() {
   const router = useRouter();
   const params = useSearchParams();
   const [text, setText] = useState("");
@@ -25,14 +25,14 @@ function DepositInner() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params]);
 
-  async function deposit(e: React.FormEvent) {
+  async function submit(e: React.FormEvent) {
     e.preventDefault();
     const t = text.trim();
     if (!t) return;
     setPending(true);
     try {
-      await depositText(t, "mailslot");
-      toast.success("Deposited.");
+      await addFieldNote(t, "mailslot");
+      toast.success("Added.");
       setText("");
       router.refresh();
     } catch (err: unknown) {
@@ -44,19 +44,19 @@ function DepositInner() {
 
   return (
     <div className="mx-auto max-w-[600px] px-10 py-16">
-      <div className="eyebrow">— Mail slot —</div>
-      <h1 className="serif-h mt-2 text-[36px] leading-tight">Deposit.</h1>
+      <div className="eyebrow">— Field Notes —</div>
+      <h1 className="serif-h mt-2 text-[36px] leading-tight">Add a field note.</h1>
       <p className="text-ink-dim">
-        Drops straight into Field Notes. Triage later.
+        Goes straight into Field Notes. Sort later.
       </p>
 
-      <form onSubmit={deposit} className="mt-8 space-y-3">
+      <form onSubmit={submit} className="mt-8 space-y-3">
         <textarea
           autoFocus
           rows={3}
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder="Add a thought…"
+          placeholder="Add a field note…"
           className="w-full rounded-sm border border-vault-line bg-vault-panel/60 px-4 py-3 text-ink outline-none focus:border-brass"
         />
         <div className="flex items-center justify-between">
@@ -68,7 +68,7 @@ function DepositInner() {
             disabled={pending}
             className="brass-button px-6 py-2 font-mono text-[10px] tracking-[0.24em] disabled:opacity-50"
           >
-            DEPOSIT
+            ADD
           </button>
         </div>
       </form>
