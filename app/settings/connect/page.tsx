@@ -21,7 +21,7 @@ export default async function ConnectPage() {
   // Resolve the public origin so snippets show real URLs.
   const h = await headers();
   const proto = h.get("x-forwarded-proto") ?? "https";
-  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "the-vault.app";
+  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "the-blueprint.app";
   const baseUrl = `${proto}://${host}`;
 
   return (
@@ -30,7 +30,7 @@ export default async function ConnectPage() {
         Settings.
       </h1>
       <p className="mt-1 text-[13px] text-ink-dim">
-        Connect The Vault to your iPhone and Mac so capture is one tap or one
+        Connect The Blueprint to your iPhone and Mac so capture is one tap or one
         word away.
       </p>
 

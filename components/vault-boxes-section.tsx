@@ -157,7 +157,7 @@ export function VaultBoxesSection({
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <Link
-                href={`/vault/${open.slug}`}
+                href={`/boxes/${open.slug}`}
                 className="rounded-sm border border-vault-line px-3 py-1.5 font-mono text-[10px] tracking-[0.16em] text-ink-mute transition hover:border-brass/40 hover:text-brass"
               >
                 Open full page

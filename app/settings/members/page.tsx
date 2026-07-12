@@ -49,7 +49,7 @@ export default async function MembersPage() {
     <div className="mx-auto max-w-[800px] px-6 py-8 md:px-10">
       <div className="eyebrow">— Members —</div>
       <h1 className="serif-h mt-2 text-[36px] leading-tight md:text-[40px]">
-        Who can open this vault.
+        Who can open this blueprint.
       </h1>
 
       <div className="mt-3">
@@ -64,7 +64,7 @@ export default async function MembersPage() {
           }}
           className="mt-6 flex flex-wrap items-center gap-3 rounded-sm border border-vault-line bg-vault-panel/40 px-4 py-3"
         >
-          <span className="eyebrow">Vault name</span>
+          <span className="eyebrow">Blueprint name</span>
           <input
             name="name"
             defaultValue={vault.name}

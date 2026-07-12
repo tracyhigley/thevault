@@ -54,7 +54,7 @@ export async function TopBar() {
 
       <div className="flex shrink-0 items-center gap-2">
         <Link
-          href="/deposit"
+          href="/field-notes/add"
           className="rounded-sm border border-gold/40 px-3 py-1.5 font-mono text-[10px] tracking-[0.18em] text-gold hover:bg-gold/10"
           title="Add a field note"
         >

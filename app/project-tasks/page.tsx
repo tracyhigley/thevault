@@ -263,7 +263,7 @@ export default async function AtmPage({
                     categoryDecoded !== "" &&
                     labelByKey.has(categoryDecoded) && (
                       <Link
-                        href={`/vault/${slugify(categoryDecoded)}`}
+                        href={`/boxes/${slugify(categoryDecoded)}`}
                         className="rounded-sm border border-vault-line px-3 py-1.5 font-mono text-[10px] tracking-[0.16em] text-ink-mute transition hover:border-brass/40 hover:text-brass"
                       >
                         Open full page

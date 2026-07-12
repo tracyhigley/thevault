@@ -23,43 +23,43 @@ export default async function OnboardingPage() {
     <div className="mx-auto max-w-[640px] px-6 py-16 md:px-10">
       <div className="eyebrow">— First run —</div>
       <h1 className="serif-h mt-2 text-[36px] leading-tight md:text-[44px]">
-        Welcome to your vault.
+        Welcome to your blueprint.
       </h1>
       <p className="mt-3 text-ink-dim">
-        You don&rsquo;t belong to a vault yet. Either start a fresh one of your own,
+        You don&rsquo;t belong to a blueprint yet. Either start a fresh one of your own,
         or wait for someone to invite you to theirs.
       </p>
 
       <form
         action={async (fd) => {
           "use server";
-          await createMyVault((fd.get("name") as string) ?? "The Vault");
+          await createMyVault((fd.get("name") as string) ?? "The Blueprint");
           redirect("/");
         }}
         className="mt-10 rounded-sm border border-vault-line bg-vault-panel/40 p-5"
       >
-        <h2 className="serif-h text-[22px]">Start a new vault</h2>
+        <h2 className="serif-h text-[22px]">Start a new blueprint</h2>
         <p className="mt-1 text-[13px] text-ink-dim">
           You&rsquo;ll be the owner. You can invite others under Settings → Members.
         </p>
         <div className="mt-4 flex flex-wrap gap-3">
           <input
             name="name"
-            placeholder="The Vault"
-            defaultValue="The Vault"
+            placeholder="The Blueprint"
+            defaultValue="The Blueprint"
             className="flex-1 min-w-[200px] rounded-sm border border-vault-line bg-vault-bg/60 px-3 py-2 text-ink outline-none focus:border-brass"
           />
           <button
             type="submit"
             className="brass-button px-6 py-2 font-mono text-[10px] tracking-[0.24em]"
           >
-            CREATE VAULT
+            CREATE BLUEPRINT
           </button>
         </div>
       </form>
 
       <div className="mt-8 rounded-sm border border-dashed border-vault-line p-5 text-[13px] text-ink-mute">
-        Waiting on an invite? Ask the vault owner to add you under{" "}
+        Waiting on an invite? Ask the blueprint owner to add you under{" "}
         <span className="text-brass">Settings → Members</span>. The link will
         come to your email.
       </div>

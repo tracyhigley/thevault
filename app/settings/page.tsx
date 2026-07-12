@@ -22,7 +22,7 @@ export default async function SettingsPage() {
         Settings.
       </h1>
       <p className="mt-1 text-[13px] text-ink-dim">
-        How the vault behaves. The tabs below cover members, the categories
+        How the blueprint behaves. The tabs below cover members, the categories
         you file into, the energies that power Project Tasks matching, Google Calendar
         to Field Notes, and how to connect your phone and Mac.
       </p>

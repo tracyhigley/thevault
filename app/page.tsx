@@ -108,7 +108,7 @@ function BuildPrompt() {
         </Link>
         <p className="mt-4 font-mono text-[10px] tracking-[0.18em] text-ink-mute">
           Or{" "}
-          <Link href="/vault" className="hover:text-brass">
+          <Link href="/boxes" className="hover:text-brass">
             open the boxes
           </Link>{" "}
           to browse without building.

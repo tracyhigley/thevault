@@ -138,7 +138,7 @@ export function BuildWizard({
           className="hover:text-brass"
           onClick={() => markPreferTodayOverDropLanding()}
         >
-          SKIP &amp; OPEN VAULT
+          SKIP &amp; OPEN
         </Link>
       </div>
     </div>

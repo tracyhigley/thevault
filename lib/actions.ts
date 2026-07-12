@@ -316,7 +316,7 @@ export async function moveItemToBox(itemId: string, box: string) {
   revalidatePath("/field-notes");
   revalidatePath("/admin-tasks");
   revalidatePath("/project-tasks");
-  revalidatePath("/vault");
+  revalidatePath("/boxes");
 }
 
 export async function softDeleteItem(itemId: string) {
@@ -329,7 +329,7 @@ export async function softDeleteItem(itemId: string) {
   revalidatePath("/project-tasks");
   revalidatePath("/admin-tasks");
   revalidatePath("/field-notes");
-  revalidatePath("/vault");
+  revalidatePath("/boxes");
 }
 
 /** Permanently deletes rows that match Today’s “Done today” bucket: on today’s plan + state done. Ignores unrelated ids. */
@@ -358,7 +358,7 @@ export async function hardDeleteDoneTodayItems(itemIds: string[]) {
   revalidatePath("/project-tasks");
   revalidatePath("/admin-tasks");
   revalidatePath("/field-notes");
-  revalidatePath("/vault");
+  revalidatePath("/boxes");
   revalidatePath("/documents");
   return { ok: true as const, deleted: validIds.length };
 }
@@ -371,7 +371,7 @@ export async function hardDeleteItem(itemId: string) {
   revalidatePath("/project-tasks");
   revalidatePath("/admin-tasks");
   revalidatePath("/field-notes");
-  revalidatePath("/vault");
+  revalidatePath("/boxes");
   revalidatePath("/documents");
 }
 
@@ -500,7 +500,7 @@ export async function createItem(box: string, title: string, extras: z.input<typ
     .select("id")
     .single();
   revalidatePath("/", "layout");
-  revalidatePath("/vault");
+  revalidatePath("/boxes");
   revalidatePath("/admin-tasks");
   revalidatePath("/project-tasks");
   return data?.id;
@@ -935,7 +935,7 @@ export async function setSealed(sealed: boolean) {
   revalidatePath("/", "layout");
 }
 
-// ─── Capture (real session — used by the /deposit Add-a-field-note page) ───
+// ─── Capture (real session — used by the /field-notes/add page) ───
 
 export async function addFieldNote(text: string, source: string = "mailslot") {
   const trimmed = text.trim();

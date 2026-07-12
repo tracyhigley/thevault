@@ -106,8 +106,8 @@ export function buildingSlug(key: string): string {
 
 // Documents are text-first storage categories (Notes, Measurements, Read &
 // Watch, Health Ideas…) — separately configured from Boxes. Same shape;
-// kept distinct so the Vault page can render them in their own section and
-// route them through /documents/<slug> instead of /vault/<slug>.
+// kept distinct so the Boxes page can render them in their own section and
+// route them through /documents/<slug> instead of /boxes/<slug>.
 export type DocumentType = {
   key: string;
   label: string;

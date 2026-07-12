@@ -90,7 +90,7 @@ function LoginForm() {
 
   return (
     <div className="mx-auto flex min-h-[80vh] max-w-[420px] flex-col items-center justify-center px-6">
-      <div className="eyebrow">— The Vault —</div>
+      <div className="eyebrow">— The Blueprint —</div>
       <h1 className="serif-h mt-2 text-[36px]">Open the door.</h1>
 
       <div className="mt-6 flex gap-1 rounded-sm border border-vault-line p-0.5">
@@ -134,7 +134,7 @@ function LoginForm() {
           {pending
             ? "..."
             : mode === "signin"
-              ? "OPEN VAULT"
+              ? "OPEN"
               : "CREATE ACCOUNT"}
         </button>
       </form>

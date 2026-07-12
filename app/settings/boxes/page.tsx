@@ -9,7 +9,7 @@ export default async function BoxesSettingsPage() {
     <div className="mx-auto max-w-[1000px] px-4 py-8 md:px-10">
       <div className="eyebrow">— Settings · boxes —</div>
       <h1 className="serif-h mt-2 text-[36px] leading-tight md:text-[40px]">
-        How the vault is organized.
+        How the blueprint is organized.
       </h1>
 
       <div className="mt-3">

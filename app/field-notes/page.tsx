@@ -30,7 +30,7 @@ export default async function DropPage() {
       {!ready && (
         <div className="mt-6 rounded-sm border border-dashed border-brass/40 bg-vault-panel/30 p-6">
           <h3 className="serif-h text-[18px] text-ink">
-            Set up your vault first.
+            Set up your blueprint first.
           </h3>
           <p className="mt-1 text-[13px] text-ink-dim">
             Triage needs at least one box (where things go) and one energy
@@ -101,7 +101,7 @@ export default async function DropPage() {
 
       <p className="mt-6 text-[11px] text-ink-mute">
         New captures land here from the iPhone Shortcut, Siri, or the{" "}
-        <Link href="/deposit" className="text-brass underline">
+        <Link href="/field-notes/add" className="text-brass underline">
           Add a Field Note
         </Link>{" "}
         page. Edit boxes and energies under{" "}

@@ -12,7 +12,7 @@ import { UnhandledRejectionGuard } from "@/components/unhandled-rejection-guard"
 import { RegisterServiceWorker } from "@/components/register-service-worker";
 
 export const metadata: Metadata = {
-  title: "The Vault",
+  title: "The Blueprint",
   description: "A place for everything.",
 };
 

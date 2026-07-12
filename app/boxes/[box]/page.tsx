@@ -33,7 +33,7 @@ export default async function BoxPage({
         </p>
         <div className="mt-6 flex justify-center gap-2">
           <Link
-            href="/vault"
+            href="/boxes"
             className="rounded-sm border border-vault-line px-4 py-2 font-mono text-[10px] tracking-[0.18em] text-ink-mute hover:border-brass/40 hover:text-brass"
           >
             ← BACK TO BOXES
@@ -52,7 +52,7 @@ export default async function BoxPage({
 
   return (
     <div className="mx-auto max-w-[1100px] px-4 py-8 md:px-10">
-      <div className="eyebrow">— Deposit box —</div>
+      <div className="eyebrow">— Storage box —</div>
       <h1 className="serif-h mt-2 text-[36px] leading-tight md:text-[40px]">
         {title}
       </h1>

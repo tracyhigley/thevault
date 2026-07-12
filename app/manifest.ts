@@ -2,9 +2,9 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "The Vault",
-    short_name: "Vault",
-    description: "The Vault — a place for everything.",
+    name: "The Blueprint",
+    short_name: "Blueprint",
+    description: "The Blueprint — a place for every plan.",
     start_url: "/",
     display: "standalone",
     background_color: "#f3eee5",

@@ -540,7 +540,7 @@ curl -s -X POST '${apiUrl}' \\
 function BookmarkletCard({ baseUrl }: { baseUrl: string }) {
   // A click-and-drag bookmarklet that opens the Field Notes quick-add page
   // pre-filled with the current page's selection / URL.
-  const code = `javascript:(function(){var s=window.getSelection&&String(window.getSelection())||'';var t=encodeURIComponent((s?s+' — ':'')+document.title+' '+location.href);location.href='${baseUrl}/deposit?t='+t;})();`;
+  const code = `javascript:(function(){var s=window.getSelection&&String(window.getSelection())||'';var t=encodeURIComponent((s?s+' — ':'')+document.title+' '+location.href);location.href='${baseUrl}/field-notes/add?t='+t;})();`;
 
   return (
     <Card
