@@ -36,15 +36,18 @@ export async function TopBar() {
 
   return (
     <header className="relative z-10 flex items-center justify-between gap-3 border-b border-vault-line/50 bg-vault-bg/85 px-4 py-3 backdrop-blur md:px-10 md:py-4">
-      <VaultHomeLink className="flex shrink-0 items-center">
+      <VaultHomeLink className="flex shrink-0 items-center gap-2.5 md:gap-3">
         <Image
-          src="/brand-logo.png"
-          alt="The Blueprint"
-          width={1721}
-          height={914}
+          src="/brand-icon.png"
+          alt=""
+          width={560}
+          height={560}
           priority
-          className="h-8 w-auto md:h-10"
+          className="h-11 w-11 md:h-14 md:w-14"
         />
+        <span className="font-serif text-xl leading-none text-ink md:text-2xl">
+          The Blueprint
+        </span>
       </VaultHomeLink>
 
       <TopBarNav fiftyFdHref={fiftyFdHref} />
