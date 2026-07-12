@@ -17,8 +17,8 @@ export default async function EnergiesSettingsPage() {
       </div>
 
       <p className="mt-6 text-ink-dim">
-        Energies label how a task feels — they live on ATM items, used by
-        the daily plan to match what you can pull today. Counter items don't
+        Energies label how a task feels — they live on Project Tasks items, used by
+        the daily plan to match what you can pull today. Admin Tasks items don't
         use energy; they go by urgency and must-do flags.
       </p>
       <p className="mt-1 text-[13px] text-ink-dim">

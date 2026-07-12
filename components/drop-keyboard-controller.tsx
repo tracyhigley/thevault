@@ -1,6 +1,6 @@
 "use client";
 
-// Page-level keyboard navigation for The Drop.
+// Page-level keyboard navigation for Field Notes.
 //
 // Each DropTriageRow's wrapper carries data-drop-row + tabIndex=0. This
 // controller sits at the page level and:
@@ -55,11 +55,11 @@ export function DropKeyboardController() {
 
   useShortcut("j", () => focusByOffset(1), {
     label: "Next thought",
-    group: "Drop",
+    group: "Field Notes",
   });
   useShortcut("k", () => focusByOffset(-1), {
     label: "Previous thought",
-    group: "Drop",
+    group: "Field Notes",
   });
   useShortcut("down", () => focusByOffset(1), {
     label: "",

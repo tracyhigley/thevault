@@ -1,5 +1,5 @@
-// Vault interior — STORAGE ONLY. Daily-action surfaces (Drop / Docket /
-// ATM / Counter) live in the top nav; here we only show the things you
+// Vault interior — STORAGE ONLY. Daily-action surfaces (Field Notes / Docket /
+// Project Tasks / Admin Tasks) live in the top nav; here we only show the things you
 // put away.
 //
 // Strictly configured-only: boxes = settings.boxes (and only those).
@@ -16,7 +16,7 @@ import type { Item } from "@/lib/types";
 export default async function VaultInteriorPage() {
   const [items, boxes] = await Promise.all([getAllItems(), getBoxes()]);
 
-  // Storage + Counter/ATM/Drop work filed under each life-area key.
+  // Storage + Admin Tasks/Project Tasks/Field Notes work filed under each life-area key.
   const itemsByBox: Record<string, Item[]> = {};
   for (const b of boxes) {
     itemsByBox[b.key] = sortedItemsForHubBox(b.key, items);

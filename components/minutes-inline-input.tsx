@@ -11,7 +11,7 @@ export function parseMinutesField(raw: string): number | undefined {
   return Math.round(n);
 }
 
-/** Compact minutes field (same pattern as Drop triage). */
+/** Compact minutes field (same pattern as Field Notes triage). */
 export function MinutesInlineInput({
   value,
   onChange,

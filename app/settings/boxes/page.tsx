@@ -17,9 +17,9 @@ export default async function BoxesSettingsPage() {
       </div>
 
       <p className="mt-6 text-ink-dim">
-        Your boxes are the categories you file thoughts into from The Drop —
-        life areas, businesses, projects. The same box can hold Counter items
-        (obligations) and ATM items (energy-matched pulls).
+        Your boxes are the categories you file thoughts into from Field Notes —
+        life areas, businesses, projects. The same box can hold Admin Tasks items
+        (obligations) and Project Tasks items (energy-matched pulls).
       </p>
       <p className="mt-1 text-[13px] text-ink-dim">
         The <strong>label</strong> is what you see in dropdowns. The{" "}

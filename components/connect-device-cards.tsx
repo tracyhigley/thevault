@@ -318,8 +318,8 @@ function IOSShortcutCard({
   return (
     <Card
       badge="iPhone · Siri"
-      title="“Hey Siri, drop in vault.”"
-      subtitle="Build a one-step Apple Shortcut that drops dictated text straight into The Drop."
+      title="“Hey Siri, add to field notes.”"
+      subtitle="Build a one-step Apple Shortcut that drops dictated text straight into Field Notes."
     >
       <div className="space-y-4">
         <div className="rounded-sm border border-vault-line/60 bg-vault-bg/40 px-3 py-2">
@@ -397,11 +397,11 @@ function IOSShortcutCard({
             <>
               Tap <strong className="text-ink">Show Notification</strong>{" "}
               (optional) so you get a confirmation. Name the shortcut{" "}
-              <strong className="text-ink">Drop in Vault</strong> and save.
+              <strong className="text-ink">Add to Field Notes</strong> and save.
             </>,
             <>
               Now you can: say{" "}
-              <em>“Hey Siri, drop in vault”</em>, run from the Lock-Screen
+              <em>“Hey Siri, add to field notes”</em>, run from the Lock-Screen
               widget, add to a Home Screen widget, or wire to the Action Button.
             </>,
           ]}
@@ -412,7 +412,7 @@ function IOSShortcutCard({
             Test from a terminal first
           </summary>
           <CodeBlock
-            label="curl test (will create a real Drop item)"
+            label="curl test (will create a real Field Notes item)"
             code={`curl -X POST '${apiUrl}' \\
   -H 'Authorization: Bearer ${token ?? "YOUR-TOKEN"}' \\
   -H 'Content-Type: application/json' \\
@@ -442,7 +442,7 @@ function MacCaptureCard({
   const u = userId || "your-user-id";
 
   const raycastSnippet = `# Raycast → Create Script Command → Bash
-# @raycast.title Drop in Vault
+# @raycast.title Add to Field Notes
 # @raycast.mode silent
 # @raycast.argument1 { "type": "text", "placeholder": "thought" }
 # @raycast.icon 🗝️
@@ -464,7 +464,7 @@ curl -s -X POST '${apiUrl}' \\
   return (
     <Card
       badge="Mac · Quick capture"
-      title="Drop without switching windows."
+      title="Capture a thought without switching windows."
       subtitle="One hotkey from anywhere — Raycast, Alfred, or a built-in macOS Shortcut."
     >
       <div className="space-y-4">
@@ -491,7 +491,7 @@ curl -s -X POST '${apiUrl}' \\
               </>,
               <>
                 Add <strong className="text-ink">Ask for Input</strong> (Text)
-                → prompt: &ldquo;Drop in Vault&rdquo;.
+                → prompt: &ldquo;Add to Field Notes&rdquo;.
               </>,
               <>
                 Add <strong className="text-ink">Get Contents of URL</strong>{" "}
@@ -517,7 +517,7 @@ curl -s -X POST '${apiUrl}' \\
             Create → Script Command → paste this. Bind a hotkey in Raycast
             preferences.
           </p>
-          <CodeBlock label="drop-in-vault.sh" code={raycastSnippet} />
+          <CodeBlock label="add-to-field-notes.sh" code={raycastSnippet} />
         </div>
 
         <details className="rounded-sm border border-vault-line/60 bg-vault-bg/40 px-3 py-2">
@@ -527,7 +527,7 @@ curl -s -X POST '${apiUrl}' \\
           <p className="mt-2 text-[13px] text-ink-dim">
             Automator → New Quick Action → Workflow receives <em>text</em> in
             any application → drag <strong>Run Shell Script</strong> → paste
-            below. Save as &ldquo;Drop in Vault&rdquo;. Then System Settings →
+            below. Save as &ldquo;Add to Field Notes&rdquo;. Then System Settings →
             Keyboard → Shortcuts → Services → bind a key.
           </p>
           <CodeBlock label="quick-action.sh" code={automatorSnippet} />
@@ -546,7 +546,7 @@ function BookmarkletCard({ baseUrl }: { baseUrl: string }) {
     <Card
       badge="Anywhere · Bookmarklet"
       title="Drag to your bookmark bar."
-      subtitle="One click on any page deposits the title + URL (or selected text) into The Drop."
+      subtitle="One click on any page deposits the title + URL (or selected text) into Field Notes."
     >
       <p className="text-[13px] text-ink-dim">
         Drag the gold button below onto your bookmarks bar. It works in any
@@ -564,7 +564,7 @@ function BookmarkletCard({ baseUrl }: { baseUrl: string }) {
             "cursor-grab hover:bg-brass/20 active:cursor-grabbing",
           )}
         >
-          🗝️ Drop in Vault
+          🗝️ Add to Field Notes
         </a>
       </div>
       <details className="mt-3 rounded-sm border border-vault-line/60 bg-vault-bg/40 px-3 py-2">

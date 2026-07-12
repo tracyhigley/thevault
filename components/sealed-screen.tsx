@@ -127,7 +127,7 @@ export function SealedScreen({
           <p className="mt-5 max-w-[460px] text-ink-dim">
             {sealed
               ? `${itemCount} items on file. Nothing needs your attention until tomorrow's first line.`
-              : `${itemCount} items on the board. Filing rolls up today's sheets. The drop slot still works.`}
+              : `${itemCount} items on the board. Filing rolls up today's sheets. The mail slot still works.`}
           </p>
 
           {/* Deposit slot — works while sealed */}
@@ -156,7 +156,7 @@ export function SealedScreen({
                 </button>
               </form>
               <p className="mt-2 hidden text-center font-mono text-[10px] tracking-[0.2em] text-ink-mute md:block">
-                ⌘K opens the drop slot anywhere.
+                ⌘K opens the mail slot anywhere.
               </p>
             </div>
           )}

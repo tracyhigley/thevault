@@ -129,7 +129,7 @@ export async function syncAllVaultCalendarsToDropWithOptions(opts?: {
   }
 
   if (imported > 0) {
-    revalidatePath("/drop");
+    revalidatePath("/field-notes");
   }
 
   return { ok: errors.length === 0, vaults: rows.length, imported, errors };

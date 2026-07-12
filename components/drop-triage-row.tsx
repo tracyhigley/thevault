@@ -10,10 +10,10 @@ import { useShortcut } from "@/lib/shortcuts";
 import type { Box, Destination, EnergyType } from "@/lib/categories";
 import type { Item } from "@/lib/types";
 
-// Drop row, two compact lines:
+// Field Notes row, two compact lines:
 //
-//   [edge]  [ATM|COUNTER]  Title (editable)              [Box ▼]
-//           ⏱ 30m   urgent / must / should (Counter)     Delete · Send
+//   [edge]  [PROJECT TASKS|ADMIN TASKS]  Title (editable)              [Box ▼]
+//           ⏱ 30m   urgent / must / should (Admin Tasks)     Delete · Send
 //
 // 4-px coloured left edge tracks the destination so a glance reads where
 // each row will land. The destination toggle is the only place the user
@@ -63,56 +63,56 @@ export function DropTriageRow({
   // all gated on `focused`. Inputs auto-skip — typing "u" in the title
   // contenteditable won't toggle Urgent.
   useShortcut("1", () => setDest("ATM"), {
-    label: "Send to ATM",
-    group: "Drop",
+    label: "Send to Project Tasks",
+    group: "Field Notes",
     options: { enabled: focused },
   });
   useShortcut("2", () => setDest("COUNTER"), {
-    label: "Send to Counter",
-    group: "Drop",
+    label: "Send to Admin Tasks",
+    group: "Field Notes",
     options: { enabled: focused },
   });
   useShortcut("u", () => dest === "COUNTER" && setUrgent((v) => !v), {
     label: "Toggle Urgent",
-    group: "Drop",
+    group: "Field Notes",
     options: { enabled: focused && dest === "COUNTER" },
   });
   useShortcut("m", () => dest === "COUNTER" && setMust((v) => !v), {
     label: "Toggle Must",
-    group: "Drop",
+    group: "Field Notes",
     options: { enabled: focused && dest === "COUNTER" },
   });
   useShortcut("s", () => dest === "COUNTER" && setShould((v) => !v), {
     label: "Toggle Should",
-    group: "Drop",
+    group: "Field Notes",
     options: { enabled: focused && dest === "COUNTER" },
   });
   useShortcut("enter", () => send(), {
     label: "Send",
-    group: "Drop",
+    group: "Field Notes",
     // Only at row-level (don't conflict with EditableText's blur-on-Enter).
     options: { enabled: focused },
   });
   useShortcut("b", () => boxSelectRef.current?.focus(), {
     label: "Focus box dropdown",
-    group: "Drop",
+    group: "Field Notes",
     options: { enabled: focused },
   });
   useShortcut("t", () => minutesInputRef.current?.focus(), {
     label: "Focus minutes",
-    group: "Drop",
+    group: "Field Notes",
     options: { enabled: focused },
   });
   useShortcut("x", () => deleteThought(), {
     label: "Delete thought",
-    group: "Drop",
+    group: "Field Notes",
     options: { enabled: focused },
   });
   // Escape from inside a field returns focus to the row wrapper, so j/k
   // work again immediately.
   useShortcut("escape", () => wrapperRef.current?.focus(), {
     label: "Back to row",
-    group: "Drop",
+    group: "Field Notes",
     options: { enabled: focused, allowInInputs: true },
   });
 
@@ -137,8 +137,8 @@ export function DropTriageRow({
         const label = boxes.find((b) => b.key === boxKey)?.label ?? boxKey;
         toast.success(
           dest === "COUNTER"
-            ? `Sent to The Counter · ${label}.`
-            : `Sent to The ATM · ${label}.`,
+            ? `Sent to Admin Tasks · ${label}.`
+            : `Sent to Project Tasks · ${label}.`,
         );
         window.dispatchEvent(new CustomEvent("vault:drop-advance"));
       } catch (e: any) {
@@ -295,7 +295,7 @@ function DestSegment({
         accent="teal"
         hint="1"
       >
-        ATM
+        PROJECT TASKS
       </SegmentButton>
       <SegmentButton
         active={dest === "COUNTER"}
@@ -303,7 +303,7 @@ function DestSegment({
         accent="rust"
         hint="2"
       >
-        COUNTER
+        ADMIN TASKS
       </SegmentButton>
     </div>
   );

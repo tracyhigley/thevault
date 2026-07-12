@@ -50,7 +50,7 @@ export function NewAtmItemRow({
             add();
           }
         }}
-        placeholder="+ New ATM option"
+        placeholder="+ New Project Tasks option"
         className="vault-task-title min-w-[220px] flex-1 bg-transparent text-ink placeholder:text-ink-mute outline-none"
       />
       <Select
@@ -58,7 +58,7 @@ export function NewAtmItemRow({
         onChange={(e) => setCategory(e.target.value)}
         tone="brass"
         className="w-[13rem] shrink-0 px-2 py-1 font-mono text-[10px]"
-        aria-label="Choose box for new ATM task"
+        aria-label="Choose box for new Project Tasks task"
       >
         <option value="" className="bg-vault-bg">
           — choose box —
@@ -72,7 +72,7 @@ export function NewAtmItemRow({
       <MinutesInlineInput
         value={minutes}
         onChange={setMinutes}
-        aria-label="Minutes for new ATM item"
+        aria-label="Minutes for new Project Tasks item"
       />
       <button
         type="button"

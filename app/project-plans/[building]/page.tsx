@@ -29,10 +29,10 @@ export default async function BuildingPage({
   return (
     <div className="mx-auto max-w-[900px] px-4 py-8 md:px-10">
       <Link
-        href="/plan"
+        href="/project-plans"
         className="font-mono text-[10px] tracking-[0.2em] text-ink-mute hover:text-brass"
       >
-        ← MASTER PLAN
+        ← MASTER PROJECT PLANS
       </Link>
       <h1 className="serif-h mt-3 text-[28px] leading-tight md:text-[36px]">
         {building.label}
@@ -73,7 +73,7 @@ export default async function BuildingPage({
         {ideas.map((p) => (
           <Link
             key={p.id}
-            href={`/plan/project/${p.id}`}
+            href={`/project-plans/project/${p.id}`}
             className="rounded-full border border-vault-line bg-vault-bg-2 px-3.5 py-1.5 text-[13px] text-ink-dim transition hover:border-brass/60 hover:text-ink"
           >
             {p.title}
@@ -89,7 +89,7 @@ export default async function BuildingPage({
             {complete.map((p) => (
               <Link
                 key={p.id}
-                href={`/plan/project/${p.id}`}
+                href={`/project-plans/project/${p.id}`}
                 className="flex items-baseline justify-between gap-3 py-2 text-[13px] text-ink-mute transition hover:text-ink"
               >
                 <span>
@@ -133,7 +133,7 @@ function ProjectCard({
   const lastLog = project.log.at(-1);
   return (
     <Link
-      href={`/plan/project/${project.id}`}
+      href={`/project-plans/project/${project.id}`}
       className={`block rounded-sm border bg-vault-panel px-4 py-3 transition hover:border-brass/60 ${
         accent ? "border-vault-line border-l-[3px] border-l-brass" : "border-vault-line"
       }`}

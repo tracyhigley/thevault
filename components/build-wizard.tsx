@@ -18,9 +18,9 @@ import { Kbd } from "./kbd";
 
 const STEPS = [
   { n: 1, title: "End Time" },
-  { n: 2, title: "Drop" },
-  { n: 3, title: "Counter" },
-  { n: 4, title: "ATM" },
+  { n: 2, title: "Field Notes" },
+  { n: 3, title: "Admin Tasks" },
+  { n: 4, title: "Project Tasks" },
 ] as const;
 
 export function BuildWizard({
@@ -217,7 +217,7 @@ function DaySetupStep({
   return (
     <Step
       title="When does your day end?"
-      hint="Set your end-of-day time first. Next, you will clear The Drop before choosing Counter and ATM items for today."
+      hint="Set your end-of-day time first. Next, you will clear Field Notes before choosing Admin Tasks and Project Tasks items for today."
       pending={pending}
       onSubmit={submit}
       submitLabel="NEXT"
@@ -261,13 +261,13 @@ function DropStep({
 
   return (
     <Step
-      title="Clear The Drop first"
+      title="Clear Field Notes first"
       hint={
         hasDrop
-          ? "For each Drop item, choose ATM or Counter, set minutes and box/area, then send it (or delete it)."
-          : "The Drop is clear. Continue to choose what is already on your Counter."
+          ? "For each Field Notes item, choose Project Tasks or Admin Tasks, set minutes and box/area, then send it (or delete it)."
+          : "Field Notes is clear. Continue to choose what is already on your Admin Tasks."
       }
-      submitLabel="ON TO THE COUNTER →"
+      submitLabel="ON TO ADMIN TASKS →"
       onSubmit={onNext}
       submitDisabled={hasDrop}
     >
@@ -282,19 +282,19 @@ function DropStep({
             />
           ))}
           <p className="pt-2 text-[12px] text-ink-mute">
-            Finish triaging or deleting all Drop items to continue.
+            Finish triaging or deleting all Field Notes items to continue.
           </p>
         </div>
       ) : (
         <p className="rounded-sm border border-dashed border-vault-line/60 px-4 py-5 text-center text-ink-mute">
-          No pending items in The Drop.
+          No pending items in Field Notes.
         </p>
       )}
     </Step>
   );
 }
 
-// Step 3: Counter review.
+// Step 3: Admin Tasks review.
 function ReviewStep({
   boxes,
   stressors,
@@ -314,13 +314,13 @@ function ReviewStep({
     stressors.length + timeSensitive.length + mustDo.length + otherAdmin.length;
   return (
     <Step
-      title="What's already on the counter?"
+      title="What's already on Admin Tasks?"
       hint={
         total === 0
-          ? "Nothing on the Counter yet — add items below, or continue with an empty plan."
+          ? "Nothing on Admin Tasks yet — add items below, or continue with an empty plan."
           : "Edit titles and minutes as needed. Tap + TODAY on what you want scheduled; add more items anytime before you continue."
       }
-      submitLabel="ON TO THE ATM →"
+      submitLabel="ON TO PROJECT TASKS →"
       onSubmit={onNext}
     >
       <div className="mb-4">
@@ -440,7 +440,7 @@ function atmBoxLabel(category: string, boxes: Box[]): string {
   return boxes.find((b) => b.key === category)?.label ?? category;
 }
 
-// Step 4: ATM box-first withdrawals.
+// Step 4: Project Tasks box-first withdrawals.
 function AtmStep({
   atm,
   counterItems,
@@ -472,7 +472,7 @@ function AtmStep({
     0,
   );
   const counterOnTodayHours = counterOnTodayMinutes / 60;
-  /** Time left for ATM after Counter items marked “on Today” in step 3. */
+  /** Time left for Project Tasks after Admin Tasks items marked “on Today” in step 3. */
   const atmPoolHours = Math.max(0, dayBudgetHours - counterOnTodayHours);
   const counterExceedsWindow = counterOnTodayMinutes > windowMinutes;
 
@@ -552,21 +552,21 @@ function AtmStep({
         await applyAtmBoxBudgets(withBudget);
         onFinish();
       } catch (e: any) {
-        toast.error(e?.message ?? "Couldn't apply ATM box budgets.");
+        toast.error(e?.message ?? "Couldn't apply Project Tasks box budgets.");
       }
     });
   }
 
   return (
     <Step
-      title="Pick 1-2 ATM boxes"
+      title="Pick 1-2 Project Tasks boxes"
       submitLabel="BUILD THE DAY"
       onSubmit={submit}
       pending={pending}
     >
       {categories.length === 0 ? (
         <p className="rounded-sm border border-dashed border-vault-line/60 px-4 py-6 text-center text-ink-mute">
-          No ATM boxes found yet.
+          No Project Tasks boxes found yet.
         </p>
       ) : (
         <div className="space-y-4">
@@ -590,9 +590,9 @@ function AtmStep({
 
           {counterExceedsWindow && (
             <p className="rounded-sm border border-rust/40 bg-rust/5 px-3 py-2 text-[12px] text-ink-dim">
-              Counter on Today is longer than your day window. ATM budget is 0
+              Admin Tasks on Today is longer than your day window. Project Tasks budget is 0
               until you take items off Today or move your end time (step 1). You
-              can still build the day without picking ATM boxes.
+              can still build the day without picking Project Tasks boxes.
             </p>
           )}
 
@@ -602,7 +602,7 @@ function AtmStep({
                 <div className="rounded-sm border border-vault-line/60 bg-vault-panel/30 p-4">
                   <label className="block">
                     <span className="font-mono text-[10px] tracking-wider text-ink-mute">
-                      How much of your ATM time goes to{" "}
+                      How much of your Project Tasks time goes to{" "}
                       <span className="text-ink">
                         {atmBoxLabel(selected[0], boxes)}
                       </span>
@@ -618,14 +618,14 @@ function AtmStep({
                         setSingleUsePct(Number(e.target.value))
                       }
                       className="mt-3 w-full accent-brass"
-                      aria-valuetext={`${singleUsePct}% of ATM pool`}
+                      aria-valuetext={`${singleUsePct}% of Project Tasks pool`}
                     />
                     <div className="mt-2 flex flex-wrap items-baseline justify-between gap-2 text-[13px] text-ink">
                       <span>
                         <span className="text-brass-bright">
                           {formatHoursProse(hoursBudgetFor(selected[0]))}
                         </span>{" "}
-                        <span className="text-ink-dim">for ATM</span>
+                        <span className="text-ink-dim">for Project Tasks</span>
                       </span>
                       <span className="font-mono text-[11px] text-ink-mute">
                         {singleUsePct}% of {formatHoursProse(atmPoolHours)}
@@ -638,7 +638,7 @@ function AtmStep({
               {selected.length === 2 && atmPoolHours > 0 && (
                 <div className="rounded-sm border border-vault-line/60 bg-vault-panel/30 p-4">
                   <p className="font-mono text-[10px] tracking-wider text-ink-mute">
-                    SPLIT YOUR {formatHoursProse(atmPoolHours)} ATM BUDGET
+                    SPLIT YOUR {formatHoursProse(atmPoolHours)} PROJECT TASKS BUDGET
                   </p>
                   <input
                     type="range"
@@ -678,16 +678,16 @@ function AtmStep({
               {dayBudgetHours <= 0 && (
                 <p className="rounded-sm border border-dashed border-rust/40 bg-rust/5 px-3 py-2 text-[12px] text-ink-dim">
                   No hours left in your day window (step 1). Adjust end time or
-                  continue — you can still build, but ATM budgets will be 0
+                  continue — you can still build, but Project Tasks budgets will be 0
                   until that changes.
                 </p>
               )}
 
               {dayBudgetHours > 0 && atmPoolHours <= 0 && !counterExceedsWindow && (
                 <p className="rounded-sm border border-dashed border-vault-line/80 bg-vault-panel/30 px-3 py-2 text-[12px] text-ink-dim">
-                  No time left for ATM: Counter on Today already fills your day
+                  No time left for Project Tasks: Admin Tasks on Today already fills your day
                   window. Take something off Today (step 3) or extend your end
-                  time (step 1) to free ATM budget.
+                  time (step 1) to free Project Tasks budget.
                 </p>
               )}
 
@@ -715,12 +715,12 @@ function AtmStep({
 
               <div className="rounded-sm border border-vault-line/50 bg-vault-bg/30 px-3 py-2.5 text-[12px] text-ink-dim">
                 <p>
-                  <span className="text-ink">ATM pulls: </span>
+                  <span className="text-ink">Project Tasks pulls: </span>
                   {formatHoursProse(totalAllocated)}
                   {atmPoolHours > 0 ? (
                     <span className="text-ink-mute">
                       {" "}
-                      ({atmSharePercent}% of ATM pool)
+                      ({atmSharePercent}% of Project Tasks pool)
                     </span>
                   ) : null}
                 </p>

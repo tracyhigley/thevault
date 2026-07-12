@@ -69,7 +69,7 @@ function coerceFilter(raw: string | undefined): Filter {
 }
 
 /**
- * Filter semantics match the row chrome on the Counter:
+ * Filter semantics match the row chrome on Admin Tasks:
  *   Stress  → both flags (rust “stressor” strip)
  *   Urgent  → urgent only, not must (amber strip)
  *   Must    → must only, not urgent (sky strip)
@@ -209,7 +209,7 @@ export default async function CounterPage({
   return (
     <div className="mx-auto max-w-[1100px] px-4 py-8 md:px-10">
       <h1 className="serif-h text-[28px] leading-tight md:text-[36px]">
-        The Counter
+        Admin Tasks
       </h1>
       <p className="mt-1 text-[13px] text-ink-dim">
         Obligations — what has to happen.
@@ -227,7 +227,7 @@ export default async function CounterPage({
             {FILTERS.map((f) => (
               <Link
                 key={f.key}
-                href={f.key === "all" ? "/counter" : `/counter?filter=${f.key}`}
+                href={f.key === "all" ? "/admin-tasks" : `/admin-tasks?filter=${f.key}`}
                 className={clsx(
                   "rounded-sm border px-4 py-1.5 font-mono text-[11px] tracking-wider transition",
                   active === f.key
@@ -244,7 +244,7 @@ export default async function CounterPage({
           {areas.map((a) => (
                 <Link
               key={a.key}
-              href={`/counter?filter=byarea&area=${encodeURIComponent(a.key)}`}
+              href={`/admin-tasks?filter=byarea&area=${encodeURIComponent(a.key)}`}
                   className={clsx(
                     "rounded-sm border px-4 py-1.5 font-mono text-[11px] tracking-wider transition",
                 active === "byarea" && area === a.key
@@ -267,7 +267,7 @@ export default async function CounterPage({
         {filtered.length === 0 ? (
           <p className="mt-4 text-[13px] text-ink-mute">
             {active === "all"
-              ? "Nothing on the Counter yet."
+              ? "Nothing on Admin Tasks yet."
               : "No items match this filter."}
           </p>
         ) : (
@@ -287,7 +287,7 @@ export default async function CounterPage({
   );
 }
 
-/** Matches ATM row `AreaPill` chip sizing. */
+/** Matches Project Tasks row `AreaPill` chip sizing. */
 const COUNTER_AREA_PILL_CLASS =
   // Wider so long area labels (e.g. "Home & Garden") don't truncate.
   "!max-h-7 max-w-[9.25rem] shrink-0 !py-0.5 !pl-1.5 !pr-1 !text-[9px] !leading-tight border-brass/40 bg-vault-bg/20";

@@ -25,7 +25,7 @@ export default async function CalendarSettingsPage() {
         Settings.
       </h1>
       <p className="mt-1 text-[13px] text-ink-dim">
-        Bring events from Google Calendar into The Drop automatically.
+        Bring events from Google Calendar into Field Notes automatically.
       </p>
 
       <div className="mt-4">

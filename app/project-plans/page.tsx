@@ -1,4 +1,4 @@
-// Master Plan — the campus view. Eight (or however many) buildings, each a
+// Master Project Plans — the campus view. Eight (or however many) buildings, each a
 // life domain holding building projects. Deliberately calm: building cards
 // show only what's under construction and what's in planning. Idea counts
 // are hidden on purpose — ideas rest safely inside each building without
@@ -31,7 +31,7 @@ export default async function MasterPlanPage() {
 
   return (
     <div className="mx-auto max-w-[1100px] px-4 py-8 md:px-10">
-      <div className="eyebrow">— Master Plan —</div>
+      <div className="eyebrow">— Master Project Plans —</div>
       <h1 className="serif-h mt-2 text-[28px] leading-tight md:text-[36px]">
         Everything you&apos;re building.
       </h1>
@@ -41,7 +41,7 @@ export default async function MasterPlanPage() {
 
       {buildings.length === 0 ? (
         <div className="mt-10 rounded-sm border border-dashed border-vault-line bg-vault-panel/40 p-8 text-center">
-          <p className="text-ink-dim">No buildings on the plan yet.</p>
+          <p className="text-ink-dim">No buildings in your project plans yet.</p>
           <Link
             href="/settings/buildings"
             className="mt-3 inline-block font-mono text-[11px] tracking-[0.2em] text-brass hover:text-brass-bright"
@@ -57,7 +57,7 @@ export default async function MasterPlanPage() {
             return (
               <Link
                 key={b.key}
-                href={`/plan/${buildingSlug(b.key)}`}
+                href={`/project-plans/${buildingSlug(b.key)}`}
                 className="group rounded-sm border border-vault-line bg-vault-panel px-4 py-4 transition hover:border-brass/60"
               >
                 <div
@@ -96,7 +96,7 @@ export default async function MasterPlanPage() {
               : `${totalBuilding} project${totalBuilding === 1 ? "" : "s"} under construction across the campus.`}
           </span>
           <Link
-            href="/plan/completed"
+            href="/project-plans/completed"
             className="font-mono text-[10px] tracking-[0.2em] text-brass hover:text-brass-bright"
           >
             COMPLETED PROJECTS{totalComplete > 0 ? ` (${totalComplete})` : ""} →

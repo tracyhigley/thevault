@@ -23,8 +23,8 @@ export default async function SettingsPage() {
       </h1>
       <p className="mt-1 text-[13px] text-ink-dim">
         How the vault behaves. The tabs below cover members, the categories
-        you file into, the energies that power ATM matching, Google Calendar
-        to Drop, and how to connect your phone and Mac.
+        you file into, the energies that power Project Tasks matching, Google Calendar
+        to Field Notes, and how to connect your phone and Mac.
       </p>
 
       <div className="mt-4">
@@ -60,7 +60,7 @@ export default async function SettingsPage() {
           </Row>
           <Row
             label="Stressor anchor threshold"
-            hint="When today's urgent+must minutes hit this, admin runs first thing in the morning. Below it, ATM picks come first and admin lands after."
+            hint="When today's urgent+must minutes hit this, admin runs first thing in the morning. Below it, Project Tasks picks come first and admin lands after."
           >
             <NumberField
               name="stressor_anchor_minutes"

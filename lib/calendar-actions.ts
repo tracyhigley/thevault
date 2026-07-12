@@ -131,7 +131,7 @@ export async function syncGoogleCalendarForMyVaultNow(): Promise<
       { ...conn, refresh_token: secret.refresh_token },
       ymd,
     );
-    revalidatePath("/drop");
+    revalidatePath("/field-notes");
     revalidatePath("/settings/calendar");
     return { ok: true, imported: n };
   } catch (e: unknown) {

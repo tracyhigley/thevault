@@ -36,7 +36,7 @@ export function ShortcutCheatSheet() {
     groups.get(g)!.push(e);
   }
   // Stable group order
-  const order = ["Help", "Navigate", "Capture", "Drop", "Build day", "Counter", "ATM", "Other"];
+  const order = ["Help", "Navigate", "Capture", "Field Notes", "Build day", "Admin Tasks", "Project Tasks", "Other"];
   const sortedKeys = Array.from(groups.keys()).sort(
     (a, b) => (order.indexOf(a) === -1 ? 99 : order.indexOf(a)) - (order.indexOf(b) === -1 ? 99 : order.indexOf(b)),
   );
@@ -60,7 +60,7 @@ export function ShortcutCheatSheet() {
         </div>
         <h2 className="serif-h mt-2 text-[24px] text-ink">Use the keyboard.</h2>
         <p className="mt-1 text-[13px] text-ink-dim">
-          Most things in The Vault have a key. Press <Kbd keys="?" /> any time to see this list.
+          Most things in The Blueprint have a key. Press <Kbd keys="?" /> any time to see this list.
         </p>
 
         <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">

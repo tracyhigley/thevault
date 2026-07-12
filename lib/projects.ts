@@ -1,4 +1,4 @@
-// Master Plan read-side helpers. Projects are long-horizon "building
+// Master Project Plans read-side helpers. Projects are long-horizon "building
 // projects" — separate from items, deliberately outside the daily engine.
 
 import { supabaseServer } from "./supabase/server";

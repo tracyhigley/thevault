@@ -82,7 +82,7 @@ export async function getEnergies(): Promise<EnergyType[]> {
     .filter((e): e is EnergyType => e !== null);
 }
 
-// Buildings are the Master Plan's life domains (The Library, The Press, …) —
+// Buildings are the Master Project Plans' life domains (The Library, The Press, …) —
 // same shape as boxes, separately configured so the planning layer never
 // reshapes the daily engine's categories. A building can point at related
 // box keys later; for now the link is by convention only.

@@ -72,7 +72,7 @@ export function CmdK() {
               void submit();
             }
           }}
-          placeholder="Drop a thought…"
+          placeholder="Add a thought…"
           className="mt-3 w-full bg-transparent text-ink outline-none placeholder:text-ink-mute serif-h text-[18px]"
         />
         <div className="mt-3 flex items-center justify-between font-mono text-[10px] tracking-wider text-ink-mute">

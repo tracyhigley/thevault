@@ -10,6 +10,8 @@ type NavItem = {
   hint: string;
   match: (p: string) => boolean;
   title?: string;
+  /** Two-word rebrand links render as a pill/button instead of plain text. */
+  button?: boolean;
 };
 
 function buildItems(fiftyFdHref: string): NavItem[] {
@@ -21,22 +23,25 @@ function buildItems(fiftyFdHref: string): NavItem[] {
       match: (p) => p === "/" || p.startsWith("/build"),
     },
     {
-      href: "/drop",
-      label: "Drop",
+      href: "/field-notes",
+      label: "FIELD NOTES",
       hint: "g r",
-      match: (p) => p.startsWith("/drop"),
+      match: (p) => p.startsWith("/field-notes"),
+      button: true,
     },
     {
-      href: "/counter",
-      label: "Counter",
+      href: "/admin-tasks",
+      label: "ADMIN TASKS",
       hint: "g c",
-      match: (p) => p.startsWith("/counter"),
+      match: (p) => p.startsWith("/admin-tasks"),
+      button: true,
     },
     {
-      href: "/atm",
-      label: "ATM",
+      href: "/project-tasks",
+      label: "PROJECT TASKS",
       hint: "g a",
-      match: (p) => p.startsWith("/atm"),
+      match: (p) => p.startsWith("/project-tasks"),
+      button: true,
     },
     {
       href: "/documents",
@@ -53,10 +58,28 @@ function buildItems(fiftyFdHref: string): NavItem[] {
       match: (p) => p.startsWith("/calendar"),
     },
     {
-      href: "/plan",
-      label: "Plan",
+      href: "/project-plans",
+      label: "PROJECT PLANS",
       hint: "g p",
-      match: (p) => p.startsWith("/plan"),
+      match: (p) =>
+        p.startsWith("/project-plans") &&
+        !p.startsWith("/project-plans/under-construction") &&
+        !p.startsWith("/project-plans/completed"),
+      button: true,
+    },
+    {
+      href: "/project-plans/under-construction",
+      label: "UNDER CONSTRUCTION",
+      hint: "g u",
+      match: (p) => p.startsWith("/project-plans/under-construction"),
+      button: true,
+    },
+    {
+      href: "/project-plans/completed",
+      label: "COMPLETED PROJECTS",
+      hint: "g f",
+      match: (p) => p.startsWith("/project-plans/completed"),
+      button: true,
     },
     {
       href: "/settings",
@@ -89,12 +112,21 @@ export function TopBarNav({ fiftyFdHref }: { fiftyFdHref: string }) {
             key={item.href}
             href={item.href}
             title={title}
-            className={clsx(
-              "group shrink-0 whitespace-nowrap pb-3 -mb-3 transition",
-              active
-                ? "border-b-2 border-brass text-brass-bright"
-                : "text-ink-mute hover:text-ink",
-            )}
+            className={
+              item.button
+                ? clsx(
+                    "shrink-0 whitespace-nowrap rounded-sm border px-2.5 py-1 font-mono text-[10px] tracking-[0.14em] transition md:px-3 md:text-[11px]",
+                    active
+                      ? "border-brass bg-brass/10 text-brass"
+                      : "border-vault-line text-ink-mute hover:border-brass/40 hover:text-brass",
+                  )
+                : clsx(
+                    "group shrink-0 whitespace-nowrap pb-3 -mb-3 transition",
+                    active
+                      ? "border-b-2 border-brass text-brass-bright"
+                      : "text-ink-mute hover:text-ink",
+                  )
+            }
             onClick={
               item.href === "/"
                 ? () => markPreferTodayOverDropLanding()

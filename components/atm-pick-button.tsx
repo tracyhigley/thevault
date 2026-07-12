@@ -24,7 +24,7 @@ export function AtmPickButton({
         startTransition(async () => {
           try {
             await pickFromAtm(itemId, next);
-            toast.success(next ? "On today's plan." : "Returned to ATM.");
+            toast.success(next ? "On today's plan." : "Returned to Project Tasks.");
           } catch (e: any) {
             toast.error(e?.message ?? "Couldn't update.");
           }

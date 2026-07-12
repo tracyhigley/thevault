@@ -163,13 +163,13 @@ export default async function AtmPage({
       p.delete("category");
     }
     const q = p.toString();
-    return q ? `/atm?${q}` : "/atm";
+    return q ? `/project-tasks?${q}` : "/project-tasks";
   }
 
   return (
     <div className="mx-auto max-w-[960px] px-4 py-8 md:px-10">
       <h1 className="serif-h text-[28px] leading-tight md:text-[36px]">
-        The ATM
+        Project Tasks
       </h1>
       <p className="mt-1 text-[13px] text-ink-dim">
         Pull out whatever you&apos;d like to work on today. Nothing here is

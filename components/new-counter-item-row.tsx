@@ -60,7 +60,7 @@ export function NewCounterItemRow({
             add();
           }
         }}
-        placeholder="+ New counter item"
+        placeholder="+ New admin task"
         className="vault-task-title min-w-[220px] flex-1 bg-transparent text-ink placeholder:text-ink-mute outline-none"
       />
       <Select
@@ -68,7 +68,7 @@ export function NewCounterItemRow({
         onChange={(e) => setArea(e.target.value)}
         tone="brass"
         className="w-[13rem] shrink-0 px-2 py-1 font-mono text-[10px]"
-        aria-label="Choose box for new counter task"
+        aria-label="Choose box for new admin task"
       >
         <option value="" className="bg-vault-bg">
           — choose box —
@@ -82,7 +82,7 @@ export function NewCounterItemRow({
       <MinutesInlineInput
         value={minutes}
         onChange={setMinutes}
-        aria-label="Minutes for new counter item"
+        aria-label="Minutes for new admin task"
       />
       <div className="flex shrink-0 items-center gap-1">
         <CounterFlagDraft

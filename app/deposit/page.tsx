@@ -47,7 +47,7 @@ function DepositInner() {
       <div className="eyebrow">— Mail slot —</div>
       <h1 className="serif-h mt-2 text-[36px] leading-tight">Deposit.</h1>
       <p className="text-ink-dim">
-        Drops straight into The Drop. Triage later.
+        Drops straight into Field Notes. Triage later.
       </p>
 
       <form onSubmit={deposit} className="mt-8 space-y-3">
@@ -56,7 +56,7 @@ function DepositInner() {
           rows={3}
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder="Drop a thought…"
+          placeholder="Add a thought…"
           className="w-full rounded-sm border border-vault-line bg-vault-panel/60 px-4 py-3 text-ink outline-none focus:border-brass"
         />
         <div className="flex items-center justify-between">

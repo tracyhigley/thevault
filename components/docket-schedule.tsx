@@ -305,7 +305,7 @@ export function DocketSchedule({
             past end-of-day.
           </span>
           <Link
-            href="/counter"
+            href="/admin-tasks"
             className="ml-auto font-mono text-[10px] tracking-[0.18em] text-rust hover:underline"
           >
             TRIM COUNTER →
@@ -354,13 +354,13 @@ export function DocketSchedule({
               <button
                 type="button"
                 disabled={clearPending}
-                title="Permanently delete every completed task from Counter and ATM"
+                title="Permanently delete every completed task from Admin Tasks and Project Tasks"
                 className="shrink-0 rounded-sm border border-vault-line bg-vault-panel/40 px-3 py-1 font-mono text-[10px] tracking-[0.18em] text-ink-mute transition hover:border-rust/50 hover:text-rust disabled:opacity-40"
                 onClick={() => {
                   const n = doneTodayItems.length;
                   if (
                     !confirm(
-                      `Permanently delete all ${n} completed item${n === 1 ? "" : "s"}? This removes them from Counter and ATM and cannot be undone.`,
+                      `Permanently delete all ${n} completed item${n === 1 ? "" : "s"}? This removes them from Admin Tasks and Project Tasks and cannot be undone.`,
                     )
                   )
                     return;

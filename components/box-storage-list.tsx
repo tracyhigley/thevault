@@ -64,7 +64,7 @@ export function BoxStorageList({
           </p>
           <TriageChips
             itemId={it.id}
-            targets={[{ label: "→ Drop", box: "DROP" }]}
+            targets={[{ label: "→ Field Notes", box: "DROP" }]}
             deleteLabel="Delete"
             deleteHard
           />

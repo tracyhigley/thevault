@@ -294,8 +294,8 @@ export async function setItemState(
   }
   await sb.from("items").update(patch).eq("id", itemId);
   revalidatePath("/");
-  revalidatePath("/counter");
-  revalidatePath("/atm");
+  revalidatePath("/admin-tasks");
+  revalidatePath("/project-tasks");
   revalidatePath("/build");
 }
 
@@ -313,9 +313,9 @@ export async function moveItemToBox(itemId: string, box: string) {
   const { sb } = await requireUser();
   await sb.from("items").update({ box }).eq("id", itemId);
   revalidatePath("/");
-  revalidatePath("/drop");
-  revalidatePath("/counter");
-  revalidatePath("/atm");
+  revalidatePath("/field-notes");
+  revalidatePath("/admin-tasks");
+  revalidatePath("/project-tasks");
   revalidatePath("/vault");
 }
 
@@ -326,9 +326,9 @@ export async function softDeleteItem(itemId: string) {
     .update({ deleted_at: new Date().toISOString() })
     .eq("id", itemId);
   revalidatePath("/");
-  revalidatePath("/atm");
-  revalidatePath("/counter");
-  revalidatePath("/drop");
+  revalidatePath("/project-tasks");
+  revalidatePath("/admin-tasks");
+  revalidatePath("/field-notes");
   revalidatePath("/vault");
 }
 
@@ -355,9 +355,9 @@ export async function hardDeleteDoneTodayItems(itemIds: string[]) {
   if (delErr) throw new Error(delErr.message);
 
   revalidatePath("/");
-  revalidatePath("/atm");
-  revalidatePath("/counter");
-  revalidatePath("/drop");
+  revalidatePath("/project-tasks");
+  revalidatePath("/admin-tasks");
+  revalidatePath("/field-notes");
   revalidatePath("/vault");
   revalidatePath("/documents");
   return { ok: true as const, deleted: validIds.length };
@@ -368,9 +368,9 @@ export async function hardDeleteItem(itemId: string) {
   const { sb } = await requireUser();
   await sb.from("items").delete().eq("id", itemId);
   revalidatePath("/");
-  revalidatePath("/atm");
-  revalidatePath("/counter");
-  revalidatePath("/drop");
+  revalidatePath("/project-tasks");
+  revalidatePath("/admin-tasks");
+  revalidatePath("/field-notes");
   revalidatePath("/vault");
   revalidatePath("/documents");
 }
@@ -501,8 +501,8 @@ export async function createItem(box: string, title: string, extras: z.input<typ
     .single();
   revalidatePath("/", "layout");
   revalidatePath("/vault");
-  revalidatePath("/counter");
-  revalidatePath("/atm");
+  revalidatePath("/admin-tasks");
+  revalidatePath("/project-tasks");
   return data?.id;
 }
 
@@ -529,7 +529,7 @@ export async function reorderAtmItems(itemIds: string[]) {
       sb.from("items").update({ atm_order: i + 1 }).eq("id", id).eq("box", "ATM"),
     ),
   );
-  revalidatePath("/atm");
+  revalidatePath("/project-tasks");
   revalidatePath("/build");
 }
 
@@ -557,8 +557,8 @@ export async function setTodayPlan(itemId: string, on: boolean) {
     await sb.from("items").update({ today_order: null }).eq("id", itemId);
   }
   revalidatePath("/");
-  revalidatePath("/atm");
-  revalidatePath("/counter");
+  revalidatePath("/project-tasks");
+  revalidatePath("/admin-tasks");
   revalidatePath("/build");
 }
 
@@ -642,7 +642,7 @@ export async function applyAtmBoxBudgets(
   }
 
   revalidatePath("/");
-  revalidatePath("/atm");
+  revalidatePath("/project-tasks");
   revalidatePath("/build");
 }
 
@@ -970,7 +970,7 @@ export async function depositText(text: string, source: string = "mailslot") {
     item_id: item.id,
   });
   if (capErr) throw new Error(capErr.message);
-  revalidatePath("/drop");
+  revalidatePath("/field-notes");
 }
 
 // ─── Settings ─────────────────────────────────────────────────────────────

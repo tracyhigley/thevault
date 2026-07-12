@@ -19,7 +19,7 @@ export default async function DropPage() {
   return (
     <div className="mx-auto max-w-[1100px] px-4 py-8 md:px-10">
       <h1 className="serif-h text-[28px] leading-tight md:text-[36px]">
-        The Drop
+        Field Notes
       </h1>
       <p className="mt-1 text-[13px] text-ink-dim">
         {ready
@@ -34,7 +34,7 @@ export default async function DropPage() {
           </h3>
           <p className="mt-1 text-[13px] text-ink-dim">
             Triage needs at least one box (where things go) and one energy
-            (which decides ATM vs Counter).
+            (which decides Project Tasks vs Admin Tasks).
           </p>
           <div className="mt-4 flex flex-wrap gap-3">
             {boxes.length === 0 && (
@@ -64,7 +64,7 @@ export default async function DropPage() {
             <Kbd keys="j" size="xs" /> <Kbd keys="k" size="xs" /> next/prev
           </span>
           <span className="flex items-center gap-1.5">
-            <Kbd keys="1" size="xs" /> ATM <Kbd keys="2" size="xs" /> Counter
+            <Kbd keys="1" size="xs" /> Project Tasks <Kbd keys="2" size="xs" /> Admin Tasks
           </span>
           <span className="flex items-center gap-1.5">
             <Kbd keys="b" size="xs" /> box <Kbd keys="t" size="xs" /> time{" "}
@@ -87,7 +87,7 @@ export default async function DropPage() {
       <div className="mt-3">
         <DropKeyboardController />
         <div className="mb-3">
-          <NewItemRow box="DROP" placeholder="+ Drop a thought" />
+          <NewItemRow box="DROP" placeholder="+ Add a field note" />
         </div>
         <SortableList
           items={list.map((it) => ({

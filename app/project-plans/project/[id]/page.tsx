@@ -23,7 +23,7 @@ export default async function ProjectPage({
   if (!project) notFound();
 
   const building = buildings.find((b) => b.key === project.building);
-  const backHref = building ? `/plan/${buildingSlug(building.key)}` : "/plan";
+  const backHref = building ? `/project-plans/${buildingSlug(building.key)}` : "/project-plans";
   const buildingLabel = building?.label ?? "Uncategorized";
 
   return (

@@ -21,10 +21,10 @@ export default async function CompletedProjectsPage() {
   return (
     <div className="mx-auto max-w-[900px] px-4 py-8 md:px-10">
       <Link
-        href="/plan"
+        href="/project-plans"
         className="font-mono text-[10px] tracking-[0.2em] text-ink-mute hover:text-brass"
       >
-        ← MASTER PLAN
+        ← MASTER PROJECT PLANS
       </Link>
       <h1 className="serif-h mt-3 text-[28px] leading-tight md:text-[36px]">
         Completed projects.
@@ -42,7 +42,7 @@ export default async function CompletedProjectsPage() {
           {complete.map((p) => (
             <Link
               key={p.id}
-              href={`/plan/project/${p.id}`}
+              href={`/project-plans/project/${p.id}`}
               className="block rounded-sm border border-vault-line bg-vault-panel px-4 py-3 transition hover:border-brass/60"
             >
               <div className="flex flex-wrap items-baseline justify-between gap-x-3">

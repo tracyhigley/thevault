@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { updateItemPatch } from "@/lib/actions";
 import { Select } from "./ui";
 
-// Compact box-key picker. Counter rows set `area`; ATM rows set `category`.
+// Compact box-key picker. Admin Tasks rows set `area`; Project Tasks rows set `category`.
 
 export function AreaPill({
   itemId,
@@ -19,7 +19,7 @@ export function AreaPill({
   initial?: string | null;
   options: { key: string; label: string }[];
   field?: "area" | "category";
-  /** Merged onto the `<select>` (e.g. compact chip sizing on ATM). */
+  /** Merged onto the `<select>` (e.g. compact chip sizing on Project Tasks). */
   className?: string;
 }) {
   const router = useRouter();

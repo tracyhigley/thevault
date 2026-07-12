@@ -1,4 +1,4 @@
-// Wizard: build today — set end time, clear Drop, review Counter, pick ATM.
+// Wizard: build today — set end time, clear Field Notes, review Admin Tasks, pick Project Tasks.
 
 import { redirect } from "next/navigation";
 import { getDayInputs, getItemsByBox, getSettings } from "@/lib/data";

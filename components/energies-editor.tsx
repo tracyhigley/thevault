@@ -4,8 +4,8 @@ import { toast } from "sonner";
 import { saveEnergyConfig } from "@/lib/actions";
 import type { EnergyType } from "@/lib/categories";
 
-// Energies don't carry a destination — ATM items use them for daily
-// energy-matching, Counter items don't have an energy column at all.
+// Energies don't carry a destination — Project Tasks items use them for daily
+// energy-matching, Admin Tasks items don't have an energy column at all.
 
 function deriveKey(label: string): string {
   return label
@@ -102,7 +102,7 @@ export function EnergiesEditor({ initial }: { initial: EnergyType[] }) {
             value={e.key}
             onChange={(ev) => changeKey(i, ev.target.value)}
             placeholder="auto"
-            title="Stored internally on each ATM item. Auto-derived from the label until you edit it."
+            title="Stored internally on each Project Tasks item. Auto-derived from the label until you edit it."
             className="w-[140px] rounded-sm border border-vault-line bg-vault-bg/60 px-2 py-1 font-mono text-[10px] text-brass outline-none focus:border-brass"
           />
           <button

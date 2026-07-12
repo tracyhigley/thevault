@@ -98,7 +98,7 @@ export function GoogleCalendarPanel({
     <div className="mt-8 space-y-6">
       <div className="rounded-sm border border-vault-line/60 bg-vault-panel/30 p-4 text-[14px] leading-relaxed text-ink-dim">
         <p>
-          When this is on, The Vault adds a <strong className="text-ink/90">Drop</strong>{" "}
+          When this is on, The Blueprint adds a <strong className="text-ink/90">Field Notes</strong>{" "}
           line for each calendar event on <strong className="text-ink/90">that day</strong>.
           It runs automatically once each morning, and you can also pull in
           today&apos;s events with the button below. Each event is only added once per day.
@@ -115,7 +115,7 @@ export function GoogleCalendarPanel({
           </a>
           <p className="mt-3 text-[12px] text-ink-mute">
             You&apos;ll sign in with Google and allow read-only access to your
-            calendars. The Vault never changes your calendar.
+            calendars. The Blueprint never changes your calendar.
           </p>
         </div>
       ) : (
@@ -217,7 +217,7 @@ export function GoogleCalendarPanel({
                       toast.success(
                         r.imported === 0
                           ? "No new events to add (or nothing on today’s calendar)."
-                          : `Added ${r.imported} to the Drop.`,
+                          : `Added ${r.imported} to Field Notes.`,
                       );
                     })();
                   });

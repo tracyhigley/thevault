@@ -1,6 +1,6 @@
 "use client";
 // Soft-deletes a project (reversible from the DB). Keeps a confirm — unlike
-// Drop dismiss, this is infrequent and the project may hold real writing.
+// Field Notes dismiss, this is infrequent and the project may hold real writing.
 
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
@@ -20,7 +20,7 @@ export function DeleteProjectButton({
   function remove() {
     if (
       !confirm(
-        "Remove this project from the plan? Its notes go with it (recoverable if you change your mind).",
+        "Remove this project from your project plans? Its notes go with it (recoverable if you change your mind).",
       )
     )
       return;
@@ -40,7 +40,7 @@ export function DeleteProjectButton({
       disabled={pending}
       className="rounded-sm border border-vault-line px-3 py-1.5 font-mono text-[10px] tracking-[0.16em] text-ink-mute transition hover:border-rust hover:text-rust disabled:opacity-50"
     >
-      REMOVE FROM PLAN
+      REMOVE FROM PROJECT PLANS
     </button>
   );
 }

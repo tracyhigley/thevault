@@ -31,10 +31,10 @@ export default async function DocketPage() {
     getItemsByBox("DROP"),
   ]);
 
-  // Anything in The Drop → open there first (fresh session / login). Once you’ve
+  // Anything in Field Notes → open there first (fresh session / login). Once you’ve
   // built today, respect “take me to Today” via cookie from nav / wizard exit.
   if (dropItems.length > 0 && (!dayRow || !skipDropLanding)) {
-    redirect("/drop");
+    redirect("/field-notes");
   }
 
   // No day built yet → calm entry.

@@ -1,6 +1,6 @@
 "use server";
 
-// Server Actions for the Master Plan — buildings config + projects.
+// Server Actions for the Master Project Plans — buildings config + projects.
 // Kept separate from lib/actions.ts: the planning layer never touches
 // items or the daily schedule.
 
@@ -45,7 +45,7 @@ export async function saveBuildingConfig(
   if (!vaultId) throw new Error("No vault");
   const parsed = buildings.map((b) => BuildingConfig.parse(b));
   await sb.from("settings").upsert({ vault_id: vaultId, buildings: parsed });
-  revalidatePath("/plan", "layout");
+  revalidatePath("/project-plans", "layout");
   revalidatePath("/settings/buildings");
 }
 
@@ -71,7 +71,7 @@ export async function createProject(
     phase: Phase.parse(phase),
   });
   if (error) throw new Error(error.message);
-  revalidatePath("/plan", "layout");
+  revalidatePath("/project-plans", "layout");
 }
 
 const ProjectPatch = z.object({
@@ -94,7 +94,7 @@ export async function updateProjectPatch(
     .update({ ...parsed, modified_at: new Date().toISOString() })
     .eq("id", id);
   if (error) throw new Error(error.message);
-  revalidatePath("/plan", "layout");
+  revalidatePath("/project-plans", "layout");
 }
 
 export async function setProjectPhase(
@@ -112,7 +112,7 @@ export async function setProjectPhase(
     })
     .eq("id", id);
   if (error) throw new Error(error.message);
-  revalidatePath("/plan", "layout");
+  revalidatePath("/project-plans", "layout");
 }
 
 // `date` comes from the client so log entries carry the user's local day,
@@ -139,7 +139,7 @@ export async function addProjectLog(id: string, text: string, date: string) {
     })
     .eq("id", id);
   if (updateError) throw new Error(updateError.message);
-  revalidatePath("/plan", "layout");
+  revalidatePath("/project-plans", "layout");
 }
 
 // Soft delete — reversible from the DB, same as items.
@@ -150,5 +150,5 @@ export async function deleteProject(id: string) {
     .update({ deleted_at: new Date().toISOString() })
     .eq("id", id);
   if (error) throw new Error(error.message);
-  revalidatePath("/plan", "layout");
+  revalidatePath("/project-plans", "layout");
 }
