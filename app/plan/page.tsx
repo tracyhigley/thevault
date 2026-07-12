@@ -1,8 +1,8 @@
 // Master Plan — the campus view. Eight (or however many) buildings, each a
 // life domain holding building projects. Deliberately calm: building cards
-// show only what's actively under construction. Idea counts are hidden on
-// purpose — ideas rest safely inside each building without demanding
-// anything from this view.
+// show only what's under construction and what's in planning. Idea counts
+// are hidden on purpose — ideas rest safely inside each building without
+// demanding anything from this view.
 
 import Link from "next/link";
 import { getBuildings, buildingSlug } from "@/lib/categories";
@@ -15,12 +15,16 @@ export default async function MasterPlanPage() {
   ]);
 
   const underConstruction: Record<string, number> = {};
+  const planning: Record<string, number> = {};
   let totalBuilding = 0;
   let totalComplete = 0;
   for (const p of projects) {
     if (p.phase === "building") {
       underConstruction[p.building] = (underConstruction[p.building] ?? 0) + 1;
       totalBuilding += 1;
+    }
+    if (p.phase === "planning") {
+      planning[p.building] = (planning[p.building] ?? 0) + 1;
     }
     if (p.phase === "complete") totalComplete += 1;
   }
@@ -49,6 +53,7 @@ export default async function MasterPlanPage() {
         <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {buildings.map((b) => {
             const active = underConstruction[b.key] ?? 0;
+            const planned = planning[b.key] ?? 0;
             return (
               <Link
                 key={b.key}
@@ -68,8 +73,13 @@ export default async function MasterPlanPage() {
                   </div>
                 ) : null}
                 <div className="mt-2 font-mono text-[10px] tracking-[0.14em] text-ink-mute">
-                  {active > 0
-                    ? `${active} UNDER CONSTRUCTION`
+                  {active > 0 || planned > 0
+                    ? [
+                        active > 0 ? `${active} UNDER CONSTRUCTION` : null,
+                        planned > 0 ? `${planned} PLANNING` : null,
+                      ]
+                        .filter(Boolean)
+                        .join(" · ")
                     : "QUIET RIGHT NOW"}
                 </div>
               </Link>
