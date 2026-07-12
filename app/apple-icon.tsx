@@ -4,12 +4,13 @@ import { ImageResponse } from "next/og";
 
 // Apple home-screen / Mac-dock icon. iOS Safari ignores SVG, so render
 // a 180×180 PNG. Apple applies its own rounded-corner mask, so this is
-// a full-bleed crop of the navy square with no baked-in corner rounding.
+// a full-bleed square with no baked-in corner rounding — white ground,
+// blueprint linework in navy, same mark as the favicon/manifest icons.
 export const size = { width: 180, height: 180 };
 export const contentType = "image/png";
 
 const brandIconDataUri = `data:image/png;base64,${readFileSync(
-  join(process.cwd(), "public", "brand-icon-edge.png"),
+  join(process.cwd(), "public", "brand-icon.png"),
 ).toString("base64")}`;
 
 export default function AppleIcon() {
