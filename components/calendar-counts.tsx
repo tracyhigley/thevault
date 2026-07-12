@@ -83,7 +83,7 @@ export function CalendarCounts({
   return (
     <section
       aria-label={heading}
-      className="rounded-sm border border-vault-line bg-vault-panel/30 px-3 py-3 md:px-4 md:py-3"
+      className="rounded-sm border border-paper-line bg-paper-panel/30 px-3 py-3 md:px-4 md:py-3"
     >
       <div className="mb-2 font-mono text-[10px] tracking-[0.18em] text-ink-mute">
         {heading}
@@ -110,7 +110,7 @@ export function CalendarCounts({
           </span>
         ))}
         {unassignedCount > 0 && (
-          <span className="inline-flex items-baseline gap-2 rounded-sm border border-dashed border-vault-line px-2 py-1 text-[12px]">
+          <span className="inline-flex items-baseline gap-2 rounded-sm border border-dashed border-paper-line px-2 py-1 text-[12px]">
             <span className="font-mono tracking-[0.06em] text-ink-mute">
               Unassigned
             </span>
@@ -121,7 +121,7 @@ export function CalendarCounts({
         )}
       </div>
       {assignedTotal > 0 && (
-        <div className="mt-3 border-t border-vault-line/80 pt-3">
+        <div className="mt-3 border-t border-paper-line/80 pt-3">
           <div className="mb-2 font-mono text-[10px] tracking-[0.18em] text-ink-mute">
             Work/Life Balance
           </div>
@@ -134,7 +134,7 @@ export function CalendarCounts({
             ).map((chip) => (
               <span
                 key={chip.label}
-                className="inline-flex items-baseline gap-2 rounded-sm border border-vault-line bg-vault-panel/50 px-2 py-1 text-[12px]"
+                className="inline-flex items-baseline gap-2 rounded-sm border border-paper-line bg-paper-panel/50 px-2 py-1 text-[12px]"
               >
                 <span className="font-mono tracking-[0.06em] text-ink">
                   {chip.label}

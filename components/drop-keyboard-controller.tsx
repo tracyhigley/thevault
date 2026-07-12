@@ -7,7 +7,7 @@
 //   - focuses the first row on mount
 //   - j / arrow-down  → focus the next row
 //   - k / arrow-up    → focus the previous row
-//   - listens for `vault:drop-advance` events fired by rows after a send /
+//   - listens for `field-notes:advance` events fired by rows after a send /
 //     delete; on revalidation the row leaves the DOM, so we just refocus
 //     the new first row.
 //
@@ -35,8 +35,8 @@ export function DropKeyboardController() {
         next?.focus();
       });
     }
-    window.addEventListener("vault:drop-advance", onAdvance);
-    return () => window.removeEventListener("vault:drop-advance", onAdvance);
+    window.addEventListener("field-notes:advance", onAdvance);
+    return () => window.removeEventListener("field-notes:advance", onAdvance);
   }, []);
 
   function focusByOffset(delta: 1 | -1) {

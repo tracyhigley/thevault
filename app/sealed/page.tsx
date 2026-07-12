@@ -1,4 +1,4 @@
-// Sealed — ceremonial closing-of-the-vault page.
+// Sealed — ceremonial closing-of-the-day page.
 //
 // When you arrive with ?just=sealed or ?just=unsealed, the dial plays the
 // transition animation. Without the param it just shows the current state.

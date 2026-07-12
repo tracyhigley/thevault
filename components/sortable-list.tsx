@@ -117,7 +117,7 @@ function SortableRow({
         {...attributes}
         {...listeners}
         title="Drag"
-        className="cursor-grab select-none rounded-sm border border-vault-line/40 bg-vault-panel/30 px-1 font-mono text-[13px] text-ink-dim hover:border-brass/40 hover:text-brass active:cursor-grabbing"
+        className="cursor-grab select-none rounded-sm border border-paper-line/40 bg-paper-panel/30 px-1 font-mono text-[13px] text-ink-dim hover:border-brass/40 hover:text-brass active:cursor-grabbing"
       >
         ⋮⋮
       </button>

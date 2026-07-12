@@ -8,7 +8,7 @@ import { NewAtmItemRow } from "@/components/new-atm-item-row";
 import { AtmCategorySortableList } from "@/components/atm-category-sortable-list";
 import type { Item } from "@/lib/types";
 
-// Convert a BOX_KEY → slug for the vault drilldown URL.
+// Convert a BOX_KEY → slug for the box drilldown URL.
 function slugify(key: string): string {
   return key.toLowerCase().replace(/_/g, "-").replace(/\//g, "-");
 }
@@ -193,7 +193,7 @@ export default async function AtmPage({
                   "rounded-sm border px-4 py-1.5 font-mono text-[11px] tracking-wider transition",
                   active === f.key
                     ? "border-brass bg-brass/10 text-brass"
-                    : "border-vault-line text-ink-mute hover:border-brass/40 hover:text-brass",
+                    : "border-paper-line text-ink-mute hover:border-brass/40 hover:text-brass",
                 )}
               >
                 {f.label}
@@ -208,7 +208,7 @@ export default async function AtmPage({
       </div>
 
       {filtered.length === 0 ? (
-        <p className="mt-8 rounded-sm border border-dashed border-vault-line/60 px-4 py-6 text-center text-ink-mute">
+        <p className="mt-8 rounded-sm border border-dashed border-paper-line/60 px-4 py-6 text-center text-ink-mute">
           Nothing matches this filter.
         </p>
       ) : (
@@ -223,11 +223,11 @@ export default async function AtmPage({
                   key={cat || "__uncat__"}
                   href={atmHref(active, { category: cat })}
                   className={clsx(
-                    "group relative flex min-h-[100px] w-full min-w-0 flex-col justify-between rounded-sm border bg-vault-panel/40 px-3 py-3 text-left transition",
+                    "group relative flex min-h-[100px] w-full min-w-0 flex-col justify-between rounded-sm border bg-paper-panel/40 px-3 py-3 text-left transition",
                     "before:absolute before:left-0 before:top-2 before:bottom-2 before:w-[1.5px] before:bg-brass/70",
                     categoryDecoded === cat
-                      ? "border-brass/50 bg-vault-panel/70 ring-1 ring-brass/25"
-                      : "border-vault-line/60 hover:border-brass/40 hover:bg-vault-panel/60",
+                      ? "border-brass/50 bg-paper-panel/70 ring-1 ring-brass/25"
+                      : "border-paper-line/60 hover:border-brass/40 hover:bg-paper-panel/60",
                   )}
                 >
                   <h3 className="min-w-0 truncate text-[16px] font-medium leading-tight text-ink sm:text-[17px]">
@@ -245,8 +245,8 @@ export default async function AtmPage({
           </div>
 
           {categoryDecoded !== undefined && (
-            <section className="mt-6 rounded-sm border border-vault-line/80 bg-vault-panel/30 p-4 md:p-6">
-              <div className="flex flex-wrap items-start justify-between gap-3 border-b border-vault-line/50 pb-4">
+            <section className="mt-6 rounded-sm border border-paper-line/80 bg-paper-panel/30 p-4 md:p-6">
+              <div className="flex flex-wrap items-start justify-between gap-3 border-b border-paper-line/50 pb-4">
                 <div>
                   <div className="eyebrow text-ink-mute">— In this box —</div>
                   <h2 className="serif-h mt-1 text-[26px] leading-tight text-ink md:text-[30px]">
@@ -264,14 +264,14 @@ export default async function AtmPage({
                     labelByKey.has(categoryDecoded) && (
                       <Link
                         href={`/boxes/${slugify(categoryDecoded)}`}
-                        className="rounded-sm border border-vault-line px-3 py-1.5 font-mono text-[10px] tracking-[0.16em] text-ink-mute transition hover:border-brass/40 hover:text-brass"
+                        className="rounded-sm border border-paper-line px-3 py-1.5 font-mono text-[10px] tracking-[0.16em] text-ink-mute transition hover:border-brass/40 hover:text-brass"
                       >
                         Open full page
                       </Link>
                     )}
                   <Link
                     href={atmHref(active, { category: null })}
-                    className="rounded-sm border border-vault-line px-3 py-1.5 font-mono text-[10px] tracking-[0.16em] text-ink-mute transition hover:border-brass/40 hover:text-brass"
+                    className="rounded-sm border border-paper-line px-3 py-1.5 font-mono text-[10px] tracking-[0.16em] text-ink-mute transition hover:border-brass/40 hover:text-brass"
                   >
                     Close
                   </Link>

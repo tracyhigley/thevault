@@ -40,7 +40,7 @@ export function CaptureTokenRow({ token }: { token: string | null }) {
             <button
               type="button"
               onClick={() => setReveal((v) => !v)}
-              className="rounded-sm border border-vault-line px-2 py-1 font-mono text-[10px] tracking-wider text-ink-mute hover:border-brass/40 hover:text-brass"
+              className="rounded-sm border border-paper-line px-2 py-1 font-mono text-[10px] tracking-wider text-ink-mute hover:border-brass/40 hover:text-brass"
             >
               {reveal ? "HIDE" : "SHOW"}
             </button>
@@ -49,7 +49,7 @@ export function CaptureTokenRow({ token }: { token: string | null }) {
             <button
               type="button"
               onClick={() => navigator.clipboard.writeText(current)}
-              className="rounded-sm border border-vault-line px-2 py-1 font-mono text-[10px] tracking-wider text-ink-mute hover:border-brass/40 hover:text-brass"
+              className="rounded-sm border border-paper-line px-2 py-1 font-mono text-[10px] tracking-wider text-ink-mute hover:border-brass/40 hover:text-brass"
             >
               COPY
             </button>
@@ -64,7 +64,7 @@ export function CaptureTokenRow({ token }: { token: string | null }) {
           </button>
         </div>
       </div>
-      <div className="mt-2 break-all rounded-sm border border-vault-line bg-vault-bg/60 px-3 py-2 font-mono text-[12px] text-brass">
+      <div className="mt-2 break-all rounded-sm border border-paper-line bg-paper-bg/60 px-3 py-2 font-mono text-[12px] text-brass">
         {display}
       </div>
     </div>

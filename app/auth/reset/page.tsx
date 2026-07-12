@@ -62,7 +62,7 @@ export default function ResetPasswordPage() {
           onChange={(e) => setPassword(e.target.value)}
           placeholder="New password (8+ chars)"
           disabled={!ready}
-          className="w-full rounded-sm border border-vault-line bg-vault-panel/60 px-4 py-3 text-ink outline-none focus:border-brass disabled:opacity-50"
+          className="w-full rounded-sm border border-paper-line bg-paper-panel/60 px-4 py-3 text-ink outline-none focus:border-brass disabled:opacity-50"
         />
         <input
           type="password"
@@ -73,7 +73,7 @@ export default function ResetPasswordPage() {
           onChange={(e) => setConfirm(e.target.value)}
           placeholder="Confirm password"
           disabled={!ready}
-          className="w-full rounded-sm border border-vault-line bg-vault-panel/60 px-4 py-3 text-ink outline-none focus:border-brass disabled:opacity-50"
+          className="w-full rounded-sm border border-paper-line bg-paper-panel/60 px-4 py-3 text-ink outline-none focus:border-brass disabled:opacity-50"
         />
         <button
           type="submit"

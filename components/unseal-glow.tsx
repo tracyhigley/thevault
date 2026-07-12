@@ -31,7 +31,7 @@ export function UnsealGlow() {
           100% { opacity: 0; }
         }
       `}</style>
-      {/* Warm lamp-relight flare — no expanding ring (that read as a vault
+      {/* Warm lamp-relight flare — no expanding ring (that read as a safe
           door iris opening); just a soft wash of light, like the drafting
           lamp clicking back on. */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(201,161,74,0.22),_transparent_60%)]" />

@@ -90,24 +90,24 @@ export function EnergiesEditor({ initial }: { initial: EnergyType[] }) {
       {energies.map((e, i) => (
         <div
           key={i}
-          className="flex flex-wrap items-center gap-2 rounded-sm border border-vault-line bg-vault-panel/40 px-4 py-3"
+          className="flex flex-wrap items-center gap-2 rounded-sm border border-paper-line bg-paper-panel/40 px-4 py-3"
         >
           <input
             value={e.label}
             onChange={(ev) => changeLabel(i, ev.target.value)}
             placeholder="Label (e.g. Creative)"
-            className="min-w-[160px] flex-1 rounded-sm border border-vault-line bg-vault-bg/60 px-2 py-1 text-ink outline-none focus:border-brass"
+            className="min-w-[160px] flex-1 rounded-sm border border-paper-line bg-paper-bg/60 px-2 py-1 text-ink outline-none focus:border-brass"
           />
           <input
             value={e.key}
             onChange={(ev) => changeKey(i, ev.target.value)}
             placeholder="auto"
             title="Stored internally on each Project Tasks item. Auto-derived from the label until you edit it."
-            className="w-[140px] rounded-sm border border-vault-line bg-vault-bg/60 px-2 py-1 font-mono text-[10px] text-brass outline-none focus:border-brass"
+            className="w-[140px] rounded-sm border border-paper-line bg-paper-bg/60 px-2 py-1 font-mono text-[10px] text-brass outline-none focus:border-brass"
           />
           <button
             onClick={() => remove(i)}
-            className="rounded-sm border border-vault-line px-2 py-1 font-mono text-[10px] tracking-wider text-ink-mute hover:border-rust hover:text-rust"
+            className="rounded-sm border border-paper-line px-2 py-1 font-mono text-[10px] tracking-wider text-ink-mute hover:border-rust hover:text-rust"
           >
             REMOVE
           </button>

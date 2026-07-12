@@ -32,10 +32,10 @@ export function RoleControl({
       }}
       className="bg-transparent font-mono text-[10px] tracking-wider text-brass disabled:opacity-50"
     >
-      <option className="bg-vault-bg" value="editor">
+      <option className="bg-paper-bg" value="editor">
         EDITOR
       </option>
-      <option className="bg-vault-bg" value="owner">
+      <option className="bg-paper-bg" value="owner">
         OWNER
       </option>
     </select>

@@ -38,14 +38,14 @@ export function CustomBlockForm({ date }: { date: string }) {
   return (
     <form
       onSubmit={submit}
-      className="rounded-sm border border-brass/40 bg-vault-panel/60 p-3"
+      className="rounded-sm border border-brass/40 bg-paper-panel/60 p-3"
     >
       <input
         autoFocus
         placeholder="What is the block for?"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
-        className="vault-task-title w-full bg-transparent text-ink outline-none placeholder:text-ink-mute"
+        className="paper-task-title w-full bg-transparent text-ink outline-none placeholder:text-ink-mute"
       />
       <div className="mt-3 flex items-center gap-3 font-mono text-[11px] text-ink-mute">
         <label className="flex items-center gap-2">
@@ -56,7 +56,7 @@ export function CustomBlockForm({ date }: { date: string }) {
             max="480"
             value={minutes}
             onChange={(e) => setMinutes(Number(e.target.value))}
-            className="w-16 rounded-sm border border-vault-line bg-vault-bg/60 px-2 py-1 text-right text-brass outline-none focus:border-brass"
+            className="w-16 rounded-sm border border-paper-line bg-paper-bg/60 px-2 py-1 text-right text-brass outline-none focus:border-brass"
           />
         </label>
         <label className="flex items-center gap-2">
@@ -65,14 +65,14 @@ export function CustomBlockForm({ date }: { date: string }) {
             type="time"
             value={time}
             onChange={(e) => setTime(e.target.value)}
-            className="rounded-sm border border-vault-line bg-vault-bg/60 px-2 py-1 text-brass outline-none focus:border-brass"
+            className="rounded-sm border border-paper-line bg-paper-bg/60 px-2 py-1 text-brass outline-none focus:border-brass"
           />
         </label>
         <span className="ml-auto flex items-center gap-2">
           <button
             type="button"
             onClick={() => setOpen(false)}
-            className="rounded-sm border border-vault-line px-3 py-1 text-ink-mute hover:border-rust hover:text-rust"
+            className="rounded-sm border border-paper-line px-3 py-1 text-ink-mute hover:border-rust hover:text-rust"
           >
             CANCEL
           </button>

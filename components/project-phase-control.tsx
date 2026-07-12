@@ -48,7 +48,7 @@ export function ProjectPhaseControl({
               "rounded-sm border px-2 py-1 font-mono text-[9px] uppercase tracking-[0.12em] transition",
               p.key === phase
                 ? "border-brass bg-brass/10 text-brass"
-                : "border-transparent text-ink-mute hover:border-vault-line hover:text-ink",
+                : "border-transparent text-ink-mute hover:border-paper-line hover:text-ink",
             )}
           >
             {p.label}

@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
-import { markPreferTodayOverDropLanding } from "@/lib/vault-nav-client";
+import { markPreferTodayOverDropLanding } from "@/lib/nav-client";
 
 type NavItem = {
   href: string;
@@ -118,7 +118,7 @@ export function TopBarNav({ fiftyFdHref }: { fiftyFdHref: string }) {
                     "shrink-0 whitespace-nowrap rounded-sm border px-2.5 py-1 font-mono text-[10px] tracking-[0.14em] transition md:px-3 md:text-[11px]",
                     active
                       ? "border-brass bg-brass/10 text-brass"
-                      : "border-vault-line text-ink-mute hover:border-brass/40 hover:text-brass",
+                      : "border-paper-line text-ink-mute hover:border-brass/40 hover:text-brass",
                   )
                 : clsx(
                     "group shrink-0 whitespace-nowrap pb-3 -mb-3 transition",

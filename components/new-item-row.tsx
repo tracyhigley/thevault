@@ -28,7 +28,7 @@ export function NewItemRow({
   }
 
   return (
-    <div className="flex items-center gap-3 rounded-sm border border-dashed border-vault-line/60 bg-vault-panel/20 px-4 py-2 transition hover:border-brass/40">
+    <div className="flex items-center gap-3 rounded-sm border border-dashed border-paper-line/60 bg-paper-panel/20 px-4 py-2 transition hover:border-brass/40">
       <span className="font-mono text-[10px] tracking-wider text-ink-mute">+</span>
       <input
         value={title}
@@ -40,7 +40,7 @@ export function NewItemRow({
           }
         }}
         placeholder={placeholder}
-        className="vault-task-title flex-1 bg-transparent text-ink placeholder:text-ink-mute outline-none"
+        className="paper-task-title flex-1 bg-transparent text-ink placeholder:text-ink-mute outline-none"
       />
       {pending && (
         <span className="font-mono text-[10px] text-brass">saving…</span>

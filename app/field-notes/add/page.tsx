@@ -57,7 +57,7 @@ function AddFieldNoteInner() {
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder="Add a field note…"
-          className="w-full rounded-sm border border-vault-line bg-vault-panel/60 px-4 py-3 text-ink outline-none focus:border-brass"
+          className="w-full rounded-sm border border-paper-line bg-paper-panel/60 px-4 py-3 text-ink outline-none focus:border-brass"
         />
         <div className="flex items-center justify-between">
           <span className="font-mono text-[10px] text-ink-mute">

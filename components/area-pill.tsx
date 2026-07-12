@@ -54,11 +54,11 @@ export function AreaPill({
         });
       }}
     >
-      <option className="bg-vault-bg" value="">
+      <option className="bg-paper-bg" value="">
         — box —
       </option>
       {options.map((o) => (
-        <option key={o.key} className="bg-vault-bg" value={o.key}>
+        <option key={o.key} className="bg-paper-bg" value={o.key}>
           {o.label}
         </option>
       ))}

@@ -123,38 +123,38 @@ export function BoxesEditor({
       {boxes.map((b, i) => (
         <div
           key={i}
-          className="flex flex-wrap items-center gap-2 rounded-sm border border-vault-line bg-vault-panel/40 px-4 py-3"
+          className="flex flex-wrap items-center gap-2 rounded-sm border border-paper-line bg-paper-panel/40 px-4 py-3"
         >
           <input
             type="color"
             value={b.color ?? "#b5853a"}
             onChange={(e) => update(i, { color: e.target.value })}
-            className="h-7 w-7 cursor-pointer rounded-sm border border-vault-line bg-transparent"
+            className="h-7 w-7 cursor-pointer rounded-sm border border-paper-line bg-transparent"
             title="Color"
           />
           <input
             value={b.label}
             onChange={(e) => changeLabel(i, e.target.value)}
             placeholder={labelPlaceholder}
-            className="min-w-[160px] flex-1 rounded-sm border border-vault-line bg-vault-bg/60 px-2 py-1 text-ink outline-none focus:border-brass"
+            className="min-w-[160px] flex-1 rounded-sm border border-paper-line bg-paper-bg/60 px-2 py-1 text-ink outline-none focus:border-brass"
           />
           <input
             value={b.meta ?? ""}
             onChange={(e) => update(i, { meta: e.target.value })}
             placeholder={metaPlaceholder}
             title="An optional one-liner to remind you what this box is — shows under the label on box cards."
-            className="min-w-[160px] flex-1 rounded-sm border border-vault-line bg-vault-bg/60 px-2 py-1 font-mono text-[11px] text-ink-mute outline-none focus:border-brass"
+            className="min-w-[160px] flex-1 rounded-sm border border-paper-line bg-paper-bg/60 px-2 py-1 font-mono text-[11px] text-ink-mute outline-none focus:border-brass"
           />
           <input
             value={b.key}
             onChange={(e) => changeKey(i, e.target.value)}
             placeholder="auto"
             title="Stored internally on each item. Auto-derived from the label until you edit it."
-            className="w-[110px] rounded-sm border border-vault-line bg-vault-bg/60 px-2 py-1 font-mono text-[10px] text-brass outline-none focus:border-brass"
+            className="w-[110px] rounded-sm border border-paper-line bg-paper-bg/60 px-2 py-1 font-mono text-[10px] text-brass outline-none focus:border-brass"
           />
           <button
             onClick={() => remove(i)}
-            className="rounded-sm border border-vault-line px-2 py-1 font-mono text-[10px] tracking-wider text-ink-mute hover:border-rust hover:text-rust"
+            className="rounded-sm border border-paper-line px-2 py-1 font-mono text-[10px] tracking-wider text-ink-mute hover:border-rust hover:text-rust"
           >
             REMOVE
           </button>

@@ -1,4 +1,4 @@
-// Vault interior — STORAGE ONLY. Daily-action surfaces (Field Notes / Docket /
+// The Boxes — STORAGE ONLY. Daily-action surfaces (Field Notes / Docket /
 // Project Tasks / Admin Tasks) live in the top nav; here we only show the things you
 // put away.
 //
@@ -8,12 +8,12 @@
 
 import { getAllItems } from "@/lib/data";
 import { getBoxes, type Box } from "@/lib/categories";
-import { layoutVaultHubBoxRows } from "@/lib/vault-box-layout";
-import { sortedItemsForHubBox } from "@/lib/vault-hub-items";
-import { VaultBoxesSection } from "@/components/vault-boxes-section";
+import { layoutBoxHubRows } from "@/lib/box-hub-layout";
+import { sortedItemsForHubBox } from "@/lib/box-hub-items";
+import { BoxesSection } from "@/components/boxes-section";
 import type { Item } from "@/lib/types";
 
-export default async function VaultInteriorPage() {
+export default async function BoxesPage() {
   const [items, boxes] = await Promise.all([getAllItems(), getBoxes()]);
 
   // Storage + Admin Tasks/Project Tasks/Field Notes work filed under each life-area key.
@@ -22,8 +22,8 @@ export default async function VaultInteriorPage() {
     itemsByBox[b.key] = sortedItemsForHubBox(b.key, items);
   }
 
-  const { rows: rowBoxes, orphans } = layoutVaultHubBoxRows(boxes);
-  const toVaultTile = (b: Box) => ({
+  const { rows: rowBoxes, orphans } = layoutBoxHubRows(boxes);
+  const toTile = (b: Box) => ({
     key: b.key,
     label: b.label,
     count: itemsByBox[b.key]?.length ?? 0,
@@ -32,8 +32,8 @@ export default async function VaultInteriorPage() {
   const tileRows =
     boxes.length === 0
       ? []
-      : rowBoxes.map((row) => row.map((b) => (b ? toVaultTile(b) : null)));
-  const orphanTiles = orphans.map(toVaultTile);
+      : rowBoxes.map((row) => row.map((b) => (b ? toTile(b) : null)));
+  const orphanTiles = orphans.map(toTile);
 
   return (
     <div className="mx-auto max-w-[1100px] px-4 py-8 md:px-10">
@@ -46,7 +46,7 @@ export default async function VaultInteriorPage() {
 
       {/* Boxes section — click a box to see its items and add new rows here. */}
       <Header label="Open a box" />
-      <VaultBoxesSection
+      <BoxesSection
         rows={tileRows}
         orphanTiles={orphanTiles}
         itemsByBox={itemsByBox}

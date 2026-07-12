@@ -140,7 +140,7 @@ export function DropTriageRow({
             ? `Sent to Admin Tasks · ${label}.`
             : `Sent to Project Tasks · ${label}.`,
         );
-        window.dispatchEvent(new CustomEvent("vault:drop-advance"));
+        window.dispatchEvent(new CustomEvent("field-notes:advance"));
       } catch (e: any) {
         toast.error(e?.message ?? "Couldn't send.");
       }
@@ -152,7 +152,7 @@ export function DropTriageRow({
       try {
         await hardDeleteItem(item.id);
         toast.success("Deleted.");
-        window.dispatchEvent(new CustomEvent("vault:drop-advance"));
+        window.dispatchEvent(new CustomEvent("field-notes:advance"));
       } catch (e: any) {
         toast.error(e?.message ?? "Couldn't delete.");
       }
@@ -165,7 +165,7 @@ export function DropTriageRow({
       tabIndex={0}
       data-drop-row="true"
       className={clsx(
-        "group relative overflow-hidden rounded-sm border bg-vault-panel/40 transition hover:bg-vault-panel/60 outline-none",
+        "group relative overflow-hidden rounded-sm border bg-paper-panel/40 transition hover:bg-paper-panel/60 outline-none",
         // The whole row is focusable. When the wrapper itself is focused
         // (j/k navigation), give it a strong brass ring so the user sees
         // exactly which thought is "armed". When focus is on a child
@@ -189,7 +189,7 @@ export function DropTriageRow({
           itemId={item.id}
           field="title"
           initial={item.title}
-          className="min-w-0 flex-1 vault-task-title"
+          className="min-w-0 flex-1 paper-task-title"
           placeholder="(no title)"
         />
         <select
@@ -200,14 +200,14 @@ export function DropTriageRow({
             "shrink-0 rounded-sm border px-2 py-1 font-mono text-[11px] outline-none transition focus:border-brass",
             boxKey
               ? "border-brass/50 text-brass"
-              : "border-vault-line text-ink-mute",
+              : "border-paper-line text-ink-mute",
           )}
         >
-          <option value="" className="bg-vault-bg">
+          <option value="" className="bg-paper-bg">
             — pick box —
           </option>
           {boxes.map((b) => (
-            <option key={b.key} value={b.key} className="bg-vault-bg">
+            <option key={b.key} value={b.key} className="bg-paper-bg">
               {b.label}
             </option>
           ))}
@@ -215,7 +215,7 @@ export function DropTriageRow({
       </div>
 
       {/* Line 2 — metadata + actions, anchored right */}
-      <div className="flex flex-wrap items-center gap-3 border-t border-vault-line/30 bg-vault-bg/20 pl-6 pr-3 py-1.5">
+      <div className="flex flex-wrap items-center gap-3 border-t border-paper-line/30 bg-paper-bg/20 pl-6 pr-3 py-1.5">
         <Minutes
           value={minutes}
           onChange={setMinutes}
@@ -288,7 +288,7 @@ function DestSegment({
   onChange: (next: Destination) => void;
 }) {
   return (
-    <div className="flex shrink-0 overflow-hidden rounded-sm border border-vault-line/60 bg-vault-bg/40">
+    <div className="flex shrink-0 overflow-hidden rounded-sm border border-paper-line/60 bg-paper-bg/40">
       <SegmentButton
         active={dest === "ATM"}
         onClick={() => onChange("ATM")}
@@ -328,8 +328,8 @@ function SegmentButton({
       title={hint ? `Press ${hint}` : undefined}
       className={clsx(
         "px-2.5 py-1 font-mono text-[10px] tracking-[0.18em] transition",
-        active && accent === "teal" && "bg-teal text-vault-bg",
-        active && accent === "rust" && "bg-rust text-vault-bg",
+        active && accent === "teal" && "bg-teal text-paper-bg",
+        active && accent === "rust" && "bg-rust text-paper-bg",
         !active && "text-ink-mute/70 hover:text-ink",
       )}
     >
@@ -351,8 +351,8 @@ function Minutes({
   return (
     <span
       className={clsx(
-        "inline-flex shrink-0 items-baseline gap-1 rounded-sm border bg-vault-bg/40 px-1.5 py-0.5 transition focus-within:border-brass",
-        value ? "border-brass/40" : "border-vault-line",
+        "inline-flex shrink-0 items-baseline gap-1 rounded-sm border bg-paper-bg/40 px-1.5 py-0.5 transition focus-within:border-brass",
+        value ? "border-brass/40" : "border-paper-line",
       )}
     >
       <span
@@ -399,7 +399,7 @@ function FlagToggle({
         "flex h-6 w-6 items-center justify-center rounded-sm border leading-none transition",
         on
           ? `border-current ${color}`
-          : "border-vault-line text-ink-mute/40 hover:border-brass/40 hover:text-ink-mute",
+          : "border-paper-line text-ink-mute/40 hover:border-brass/40 hover:text-ink-mute",
       )}
     >
       <FlagIcon kind={kind} filled={on} size={12} />

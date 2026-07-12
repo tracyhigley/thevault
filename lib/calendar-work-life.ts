@@ -3,7 +3,7 @@ import {
   DOCUMENT_FOLDERS,
   type DocumentFolderKey,
 } from "@/lib/document-folders";
-import { vaultHubSlotMatchesBox } from "@/lib/vault-box-layout";
+import { hubSlotMatchesBox } from "@/lib/box-hub-layout";
 
 export type WorkLifeGroup = "work" | "other";
 
@@ -20,7 +20,7 @@ const OTHER_FOLDER_KEYS: DocumentFolderKey[] = [
   "home-garden",
 ];
 
-/** Vault hub abbreviations that map to document-folder groups on the calendar. */
+/** Box hub abbreviations that map to document-folder groups on the calendar. */
 const WORK_EXTRA_SLOTS = ["SWB", "PCS", "QCOM", "ECOSHIP"] as const;
 const OTHER_EXTRA_SLOTS = ["F&F"] as const;
 
@@ -38,7 +38,7 @@ const WORK_SLOTS = [...folderSlots(WORK_FOLDER_KEYS), ...WORK_EXTRA_SLOTS];
 const OTHER_SLOTS = [...folderSlots(OTHER_FOLDER_KEYS), ...OTHER_EXTRA_SLOTS];
 
 function matchesAnySlot(box: Box, slots: readonly string[]): boolean {
-  return slots.some((slot) => vaultHubSlotMatchesBox(box, slot));
+  return slots.some((slot) => hubSlotMatchesBox(box, slot));
 }
 
 /** Classify a calendar project box as work, life/other, or outside those groups. */

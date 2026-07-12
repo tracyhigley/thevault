@@ -6,7 +6,7 @@ import clsx from "clsx";
 import { toast } from "sonner";
 import { formatEndOfDay12h, parseTimeOnDate } from "@/lib/daily-plan";
 import { saveDayInputsPartial, applyAtmBoxBudgets } from "@/lib/actions";
-import { markPreferTodayOverDropLanding } from "@/lib/vault-nav-client";
+import { markPreferTodayOverDropLanding } from "@/lib/nav-client";
 import { DropTriageRow } from "@/components/drop-triage-row";
 import { EditableText } from "@/components/editable-text";
 import { NewCounterItemRow } from "@/components/new-counter-item-row";
@@ -157,7 +157,7 @@ function Progress({ step, total }: { step: number; total: number }) {
               ? "bg-brass"
               : n === step
                 ? "bg-brass-bright"
-                : "bg-vault-line",
+                : "bg-paper-line",
           )}
         />
       ))}
@@ -230,7 +230,7 @@ function DaySetupStep({
           onChange={(e) => setEndOfDay(e.target.value)}
           placeholder="e.g. 4:30 PM"
           autoComplete="off"
-          className="mt-3 w-full rounded-sm border border-vault-line bg-vault-panel/60 px-4 py-3 font-mono text-[18px] text-ink outline-none placeholder:text-ink-mute focus:border-brass"
+          className="mt-3 w-full rounded-sm border border-paper-line bg-paper-panel/60 px-4 py-3 font-mono text-[18px] text-ink outline-none placeholder:text-ink-mute focus:border-brass"
         />
       </div>
     </Step>
@@ -253,8 +253,8 @@ function DropStep({
     function onAdvance() {
       router.refresh();
     }
-    window.addEventListener("vault:drop-advance", onAdvance);
-    return () => window.removeEventListener("vault:drop-advance", onAdvance);
+    window.addEventListener("field-notes:advance", onAdvance);
+    return () => window.removeEventListener("field-notes:advance", onAdvance);
   }, [router]);
 
   const hasDrop = dropItems.length > 0;
@@ -286,7 +286,7 @@ function DropStep({
           </p>
         </div>
       ) : (
-        <p className="rounded-sm border border-dashed border-vault-line/60 px-4 py-5 text-center text-ink-mute">
+        <p className="rounded-sm border border-dashed border-paper-line/60 px-4 py-5 text-center text-ink-mute">
           No pending items in Field Notes.
         </p>
       )}
@@ -347,8 +347,8 @@ function Row({ item }: { item: Item }) {
   return (
     <div
       className={clsx(
-        "flex items-center gap-3 rounded-sm border bg-vault-panel/40 px-3 py-2 transition",
-        onToday ? "border-brass/40" : "border-vault-line/60",
+        "flex items-center gap-3 rounded-sm border bg-paper-panel/40 px-3 py-2 transition",
+        onToday ? "border-brass/40" : "border-paper-line/60",
       )}
     >
       {item.area && (
@@ -361,7 +361,7 @@ function Row({ item }: { item: Item }) {
         field="title"
         initial={item.title}
         className={clsx(
-          "vault-task-title min-w-0 flex-1",
+          "paper-task-title min-w-0 flex-1",
           onToday ? "text-ink" : "text-ink-mute",
         )}
         placeholder="(no title)"
@@ -565,7 +565,7 @@ function AtmStep({
       pending={pending}
     >
       {categories.length === 0 ? (
-        <p className="rounded-sm border border-dashed border-vault-line/60 px-4 py-6 text-center text-ink-mute">
+        <p className="rounded-sm border border-dashed border-paper-line/60 px-4 py-6 text-center text-ink-mute">
           No Project Tasks boxes found yet.
         </p>
       ) : (
@@ -580,7 +580,7 @@ function AtmStep({
                   "rounded-sm border px-3 py-2 text-[12px] transition",
                   selected.includes(category)
                     ? "border-brass bg-brass/10 text-brass-bright"
-                    : "border-vault-line/60 text-ink-mute hover:border-brass/40 hover:text-brass",
+                    : "border-paper-line/60 text-ink-mute hover:border-brass/40 hover:text-brass",
                 )}
               >
                 {atmBoxLabel(category, boxes)}
@@ -599,7 +599,7 @@ function AtmStep({
           {selected.length > 0 && (
             <div className="space-y-4">
               {selected.length === 1 && atmPoolHours > 0 && (
-                <div className="rounded-sm border border-vault-line/60 bg-vault-panel/30 p-4">
+                <div className="rounded-sm border border-paper-line/60 bg-paper-panel/30 p-4">
                   <label className="block">
                     <span className="font-mono text-[10px] tracking-wider text-ink-mute">
                       How much of your Project Tasks time goes to{" "}
@@ -636,7 +636,7 @@ function AtmStep({
               )}
 
               {selected.length === 2 && atmPoolHours > 0 && (
-                <div className="rounded-sm border border-vault-line/60 bg-vault-panel/30 p-4">
+                <div className="rounded-sm border border-paper-line/60 bg-paper-panel/30 p-4">
                   <p className="font-mono text-[10px] tracking-wider text-ink-mute">
                     SPLIT YOUR {formatHoursProse(atmPoolHours)} PROJECT TASKS BUDGET
                   </p>
@@ -684,7 +684,7 @@ function AtmStep({
               )}
 
               {dayBudgetHours > 0 && atmPoolHours <= 0 && !counterExceedsWindow && (
-                <p className="rounded-sm border border-dashed border-vault-line/80 bg-vault-panel/30 px-3 py-2 text-[12px] text-ink-dim">
+                <p className="rounded-sm border border-dashed border-paper-line/80 bg-paper-panel/30 px-3 py-2 text-[12px] text-ink-dim">
                   No time left for Project Tasks: Admin Tasks on Today already fills your day
                   window. Take something off Today (step 3) or extend your end
                   time (step 1) to free Project Tasks budget.
@@ -697,7 +697,7 @@ function AtmStep({
                 return (
                   <div
                     key={category}
-                    className="rounded-sm border border-vault-line/60 bg-vault-panel/40 p-3"
+                    className="rounded-sm border border-paper-line/60 bg-paper-panel/40 p-3"
                   >
                     <p className="font-mono text-[11px] tracking-wider text-ink">
                       {atmBoxLabel(category, boxes)}
@@ -713,7 +713,7 @@ function AtmStep({
                 );
               })}
 
-              <div className="rounded-sm border border-vault-line/50 bg-vault-bg/30 px-3 py-2.5 text-[12px] text-ink-dim">
+              <div className="rounded-sm border border-paper-line/50 bg-paper-bg/30 px-3 py-2.5 text-[12px] text-ink-dim">
                 <p>
                   <span className="text-ink">Project Tasks pulls: </span>
                   {formatHoursProse(totalAllocated)}

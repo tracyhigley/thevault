@@ -51,7 +51,7 @@ export function ProjectLog({
           No notes yet — a line or two counts.
         </p>
       ) : (
-        <div className="divide-y divide-vault-line/50">
+        <div className="divide-y divide-paper-line/50">
           {newestFirst.map((e, i) => (
             <div key={`${e.date}-${i}`} className="flex gap-3 py-2 text-[13px]">
               <span className="shrink-0 font-mono text-[11px] text-ink-mute">
@@ -70,7 +70,7 @@ export function ProjectLog({
             if (e.key === "Enter") add();
           }}
           placeholder="Add a quick note…"
-          className="min-w-0 flex-1 rounded-sm border border-vault-line bg-vault-bg/60 px-2 py-1.5 text-[13px] text-ink outline-none placeholder:text-ink-mute/60 focus:border-brass"
+          className="min-w-0 flex-1 rounded-sm border border-paper-line bg-paper-bg/60 px-2 py-1.5 text-[13px] text-ink outline-none placeholder:text-ink-mute/60 focus:border-brass"
         />
         <button
           onClick={add}

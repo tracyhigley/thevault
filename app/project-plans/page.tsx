@@ -40,7 +40,7 @@ export default async function MasterPlanPage() {
       </p>
 
       {buildings.length === 0 ? (
-        <div className="mt-10 rounded-sm border border-dashed border-vault-line bg-vault-panel/40 p-8 text-center">
+        <div className="mt-10 rounded-sm border border-dashed border-paper-line bg-paper-panel/40 p-8 text-center">
           <p className="text-ink-dim">No buildings in your project plans yet.</p>
           <Link
             href="/settings/buildings"
@@ -58,7 +58,7 @@ export default async function MasterPlanPage() {
               <Link
                 key={b.key}
                 href={`/project-plans/${buildingSlug(b.key)}`}
-                className="group rounded-sm border border-vault-line bg-vault-panel px-4 py-4 transition hover:border-brass/60"
+                className="group rounded-sm border border-paper-line bg-paper-panel px-4 py-4 transition hover:border-brass/60"
               >
                 <div
                   className="h-1.5 w-6 rounded-full"
@@ -89,7 +89,7 @@ export default async function MasterPlanPage() {
       )}
 
       {buildings.length > 0 ? (
-        <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-vault-line pt-4">
+        <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-paper-line pt-4">
           <span className="text-[13px] text-ink-mute">
             {totalBuilding === 0
               ? "Nothing under construction — the campus is at rest."

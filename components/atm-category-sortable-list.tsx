@@ -25,8 +25,8 @@ export function AtmCategorySortableList({
         <div
           title={[it.energy, it.title].filter(Boolean).join(" · ") || undefined}
           className={clsx(
-            "flex items-center gap-3 rounded-sm border bg-vault-panel/40 px-3 py-2 transition",
-            picked ? "border-brass/40" : "border-vault-line/60",
+            "flex items-center gap-3 rounded-sm border bg-paper-panel/40 px-3 py-2 transition",
+            picked ? "border-brass/40" : "border-paper-line/60",
           )}
         >
           <AreaPill
@@ -37,14 +37,14 @@ export function AtmCategorySortableList({
               key: b.key,
               label: b.label,
             }))}
-            className="!max-h-7 max-w-[9.25rem] shrink-0 !py-0.5 !pl-1.5 !pr-1 !text-[9px] !leading-tight border-brass/40 bg-vault-bg/20"
+            className="!max-h-7 max-w-[9.25rem] shrink-0 !py-0.5 !pl-1.5 !pr-1 !text-[9px] !leading-tight border-brass/40 bg-paper-bg/20"
           />
           <EditableText
             itemId={it.id}
             field="title"
             initial={it.title}
             className={clsx(
-              "vault-task-title min-w-0 flex-1 truncate",
+              "paper-task-title min-w-0 flex-1 truncate",
               picked ? "text-ink" : "text-ink-mute",
             )}
             placeholder="(no title)"

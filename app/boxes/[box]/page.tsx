@@ -2,7 +2,7 @@ import Link from "next/link";
 import { getAllItems } from "@/lib/data";
 import { getBoxes } from "@/lib/categories";
 import { BoxStorageList } from "@/components/box-storage-list";
-import { sortedItemsForHubBox } from "@/lib/vault-hub-items";
+import { sortedItemsForHubBox } from "@/lib/box-hub-items";
 import type { BoxKey } from "@/lib/types";
 
 export default async function BoxPage({
@@ -34,7 +34,7 @@ export default async function BoxPage({
         <div className="mt-6 flex justify-center gap-2">
           <Link
             href="/boxes"
-            className="rounded-sm border border-vault-line px-4 py-2 font-mono text-[10px] tracking-[0.18em] text-ink-mute hover:border-brass/40 hover:text-brass"
+            className="rounded-sm border border-paper-line px-4 py-2 font-mono text-[10px] tracking-[0.18em] text-ink-mute hover:border-brass/40 hover:text-brass"
           >
             ← BACK TO BOXES
           </Link>

@@ -37,7 +37,7 @@ export function DocumentsEditor({
             "rounded-sm border px-3 py-1",
             mode === "read"
               ? "border-brass bg-brass/10 text-brass"
-              : "border-vault-line text-ink-mute hover:border-brass/40 hover:text-brass",
+              : "border-paper-line text-ink-mute hover:border-brass/40 hover:text-brass",
           )}
         >
           READ
@@ -48,7 +48,7 @@ export function DocumentsEditor({
             "rounded-sm border px-3 py-1",
             mode === "edit"
               ? "border-brass bg-brass/10 text-brass"
-              : "border-vault-line text-ink-mute hover:border-brass/40 hover:text-brass",
+              : "border-paper-line text-ink-mute hover:border-brass/40 hover:text-brass",
           )}
         >
           EDIT
@@ -71,8 +71,8 @@ export function DocumentsEditor({
             "prose-headings:font-sans prose-headings:font-semibold prose-headings:tracking-tight prose-headings:text-ink",
             "prose-p:text-[17px] prose-p:leading-[1.75] prose-li:text-[17px] prose-li:leading-[1.75]",
             "prose-blockquote:text-ink-dim prose-blockquote:border-brass/35",
-            "prose-code:rounded-sm prose-code:bg-vault-panel prose-code:px-1 prose-code:font-mono prose-code:text-[0.9em] prose-code:before:content-none prose-code:after:content-none",
-            "prose-pre:bg-vault-panel/80 prose-pre:border prose-pre:border-vault-line/80 prose-pre:font-mono prose-pre:text-[14px]",
+            "prose-code:rounded-sm prose-code:bg-paper-panel prose-code:px-1 prose-code:font-mono prose-code:text-[0.9em] prose-code:before:content-none prose-code:after:content-none",
+            "prose-pre:bg-paper-panel/80 prose-pre:border prose-pre:border-paper-line/80 prose-pre:font-mono prose-pre:text-[14px]",
             "prose-table:text-[15px] prose-th:text-[14px] prose-td:text-[15px]",
             "prose-a:text-brass prose-a:underline prose-a:decoration-brass/40 prose-a:underline-offset-2",
           )}
@@ -93,10 +93,10 @@ export function DocumentsEditor({
             onBlur={save}
             rows={24}
             spellCheck
-            className="w-full rounded-sm border border-vault-line bg-vault-panel/40 p-4 font-sans text-[16px] leading-[1.7] text-ink outline-none focus:border-brass"
+            className="w-full rounded-sm border border-paper-line bg-paper-panel/40 p-4 font-sans text-[16px] leading-[1.7] text-ink outline-none focus:border-brass"
             placeholder="# Start writing in markdown…"
           />
-          <details className="rounded-sm border border-vault-line bg-vault-panel/30 px-4 py-3">
+          <details className="rounded-sm border border-paper-line bg-paper-panel/30 px-4 py-3">
             <summary className="cursor-pointer font-mono text-[11px] tracking-[0.18em] text-ink-mute hover:text-brass">
               MARKDOWN CHEAT SHEET
             </summary>

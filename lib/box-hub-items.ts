@@ -1,6 +1,6 @@
 import type { Item } from "@/lib/types";
 
-/** Same ordering as vault storage lists: today_order, then created_at. */
+/** Same ordering as box storage lists: today_order, then created_at. */
 export function sortHubItems(a: Item, b: Item): number {
   const ao = a.todayOrder;
   const bo = b.todayOrder;

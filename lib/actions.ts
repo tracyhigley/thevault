@@ -709,8 +709,8 @@ export async function saveDocument(box: string, body: string, title?: string) {
   revalidatePath(`/documents`, "layout");
 }
 
-// Vault & box config.
-export async function renameVault(name: string) {
+// Blueprint & box config.
+export async function renameBlueprint(name: string) {
   const { sb } = await requireUser();
   const vaultId = await currentVaultId();
   if (!vaultId) throw new Error("No vault");
@@ -718,11 +718,11 @@ export async function renameVault(name: string) {
   revalidatePath("/", "layout");
 }
 
-export async function createMyVault(name: string) {
+export async function createMyBlueprint(name: string) {
   const { sb, user } = await requireUser();
   const { data: v, error } = await sb
     .from("vaults")
-    .insert({ name: name.trim() || "The Vault", owner_id: user.id })
+    .insert({ name: name.trim() || "The Blueprint", owner_id: user.id })
     .select("id")
     .single();
   if (error) throw error;
@@ -916,7 +916,7 @@ export async function rotateCaptureToken() {
   const vaultId = await currentVaultId();
   if (!vaultId) throw new Error("No vault");
   const token =
-    "vault_" +
+    "bp_" +
     crypto.getRandomValues(new Uint8Array(24))
       .reduce((s, b) => s + b.toString(16).padStart(2, "0"), "");
   await sb
@@ -991,7 +991,7 @@ export async function saveSettings(formData: FormData) {
   revalidatePath("/settings");
 }
 
-// ─── Vault members (invite / role / remove) ────────────────────────────────
+// ─── Blueprint members (invite / role / remove) ─────────────────────────────
 
 const InviteSchema = z.object({
   email: z.string().email(),

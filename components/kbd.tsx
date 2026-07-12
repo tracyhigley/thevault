@@ -28,7 +28,7 @@ export function Kbd({
             <kbd
               key={ki}
               className={clsx(
-                "inline-flex items-center justify-center rounded-[3px] border border-vault-line/80 bg-vault-panel/60 px-1 leading-none",
+                "inline-flex items-center justify-center rounded-[3px] border border-paper-line/80 bg-paper-panel/60 px-1 leading-none",
                 size === "sm" ? "min-w-[18px] h-[18px] text-[10px]" : "min-w-[14px] h-[14px] text-[9px]",
               )}
             >

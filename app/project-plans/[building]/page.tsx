@@ -74,7 +74,7 @@ export default async function BuildingPage({
           <Link
             key={p.id}
             href={`/project-plans/project/${p.id}`}
-            className="rounded-full border border-vault-line bg-vault-bg-2 px-3.5 py-1.5 text-[13px] text-ink-dim transition hover:border-brass/60 hover:text-ink"
+            className="rounded-full border border-paper-line bg-paper-bg-2 px-3.5 py-1.5 text-[13px] text-ink-dim transition hover:border-brass/60 hover:text-ink"
           >
             {p.title}
           </Link>
@@ -85,7 +85,7 @@ export default async function BuildingPage({
       {complete.length > 0 ? (
         <>
           <SectionHeader label="Completed" />
-          <div className="divide-y divide-vault-line/60">
+          <div className="divide-y divide-paper-line/60">
             {complete.map((p) => (
               <Link
                 key={p.id}
@@ -134,12 +134,12 @@ function ProjectCard({
   return (
     <Link
       href={`/project-plans/project/${project.id}`}
-      className={`block rounded-sm border bg-vault-panel px-4 py-3 transition hover:border-brass/60 ${
-        accent ? "border-vault-line border-l-[3px] border-l-brass" : "border-vault-line"
+      className={`block rounded-sm border bg-paper-panel px-4 py-3 transition hover:border-brass/60 ${
+        accent ? "border-paper-line border-l-[3px] border-l-brass" : "border-paper-line"
       }`}
     >
       <div className="flex flex-wrap items-baseline justify-between gap-x-3">
-        <span className="vault-task-title text-ink">{project.title}</span>
+        <span className="paper-task-title text-ink">{project.title}</span>
         {lastLog ? (
           <span className="font-mono text-[10px] text-ink-mute">
             last note {lastLog.date}

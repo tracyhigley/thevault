@@ -1,6 +1,6 @@
 export type ItemState = "upcoming" | "active" | "done" | "skipped" | "overrun";
 
-// Energies are user-defined per vault (settings.energies), so this is a
+// Energies are user-defined per blueprint (settings.energies), so this is a
 // loose string. Each energy carries a destination — see lib/categories.ts.
 export type Energy = string;
 

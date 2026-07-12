@@ -155,7 +155,7 @@ export function CalendarBoard({
 
   if (boxes.length === 0) {
     return (
-      <div className="mt-8 rounded-sm border border-dashed border-vault-line bg-vault-panel/40 p-6 text-center">
+      <div className="mt-8 rounded-sm border border-dashed border-paper-line bg-paper-panel/40 p-6 text-center">
         <p className="text-ink-dim">
           You haven&apos;t set up any boxes yet — those are the projects you
           can block out weeks for.
@@ -181,7 +181,7 @@ export function CalendarBoard({
         <button
           type="button"
           onClick={() => setShowPast((v) => !v)}
-          className="block w-full rounded-sm border border-dashed border-vault-line bg-vault-panel/20 px-3 py-2 font-mono text-[10px] tracking-[0.18em] text-ink-mute hover:border-brass/40 hover:text-brass"
+          className="block w-full rounded-sm border border-dashed border-paper-line bg-paper-panel/20 px-3 py-2 font-mono text-[10px] tracking-[0.18em] text-ink-mute hover:border-brass/40 hover:text-brass"
         >
           {showPast
             ? `▴  HIDE EARLIER WEEKS (${pastWeeks.length})`

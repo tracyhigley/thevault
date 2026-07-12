@@ -7,7 +7,7 @@ export type BoxCardProps = {
   count?: number | string;
   accent?: "brass" | "rust" | "teal";
   href?: string;
-  /** When set, the card is a button (e.g. expand in place on the vault hub). */
+  /** When set, the card is a button (e.g. expand in place on the boxes hub). */
   onPress?: () => void;
   selected?: boolean;
   /** Tighter tile for the Boxes hub grid. */
@@ -24,7 +24,7 @@ const ACCENT: Record<NonNullable<BoxCardProps["accent"]>, string> = {
 export function BoxCard(p: BoxCardProps) {
   const compact = p.size === "compact";
   const shell = clsx(
-    "group relative flex w-full flex-col justify-end rounded-sm border border-vault-line/60 bg-vault-panel/40 transition hover:border-brass/40 hover:bg-vault-panel/60",
+    "group relative flex w-full flex-col justify-end rounded-sm border border-paper-line/60 bg-paper-panel/40 transition hover:border-brass/40 hover:bg-paper-panel/60",
     compact
       ? "min-h-[96px] min-w-0 p-3 sm:min-h-[100px]"
       : "h-[140px] p-4 sm:w-[240px]",
@@ -33,7 +33,7 @@ export function BoxCard(p: BoxCardProps) {
       : "before:absolute before:left-0 before:top-3 before:bottom-3 before:w-[2px]",
     ACCENT[p.accent ?? "brass"],
     p.selected &&
-      "border-brass/50 bg-vault-panel/70 ring-1 ring-brass/25 hover:border-brass/60",
+      "border-brass/50 bg-paper-panel/70 ring-1 ring-brass/25 hover:border-brass/60",
   );
 
   const inner = (

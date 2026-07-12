@@ -12,17 +12,17 @@ import { DocketSchedule } from "@/components/docket-schedule";
 import { DocketDayRange } from "@/components/docket-day-range";
 import { UnsealGlow } from "@/components/unseal-glow";
 import type { DayInputs } from "@/lib/types";
-import { VAULT_SKIP_DROP_LANDING_COOKIE } from "@/lib/vault-nav";
+import { SKIP_FIELD_NOTES_LANDING_COOKIE } from "@/lib/nav-cookies";
 import { BuildPromptGreeting } from "@/components/build-prompt-greeting";
-import { vaultTodayYmd, vaultZonedDayOfMonth } from "@/lib/vault-day";
+import { todayYmd, zonedDayOfMonth } from "@/lib/day-timezone";
 
 const DAY_GREETINGS = ["Today", "Today is going to be great!", "Have fun today"];
 
 export default async function DocketPage() {
-  const date = vaultTodayYmd();
+  const date = todayYmd();
   const cookieStore = await cookies();
   const skipDropLanding =
-    cookieStore.get(VAULT_SKIP_DROP_LANDING_COOKIE)?.value === "1";
+    cookieStore.get(SKIP_FIELD_NOTES_LANDING_COOKIE)?.value === "1";
 
   const [counterItems, atmItems, dayRow, dropItems] = await Promise.all([
     getItemsByBox("COUNTER"),
@@ -52,7 +52,7 @@ export default async function DocketPage() {
   };
 
   const greeting =
-    DAY_GREETINGS[vaultZonedDayOfMonth() % DAY_GREETINGS.length];
+    DAY_GREETINGS[zonedDayOfMonth() % DAY_GREETINGS.length];
 
   return (
     <div className="mx-auto max-w-[820px] px-4 py-6 md:px-10 md:py-10">

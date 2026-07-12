@@ -52,7 +52,7 @@ export function ScheduleBlock({
   return (
     <div
       className={clsx(
-        "group relative flex items-center gap-4 rounded-sm border-l-2 bg-vault-panel/60 px-4 py-3 transition",
+        "group relative flex items-center gap-4 rounded-sm border-l-2 bg-paper-panel/60 px-4 py-3 transition",
         BUCKET_COLOR[block.bucket] ?? "border-l-ink-mute",
         isDone && "opacity-50",
         state === "active" &&
@@ -73,7 +73,7 @@ export function ScheduleBlock({
         title={
           isDone
             ? "Mark not done"
-            : "Mark done — the item stays in your vault"
+            : "Mark done — the item stays in your boxes"
         }
         onClick={() => {
           if (doneButtonDisabled) return;
@@ -86,7 +86,7 @@ export function ScheduleBlock({
                 isDone ? "upcoming" : "done",
               );
               if (!isDone) {
-                toast.success("Done. Still safe in your vault.", {
+                toast.success("Done. Still safe in your boxes.", {
                   action: {
                     label: "Undo",
                     onClick: () => {
@@ -118,7 +118,7 @@ export function ScheduleBlock({
           initial={block.title}
           multiline
           className={clsx(
-            "vault-task-title w-full whitespace-normal break-words px-0 leading-snug",
+            "paper-task-title w-full whitespace-normal break-words px-0 leading-snug",
             isDone && "line-through text-ink-mute",
           )}
           placeholder="(no title)"
@@ -136,14 +136,14 @@ export function ScheduleBlock({
         <button
           title="More"
           onClick={() => setMenuOpen((v) => !v)}
-          className="flex h-8 w-8 items-center justify-center rounded-sm font-mono text-[14px] text-ink-mute opacity-30 transition hover:bg-vault-bg/40 hover:text-brass group-hover:opacity-100"
+          className="flex h-8 w-8 items-center justify-center rounded-sm font-mono text-[14px] text-ink-mute opacity-30 transition hover:bg-paper-bg/40 hover:text-brass group-hover:opacity-100"
         >
           ···
         </button>
         {menuOpen && (
           <div
             onClick={() => setMenuOpen(false)}
-            className="absolute right-0 top-9 z-10 flex w-32 flex-col gap-px rounded-sm border border-vault-line bg-vault-panel shadow-xl"
+            className="absolute right-0 top-9 z-10 flex w-32 flex-col gap-px rounded-sm border border-paper-line bg-paper-panel shadow-xl"
           >
             <MenuButton
               onClick={() =>
@@ -181,7 +181,7 @@ function MenuButton({
   return (
     <button
       onClick={onClick}
-      className="px-3 py-2 text-left text-[12px] text-ink hover:bg-vault-bg/60 hover:text-brass"
+      className="px-3 py-2 text-left text-[12px] text-ink hover:bg-paper-bg/60 hover:text-brass"
     >
       {children}
     </button>

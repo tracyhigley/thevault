@@ -124,8 +124,8 @@ function Card({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-sm border border-vault-line/60 bg-vault-panel/30">
-      <header className="flex items-start justify-between gap-4 border-b border-vault-line/40 px-4 py-3">
+    <section className="rounded-sm border border-paper-line/60 bg-paper-panel/30">
+      <header className="flex items-start justify-between gap-4 border-b border-paper-line/40 px-4 py-3">
         <div className="min-w-0">
           <div className="eyebrow text-brass">— {badge} —</div>
           <h2 className="serif-h mt-1 text-[20px] text-ink">{title}</h2>
@@ -171,9 +171,9 @@ function CodeBlock({
       .catch(() => toast.error("Couldn't copy."));
   }
   return (
-    <div className="mt-2 overflow-hidden rounded-sm border border-vault-line bg-vault-bg/60">
+    <div className="mt-2 overflow-hidden rounded-sm border border-paper-line bg-paper-bg/60">
       {label && (
-        <div className="flex items-center justify-between border-b border-vault-line/50 px-3 py-1 font-mono text-[10px] tracking-wider text-ink-mute">
+        <div className="flex items-center justify-between border-b border-paper-line/50 px-3 py-1 font-mono text-[10px] tracking-wider text-ink-mute">
           <span>{label}</span>
           <button
             onClick={copy}
@@ -187,7 +187,7 @@ function CodeBlock({
         {code}
       </pre>
       {!label && (
-        <div className="border-t border-vault-line/50 px-3 py-1 text-right">
+        <div className="border-t border-paper-line/50 px-3 py-1 text-right">
           <button
             onClick={copy}
             className="font-mono text-[10px] tracking-wider text-ink-mute hover:text-brass"
@@ -223,7 +223,7 @@ function MaskedToken({
       </span>
       <button
         onClick={onToggle}
-        className="rounded-sm border border-vault-line px-1.5 py-0.5 text-[9px] tracking-wider text-ink-mute hover:border-brass/40 hover:text-brass"
+        className="rounded-sm border border-paper-line px-1.5 py-0.5 text-[9px] tracking-wider text-ink-mute hover:border-brass/40 hover:text-brass"
       >
         {reveal ? "HIDE" : "SHOW"}
       </button>
@@ -237,7 +237,7 @@ function InstallIPhoneCard({ standalone }: { standalone: boolean }) {
   return (
     <Card
       badge="iPhone"
-      title="Add The Vault to your home screen."
+      title="Add The Blueprint to your home screen."
       subtitle="Opens like an app — no Safari chrome, no tabs, lock-screen friendly."
       done={standalone}
     >
@@ -270,7 +270,7 @@ function InstallMacCard({ standalone }: { standalone: boolean }) {
   return (
     <Card
       badge="Mac"
-      title="Dock The Vault as a desktop app."
+      title="Dock The Blueprint as a desktop app."
       subtitle="Lives in your Dock, opens in its own window, ⌘-tab-able."
       done={standalone}
     >
@@ -292,7 +292,7 @@ function InstallMacCard({ standalone }: { standalone: boolean }) {
           </>,
           <>
             Pair with <span className="font-mono text-brass">⌘K</span> inside
-            the app for quick capture, or use Spotlight (⌘ Space → &ldquo;Vault&rdquo;)
+            the app for quick capture, or use Spotlight (⌘ Space → &ldquo;Blueprint&rdquo;)
             to launch.
           </>,
         ]}
@@ -322,7 +322,7 @@ function IOSShortcutCard({
       subtitle="Build a one-step Apple Shortcut that drops dictated text straight into Field Notes."
     >
       <div className="space-y-4">
-        <div className="rounded-sm border border-vault-line/60 bg-vault-bg/40 px-3 py-2">
+        <div className="rounded-sm border border-paper-line/60 bg-paper-bg/40 px-3 py-2">
           <div className="font-mono text-[10px] tracking-wider text-ink-mute">
             Your details
           </div>
@@ -407,7 +407,7 @@ function IOSShortcutCard({
           ]}
         />
 
-        <details className="rounded-sm border border-vault-line/60 bg-vault-bg/40 px-3 py-2">
+        <details className="rounded-sm border border-paper-line/60 bg-paper-bg/40 px-3 py-2">
           <summary className="cursor-pointer font-mono text-[10px] tracking-wider text-ink-mute hover:text-brass">
             Test from a terminal first
           </summary>
@@ -468,7 +468,7 @@ curl -s -X POST '${apiUrl}' \\
       subtitle="One hotkey from anywhere — Raycast, Alfred, or a built-in macOS Shortcut."
     >
       <div className="space-y-4">
-        <div className="rounded-sm border border-vault-line/60 bg-vault-bg/40 px-3 py-2 text-[12px]">
+        <div className="rounded-sm border border-paper-line/60 bg-paper-bg/40 px-3 py-2 text-[12px]">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <span className="text-ink-mute">Bearer token</span>
             <MaskedToken
@@ -520,7 +520,7 @@ curl -s -X POST '${apiUrl}' \\
           <CodeBlock label="add-to-field-notes.sh" code={raycastSnippet} />
         </div>
 
-        <details className="rounded-sm border border-vault-line/60 bg-vault-bg/40 px-3 py-2">
+        <details className="rounded-sm border border-paper-line/60 bg-paper-bg/40 px-3 py-2">
           <summary className="cursor-pointer font-mono text-[10px] tracking-wider text-ink-mute hover:text-brass">
             OPTION C · Automator Quick Action (system-wide)
           </summary>
@@ -567,7 +567,7 @@ function BookmarkletCard({ baseUrl }: { baseUrl: string }) {
           🗝️ Add to Field Notes
         </a>
       </div>
-      <details className="mt-3 rounded-sm border border-vault-line/60 bg-vault-bg/40 px-3 py-2">
+      <details className="mt-3 rounded-sm border border-paper-line/60 bg-paper-bg/40 px-3 py-2">
         <summary className="cursor-pointer font-mono text-[10px] tracking-wider text-ink-mute hover:text-brass">
           Show the raw code
         </summary>

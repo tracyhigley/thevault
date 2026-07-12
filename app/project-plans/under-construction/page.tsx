@@ -45,10 +45,10 @@ export default async function UnderConstructionProjectsPage() {
               <Link
                 key={p.id}
                 href={`/project-plans/project/${p.id}`}
-                className="block rounded-sm border border-vault-line border-l-[3px] border-l-brass bg-vault-panel px-4 py-3 transition hover:border-brass/60"
+                className="block rounded-sm border border-paper-line border-l-[3px] border-l-brass bg-paper-panel px-4 py-3 transition hover:border-brass/60"
               >
                 <div className="flex flex-wrap items-baseline justify-between gap-x-3">
-                  <span className="vault-task-title text-ink">{p.title}</span>
+                  <span className="paper-task-title text-ink">{p.title}</span>
                   <span className="font-mono text-[10px] text-ink-mute">
                     {labelFor(p.building).toUpperCase()}
                     {lastLog ? ` · last note ${lastLog.date}` : ""}

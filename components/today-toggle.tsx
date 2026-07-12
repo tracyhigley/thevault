@@ -42,7 +42,7 @@ export function TodayToggle({
         size === "sm" ? "px-2 py-0.5 text-[10px]" : "px-3 py-1 text-[10px]",
         on
           ? "border-brass bg-brass/15 text-brass"
-          : "border-vault-line text-ink-mute hover:border-brass/40 hover:text-brass",
+          : "border-paper-line text-ink-mute hover:border-brass/40 hover:text-brass",
         pending && "opacity-60",
       )}
       title={on ? "On today's plan" : "Add to today's plan"}

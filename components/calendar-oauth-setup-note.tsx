@@ -32,7 +32,7 @@ export async function CalendarOAuthSetupNote() {
   const callback = `${siteUrl}/api/google-calendar/callback`;
 
   return (
-    <details className="mt-10 rounded-sm border border-vault-line/50 bg-vault-panel/20 px-3 py-2 text-[12px] text-ink-mute">
+    <details className="mt-10 rounded-sm border border-paper-line/50 bg-paper-panel/20 px-3 py-2 text-[12px] text-ink-mute">
       <summary className="cursor-pointer font-mono tracking-[0.12em]">
         GOOGLE OAUTH SETUP REFERENCE (not an error)
       </summary>
@@ -71,7 +71,7 @@ export async function CalendarOAuthSetupNote() {
         </p>
         <p className="break-all font-mono text-[11px] text-brass">{callback}</p>
         <p>
-          Open The Vault at{" "}
+          Open The Blueprint at{" "}
           <span className="font-mono text-ink/80">{siteUrl}</span> when you
           connect.
         </p>

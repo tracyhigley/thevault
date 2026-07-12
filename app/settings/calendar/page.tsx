@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { supabaseServer } from "@/lib/supabase/server";
-import { getCurrentVault } from "@/lib/data";
+import { getCurrentBlueprint } from "@/lib/data";
 import { SettingsSubnav } from "@/components/settings-subnav";
 import { CalendarOAuthSetupNote } from "@/components/calendar-oauth-setup-note";
 import { GoogleCalendarPanel } from "@/components/google-calendar-panel";
@@ -9,7 +9,7 @@ import { GoogleCalendarPanel } from "@/components/google-calendar-panel";
 export const dynamic = "force-dynamic";
 
 export default async function CalendarSettingsPage() {
-  const vault = await getCurrentVault();
+  const vault = await getCurrentBlueprint();
   if (!vault) redirect("/onboarding");
 
   const sb = await supabaseServer();
@@ -32,7 +32,7 @@ export default async function CalendarSettingsPage() {
         <SettingsSubnav />
       </div>
 
-      <div className="mt-8 border-t border-vault-line/60 pt-8">
+      <div className="mt-8 border-t border-paper-line/60 pt-8">
         <h2 className="eyebrow text-ink-mute">— Google Calendar —</h2>
         <Suspense
           fallback={

@@ -43,7 +43,7 @@ export default async function DocumentsFolderPage({
       <div className="mt-4">
         <Link
           href="/documents"
-          className="rounded-sm border border-vault-line px-3 py-1 font-mono text-[11px] tracking-[0.18em] text-ink-mute transition hover:border-brass/40 hover:text-brass"
+          className="rounded-sm border border-paper-line px-3 py-1 font-mono text-[11px] tracking-[0.18em] text-ink-mute transition hover:border-brass/40 hover:text-brass"
         >
           ← BACK TO FOLDERS
         </Link>

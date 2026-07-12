@@ -55,7 +55,7 @@ export default async function SettingsPage() {
               type="time"
               name="default_end_of_day"
               defaultValue={s.defaultEndOfDay}
-              className="w-[120px] rounded-sm border border-vault-line bg-vault-bg/60 px-2.5 py-1.5 text-right font-mono text-[12px] text-ink outline-none transition focus:border-brass focus:bg-vault-bg/80"
+              className="w-[120px] rounded-sm border border-paper-line bg-paper-bg/60 px-2.5 py-1.5 text-right font-mono text-[12px] text-ink outline-none transition focus:border-brass focus:bg-paper-bg/80"
             />
           </Row>
           <Row
@@ -86,7 +86,7 @@ export default async function SettingsPage() {
       <div className="mt-12">
         <Group title="Capture (Apple Shortcut)">
           <CaptureTokenRow token={row?.capture_token ?? null} />
-          <div className="border-t border-vault-line/40 px-4 py-3 text-[13px] text-ink-dim">
+          <div className="border-t border-paper-line/40 px-4 py-3 text-[13px] text-ink-dim">
             Want a step-by-step?{" "}
             <Link href="/settings/connect" className="text-brass hover:underline">
               Connect your iPhone &amp; Mac →
@@ -110,7 +110,7 @@ function Group({
   return (
     <section>
       <h2 className="eyebrow">— {title} —</h2>
-      <div className="mt-3 divide-y divide-vault-line/60 rounded-sm border border-vault-line/60 bg-vault-panel/30">
+      <div className="mt-3 divide-y divide-paper-line/60 rounded-sm border border-paper-line/60 bg-paper-panel/30">
         {children}
       </div>
     </section>

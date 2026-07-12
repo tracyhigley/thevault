@@ -51,7 +51,7 @@ export function NewProjectRow({ building }: { building: string }) {
           }
         }}
         placeholder="Name the idea…"
-        className="w-[220px] rounded-full border border-vault-line bg-vault-bg/60 px-3.5 py-1.5 text-[13px] text-ink outline-none placeholder:text-ink-mute/60 focus:border-brass"
+        className="w-[220px] rounded-full border border-paper-line bg-paper-bg/60 px-3.5 py-1.5 text-[13px] text-ink outline-none placeholder:text-ink-mute/60 focus:border-brass"
       />
       <button
         onClick={add}

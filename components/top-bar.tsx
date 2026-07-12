@@ -3,7 +3,7 @@ import Image from "next/image";
 import { getDocuments } from "@/lib/categories";
 import { fiftyFdDocumentHref } from "@/lib/document-folders";
 import { getSettings } from "@/lib/data";
-import { VaultHomeLink } from "@/components/vault-home-link";
+import { HomeLink } from "@/components/home-link";
 import { supabaseServer } from "@/lib/supabase/server";
 import { TopBarNav } from "./top-bar-nav";
 import { SealToggle } from "./seal-toggle";
@@ -35,8 +35,8 @@ export async function TopBar() {
   const fiftyFdHref = fiftyFdDocumentHref(documents);
 
   return (
-    <header className="relative z-10 flex items-center justify-between gap-3 border-b border-vault-line/50 bg-vault-bg/85 px-4 py-3 backdrop-blur md:px-10 md:py-4">
-      <VaultHomeLink className="flex shrink-0 items-center gap-2.5 md:gap-3">
+    <header className="relative z-10 flex items-center justify-between gap-3 border-b border-paper-line/50 bg-paper-bg/85 px-4 py-3 backdrop-blur md:px-10 md:py-4">
+      <HomeLink className="flex shrink-0 items-center gap-2.5 md:gap-3">
         <Image
           src="/brand-icon.png"
           alt=""
@@ -48,7 +48,7 @@ export async function TopBar() {
         <span className="font-serif text-xl leading-none text-ink md:text-2xl">
           The Blueprint
         </span>
-      </VaultHomeLink>
+      </HomeLink>
 
       <TopBarNav fiftyFdHref={fiftyFdHref} />
 
@@ -56,16 +56,16 @@ export async function TopBar() {
         <Link
           href="/field-notes/add"
           className="rounded-sm border border-gold/40 px-3 py-1.5 font-mono text-[10px] tracking-[0.18em] text-gold hover:bg-gold/10"
-          title="Add a field note"
+          title="Jot a field note"
         >
-          + ADD
+          + JOT
         </Link>
         <SealToggle sealed={sealed} />
         <form action="/auth/signout" method="post">
           <button
             type="submit"
             title="Sign out"
-            className="flex h-8 w-8 items-center justify-center rounded-full border border-vault-line bg-vault-panel text-brass-bright hover:border-brass"
+            className="flex h-8 w-8 items-center justify-center rounded-full border border-paper-line bg-paper-panel text-brass-bright hover:border-brass"
           >
             T
           </button>

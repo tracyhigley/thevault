@@ -15,7 +15,7 @@ export type DayChange =
 const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 // Boxes the user doesn't want offered as week/day projects on the calendar.
-// They still exist on Admin Tasks/Project Tasks/Vault — this only hides them from the
+// They still exist on Admin Tasks/Project Tasks/Boxes — this only hides them from the
 // calendar's pickers. Matched on label, case-insensitive, whitespace-collapsed.
 const CALENDAR_HIDDEN_BOX_LABELS = new Set(["health", "read / watch"]);
 
@@ -78,7 +78,7 @@ export function CalendarWeekRow({
   return (
     <section
       className={clsx(
-        "rounded-sm border border-vault-line bg-vault-panel/30 px-3 py-3 md:px-4 md:py-4",
+        "rounded-sm border border-paper-line bg-paper-panel/30 px-3 py-3 md:px-4 md:py-4",
         week.isCurrentWeek && "ring-1 ring-brass/40",
       )}
     >
@@ -104,7 +104,7 @@ export function CalendarWeekRow({
           }}
           placeholder="Notes for the week…"
           aria-label={`Notes for ${week.weekLabel}`}
-          className="min-w-[140px] flex-1 rounded-sm border border-vault-line bg-vault-bg/60 px-2 py-1 text-[13px] italic text-ink-dim outline-none placeholder:text-ink-mute/50 focus:border-brass focus:not-italic focus:text-ink"
+          className="min-w-[140px] flex-1 rounded-sm border border-paper-line bg-paper-bg/60 px-2 py-1 text-[13px] italic text-ink-dim outline-none placeholder:text-ink-mute/50 focus:border-brass focus:not-italic focus:text-ink"
         />
 
         <label className="flex items-center gap-2 text-[11px] text-ink-mute">
@@ -112,7 +112,7 @@ export function CalendarWeekRow({
           <select
             value={week.boxKey ?? ""}
             onChange={(e) => onSetWeek(e.target.value || null)}
-            className="rounded-sm border border-vault-line bg-vault-bg/60 px-2 py-1 text-[12px] text-ink outline-none focus:border-brass"
+            className="rounded-sm border border-paper-line bg-paper-bg/60 px-2 py-1 text-[12px] text-ink outline-none focus:border-brass"
             style={{
               backgroundColor: hexToRgba(weekBox?.color, 0.12),
               borderColor: hexToRgba(weekBox?.color, 0.5),
@@ -176,9 +176,9 @@ function DayCell({
         day.isToday
           ? "border-brass"
           : explicitlyUnassigned
-            ? "border-dashed border-vault-line-2"
-            : "border-vault-line",
-        !activeBox && isWeekend && "bg-vault-bg/40",
+            ? "border-dashed border-paper-line-2"
+            : "border-paper-line",
+        !activeBox && isWeekend && "bg-paper-bg/40",
       )}
       style={
         activeBox

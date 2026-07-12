@@ -17,7 +17,7 @@ export function CopyTableMarkdownButton() {
     <button
       type="button"
       onClick={copy}
-      className="w-fit rounded-sm border border-vault-line bg-vault-panel/40 px-3 py-1.5 text-[12px] text-ink-mute transition hover:border-brass/40 hover:text-brass"
+      className="w-fit rounded-sm border border-paper-line bg-paper-panel/40 px-3 py-1.5 text-[12px] text-ink-mute transition hover:border-brass/40 hover:text-brass"
     >
       Copy table markdown
     </button>

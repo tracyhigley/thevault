@@ -26,8 +26,8 @@ export function MinutesInlineInput({
   return (
     <span
       className={clsx(
-        "inline-flex shrink-0 items-baseline gap-1 rounded-sm border bg-vault-bg/40 px-1.5 py-0.5 transition focus-within:border-brass",
-        value ? "border-brass/40" : "border-vault-line",
+        "inline-flex shrink-0 items-baseline gap-1 rounded-sm border bg-paper-bg/40 px-1.5 py-0.5 transition focus-within:border-brass",
+        value ? "border-brass/40" : "border-paper-line",
       )}
     >
       <span

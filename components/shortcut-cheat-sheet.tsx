@@ -43,12 +43,12 @@ export function ShortcutCheatSheet() {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center bg-vault-bg/80 backdrop-blur"
+      className="fixed inset-0 z-50 flex items-start justify-center bg-paper-bg/80 backdrop-blur"
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) setCheatOpen(false);
       }}
     >
-      <div className="mt-20 max-h-[80vh] w-full max-w-[720px] overflow-y-auto rounded-sm border border-brass/40 bg-vault-panel/95 p-6 shadow-2xl">
+      <div className="mt-20 max-h-[80vh] w-full max-w-[720px] overflow-y-auto rounded-sm border border-brass/40 bg-paper-panel/95 p-6 shadow-2xl">
         <div className="flex items-baseline justify-between">
           <div className="eyebrow">— Keyboard shortcuts —</div>
           <button
@@ -71,7 +71,7 @@ export function ShortcutCheatSheet() {
                 {groups.get(g)!.map((e) => (
                   <li
                     key={e.id}
-                    className="flex items-center justify-between gap-3 border-b border-vault-line/40 pb-1.5"
+                    className="flex items-center justify-between gap-3 border-b border-paper-line/40 pb-1.5"
                   >
                     <span className="text-[13px] text-ink">{e.label}</span>
                     <Kbd keys={e.keys} />

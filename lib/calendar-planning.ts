@@ -5,7 +5,7 @@
 // timezone in the table — these are calendar dates, not instants).
 
 import { supabaseServer } from "@/lib/supabase/server";
-import { vaultTodayYmd } from "@/lib/vault-day";
+import { todayYmd } from "@/lib/day-timezone";
 
 export type CalendarDay = {
   date: string;
@@ -84,7 +84,7 @@ export function sundayOfYmd(date: string): string {
 }
 
 export function thisWeekStart(): string {
-  return ymd(sundayOf(fromYmd(vaultTodayYmd())));
+  return ymd(sundayOf(fromYmd(todayYmd())));
 }
 
 // Returns weeks from `weeksBefore` Sundays back through `weeksAfter` Sundays
@@ -93,10 +93,10 @@ export async function getCalendarRange(opts: {
   weeksBefore: number;
   weeksAfter: number;
 }): Promise<CalendarWeek[]> {
-  // "Today" is a calendar concept — fix it to the vault timezone instead of
+  // "Today" is a calendar concept — fix it to the app timezone instead of
   // the server's UTC so the today-marker doesn't roll at UTC midnight.
-  const todayYmd = vaultTodayYmd();
-  const currentSunday = sundayOf(fromYmd(todayYmd));
+  const today = todayYmd();
+  const currentSunday = sundayOf(fromYmd(today));
 
   const firstSunday = new Date(currentSunday);
   firstSunday.setDate(firstSunday.getDate() - 7 * opts.weeksBefore);
@@ -169,7 +169,7 @@ export async function getCalendarRange(opts: {
         date: dYmd,
         dayOfMonth: day.getDate(),
         dayOfWeek: day.getDay(),
-        isToday: dYmd === todayYmd,
+        isToday: dYmd === today,
         boxKey,
         overridden,
       });

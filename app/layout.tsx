@@ -29,7 +29,7 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=JetBrains+Mono:wght@400;600&family=Carlito:wght@400;700&display=swap"
         />
       </head>
-      <body className="bg-vault-bg text-ink min-h-screen">
+      <body className="bg-paper-bg text-ink min-h-screen">
         <RegisterServiceWorker />
         <div className="absolute inset-0 lamp-glow pointer-events-none" />
         <ShortcutsProvider>
@@ -48,8 +48,8 @@ export default function RootLayout({
           position="bottom-right"
           toastOptions={{
             style: {
-              background: "var(--vault-panel)",
-              border: "1px solid var(--vault-line)",
+              background: "var(--paper-panel)",
+              border: "1px solid var(--paper-line)",
               color: "var(--ink)",
               fontFamily: "var(--font-mono)",
             },

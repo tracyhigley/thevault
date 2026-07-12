@@ -29,7 +29,7 @@ export function SealToggle({ sealed }: { sealed: boolean }) {
         "flex h-8 w-8 items-center justify-center rounded-sm border transition",
         sealed
           ? "border-brass bg-brass/10 text-brass"
-          : "border-vault-line text-ink-mute hover:border-brass/40 hover:text-brass",
+          : "border-paper-line text-ink-mute hover:border-brass/40 hover:text-brass",
         pending && "opacity-60",
       )}
     >

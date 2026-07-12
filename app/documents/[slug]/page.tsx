@@ -40,7 +40,7 @@ export default async function DocumentPage({
         <div className="mt-6 flex justify-center gap-2">
           <Link
             href="/documents"
-            className="rounded-sm border border-vault-line px-4 py-2 font-mono text-[11px] tracking-[0.18em] text-ink-mute hover:border-brass/40 hover:text-brass"
+            className="rounded-sm border border-paper-line px-4 py-2 font-mono text-[11px] tracking-[0.18em] text-ink-mute hover:border-brass/40 hover:text-brass"
           >
             ← BACK TO DOCUMENTS
           </Link>
@@ -65,7 +65,7 @@ export default async function DocumentPage({
       <div className="mb-6">
         <Link
           href={`/documents/folders/${folderKey}`}
-          className="rounded-sm border border-vault-line px-3 py-1 font-mono text-[11px] tracking-[0.18em] text-ink-mute transition hover:border-brass/40 hover:text-brass"
+          className="rounded-sm border border-paper-line px-3 py-1 font-mono text-[11px] tracking-[0.18em] text-ink-mute transition hover:border-brass/40 hover:text-brass"
         >
           ← BACK TO {folderMeta.label}
         </Link>

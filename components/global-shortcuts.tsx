@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { markPreferTodayOverDropLanding } from "@/lib/vault-nav-client";
+import { markPreferTodayOverDropLanding } from "@/lib/nav-client";
 import { useShortcut } from "@/lib/shortcuts";
 
 // Registers the global navigation + capture shortcuts.
@@ -33,7 +33,7 @@ export function GlobalShortcuts() {
   // for a custom event so this stays decoupled.
   useShortcut(
     "n",
-    () => window.dispatchEvent(new CustomEvent("vault:open-cmdk")),
+    () => window.dispatchEvent(new CustomEvent("app:open-cmdk")),
     { label: "Quick add (Field Notes)", group: "Capture" },
   );
 

@@ -35,7 +35,7 @@ export function SettingsSubnav() {
               "rounded-sm border px-3 py-1.5 transition",
               on
                 ? "border-brass bg-brass/10 text-brass"
-                : "border-vault-line text-ink-mute hover:border-brass/40 hover:text-brass",
+                : "border-paper-line text-ink-mute hover:border-brass/40 hover:text-brass",
             )}
           >
             {label}

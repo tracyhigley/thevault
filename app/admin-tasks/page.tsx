@@ -232,7 +232,7 @@ export default async function CounterPage({
                   "rounded-sm border px-4 py-1.5 font-mono text-[11px] tracking-wider transition",
                   active === f.key
                     ? "border-brass bg-brass/10 text-brass"
-                    : "border-vault-line text-ink-mute hover:border-brass/40 hover:text-brass",
+                    : "border-paper-line text-ink-mute hover:border-brass/40 hover:text-brass",
                 )}
               >
                 {`${f.label}: ${formatMinutesShort(filterTotals[f.key] ?? 0)}`}
@@ -249,7 +249,7 @@ export default async function CounterPage({
                     "rounded-sm border px-4 py-1.5 font-mono text-[11px] tracking-wider transition",
                 active === "byarea" && area === a.key
                       ? "border-brass bg-brass/10 text-brass"
-                      : "border-vault-line text-ink-mute hover:border-brass/40 hover:text-brass",
+                      : "border-paper-line text-ink-mute hover:border-brass/40 hover:text-brass",
                   )}
                 >
               {a.label}
@@ -290,7 +290,7 @@ export default async function CounterPage({
 /** Matches Project Tasks row `AreaPill` chip sizing. */
 const COUNTER_AREA_PILL_CLASS =
   // Wider so long area labels (e.g. "Home & Garden") don't truncate.
-  "!max-h-7 max-w-[9.25rem] shrink-0 !py-0.5 !pl-1.5 !pr-1 !text-[9px] !leading-tight border-brass/40 bg-vault-bg/20";
+  "!max-h-7 max-w-[9.25rem] shrink-0 !py-0.5 !pl-1.5 !pr-1 !text-[9px] !leading-tight border-brass/40 bg-paper-bg/20";
 
 function CounterRow({
   item,
@@ -307,7 +307,7 @@ function CounterRow({
   return (
     <div
       className={clsx(
-        "flex min-w-0 items-start gap-3 rounded-sm border bg-vault-panel/40 px-3 py-2 transition",
+        "flex min-w-0 items-start gap-3 rounded-sm border bg-paper-panel/40 px-3 py-2 transition",
         onToday
           ? "border-brass/40"
           : stressor
@@ -318,7 +318,7 @@ function CounterRow({
                 ? "border-amber-500/45"
                 : shouldOnly
                   ? "border-emerald-600/40"
-                : "border-vault-line/60",
+                : "border-paper-line/60",
       )}
     >
       {stressor || item.urgent || item.must || item.should ? (
@@ -349,7 +349,7 @@ function CounterRow({
             field="title"
             initial={item.title}
             className={clsx(
-              "vault-task-title min-w-0 flex-1 truncate",
+              "paper-task-title min-w-0 flex-1 truncate",
               onToday ? "text-ink" : "text-ink-mute",
             )}
             placeholder="(no title)"

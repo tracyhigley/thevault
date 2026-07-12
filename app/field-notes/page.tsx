@@ -28,7 +28,7 @@ export default async function DropPage() {
       </p>
 
       {!ready && (
-        <div className="mt-6 rounded-sm border border-dashed border-brass/40 bg-vault-panel/30 p-6">
+        <div className="mt-6 rounded-sm border border-dashed border-brass/40 bg-paper-panel/30 p-6">
           <h3 className="serif-h text-[18px] text-ink">
             Set up your blueprint first.
           </h3>
@@ -58,7 +58,7 @@ export default async function DropPage() {
       )}
 
       {ready && list.length > 0 && (
-        <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 rounded-sm border border-vault-line/40 bg-vault-panel/20 px-3 py-2 font-mono text-[10px] tracking-wider text-ink-mute">
+        <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 rounded-sm border border-paper-line/40 bg-paper-panel/20 px-3 py-2 font-mono text-[10px] tracking-wider text-ink-mute">
           <span className="text-brass">Keyboard:</span>
           <span className="flex items-center gap-1.5">
             <Kbd keys="j" size="xs" /> <Kbd keys="k" size="xs" /> next/prev

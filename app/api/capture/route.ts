@@ -8,7 +8,7 @@ const Body = z.object({
   userId: z.string().uuid(),
 });
 
-/** Bearer matches `settings.capture_token` for a vault the user belongs to, or legacy `CAPTURE_TOKEN` env + user’s default vault. */
+/** Bearer matches `settings.capture_token` for a blueprint the user belongs to, or legacy `CAPTURE_TOKEN` env + user’s default blueprint. */
 async function resolveVaultId(
   bearerToken: string,
   userId: string,

@@ -6,7 +6,7 @@ import clsx from "clsx";
 import { toast } from "sonner";
 import { DraftingScene } from "./drafting-scene";
 import { addFieldNote } from "@/lib/actions";
-import { markPreferTodayOverDropLanding } from "@/lib/vault-nav-client";
+import { markPreferTodayOverDropLanding } from "@/lib/nav-client";
 
 export function SealedScreen({
   sealed,
@@ -75,7 +75,7 @@ export function SealedScreen({
   }
 
   return (
-    <div className="sealed-blueprint-scheme relative min-h-[100vh] overflow-hidden bg-vault-bg text-ink">
+    <div className="sealed-blueprint-scheme relative min-h-[100vh] overflow-hidden bg-paper-bg text-ink">
       {/* Subtle vignette */}
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(143,165,99,0.06),_transparent_70%)]" />
 
@@ -95,7 +95,7 @@ export function SealedScreen({
           <span>·</span>
           <span>{time}</span>
         </div>
-        <div className="flex h-8 w-8 items-center justify-center rounded-full border border-vault-line bg-vault-panel/80 text-brass-bright/80">
+        <div className="flex h-8 w-8 items-center justify-center rounded-full border border-paper-line bg-paper-panel/80 text-brass-bright/80">
           T
         </div>
       </header>
@@ -135,7 +135,7 @@ export function SealedScreen({
             <div className="mt-8 w-full max-w-[520px]">
               <form
                 onSubmit={(e) => void addNote(e)}
-                className="flex items-center gap-2 rounded-sm border border-vault-line bg-vault-panel/40 px-4 py-2"
+                className="flex items-center gap-2 rounded-sm border border-paper-line bg-paper-panel/40 px-4 py-2"
               >
                 <QuickAddIcon />
                 <input
@@ -184,7 +184,7 @@ export function SealedScreen({
                 </button>
                 <Link
                   href="/"
-                  className="rounded-sm border border-vault-line px-5 py-3 font-mono text-[10px] tracking-[0.24em] text-ink-mute hover:border-brass/40 hover:text-brass"
+                  className="rounded-sm border border-paper-line px-5 py-3 font-mono text-[10px] tracking-[0.24em] text-ink-mute hover:border-brass/40 hover:text-brass"
                   onClick={() => markPreferTodayOverDropLanding()}
                 >
                   CANCEL

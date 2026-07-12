@@ -55,7 +55,7 @@ export function TriageChips({
             }
           })
         }
-        className="rounded-sm border border-vault-line px-2 py-1 font-mono text-[10px] tracking-wider text-ink-mute transition hover:border-rust hover:text-rust"
+        className="rounded-sm border border-paper-line px-2 py-1 font-mono text-[10px] tracking-wider text-ink-mute transition hover:border-rust hover:text-rust"
       >
         {deleteLabel}
       </button>

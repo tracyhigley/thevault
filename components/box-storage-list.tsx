@@ -27,7 +27,7 @@ export function BoxStorageList({
       {items.map((it) => (
         <div
           key={it.id}
-          className="flex flex-wrap items-start gap-3 rounded-sm border border-vault-line bg-vault-panel/40 px-4 py-3"
+          className="flex flex-wrap items-start gap-3 rounded-sm border border-paper-line bg-paper-panel/40 px-4 py-3"
         >
           {it.potential && (
             <span
@@ -57,7 +57,7 @@ export function BoxStorageList({
             </span>
           )}
           <p
-            className="vault-task-title min-w-[200px] flex-1 whitespace-pre-wrap break-words text-ink"
+            className="paper-task-title min-w-[200px] flex-1 whitespace-pre-wrap break-words text-ink"
             title={it.title}
           >
             {it.title}

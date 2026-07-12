@@ -26,8 +26,8 @@ export function CmdK() {
   // `n` from anywhere also opens quick-add.
   useEffect(() => {
     const onOpen = () => setOpen(true);
-    window.addEventListener("vault:open-cmdk", onOpen);
-    return () => window.removeEventListener("vault:open-cmdk", onOpen);
+    window.addEventListener("app:open-cmdk", onOpen);
+    return () => window.removeEventListener("app:open-cmdk", onOpen);
   }, []);
 
   useEffect(() => {
@@ -54,12 +54,12 @@ export function CmdK() {
   if (!open) return null;
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center bg-vault-bg/80 backdrop-blur"
+      className="fixed inset-0 z-50 flex items-start justify-center bg-paper-bg/80 backdrop-blur"
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) setOpen(false);
       }}
     >
-      <div className="mt-32 w-full max-w-[600px] rounded-sm border border-brass/40 bg-vault-panel/95 p-5 shadow-2xl">
+      <div className="mt-32 w-full max-w-[600px] rounded-sm border border-brass/40 bg-paper-panel/95 p-5 shadow-2xl">
         <div className="eyebrow">— Add a Field Note · ⌘K —</div>
         <textarea
           ref={inputRef}

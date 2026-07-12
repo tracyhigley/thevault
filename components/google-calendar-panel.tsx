@@ -96,7 +96,7 @@ export function GoogleCalendarPanel({
 
   return (
     <div className="mt-8 space-y-6">
-      <div className="rounded-sm border border-vault-line/60 bg-vault-panel/30 p-4 text-[14px] leading-relaxed text-ink-dim">
+      <div className="rounded-sm border border-paper-line/60 bg-paper-panel/30 p-4 text-[14px] leading-relaxed text-ink-dim">
         <p>
           When this is on, The Blueprint adds a <strong className="text-ink/90">Field Notes</strong>{" "}
           line for each calendar event on <strong className="text-ink/90">that day</strong>.
@@ -159,7 +159,7 @@ export function GoogleCalendarPanel({
                 name="calendar_id"
                 value={selectedCalendarId}
                 onChange={(e) => setSelectedCalendarId(e.target.value)}
-                className="max-w-md rounded-sm border border-vault-line bg-vault-bg/60 px-2.5 py-2 text-[13px] text-ink outline-none focus:border-brass"
+                className="max-w-md rounded-sm border border-paper-line bg-paper-bg/60 px-2.5 py-2 text-[13px] text-ink outline-none focus:border-brass"
                 required
               >
                 {calendars.length === 0 ? (
@@ -185,7 +185,7 @@ export function GoogleCalendarPanel({
                 name="timezone"
                 value={selectedTimezone}
                 onChange={(e) => setSelectedTimezone(e.target.value)}
-                className="max-w-md rounded-sm border border-vault-line bg-vault-bg/60 px-2.5 py-2 text-[13px] text-ink outline-none focus:border-brass"
+                className="max-w-md rounded-sm border border-paper-line bg-paper-bg/60 px-2.5 py-2 text-[13px] text-ink outline-none focus:border-brass"
                 required
               >
                 {tzList.map((z) => (
@@ -222,14 +222,14 @@ export function GoogleCalendarPanel({
                     })();
                   });
                 }}
-                className="rounded-sm border border-vault-line px-3 py-2 text-[12px] text-ink-mute transition hover:border-brass/40 hover:text-brass disabled:opacity-50"
+                className="rounded-sm border border-paper-line px-3 py-2 text-[12px] text-ink-mute transition hover:border-brass/40 hover:text-brass disabled:opacity-50"
               >
                 {syncing ? "Working…" : "Pull in today’s events now"}
               </button>
             </div>
           </form>
 
-          <div className="flex flex-wrap gap-3 border-t border-vault-line/40 pt-6">
+          <div className="flex flex-wrap gap-3 border-t border-paper-line/40 pt-6">
             <a
               href="/api/google-calendar/auth"
               className="text-[12px] text-brass underline-offset-2 hover:underline"

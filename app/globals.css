@@ -2,11 +2,11 @@
 @plugin "@tailwindcss/typography";
 
 :root {
-  --vault-bg: #f3eee5;
-  --vault-bg-2: #e9e2d6;
-  --vault-panel: #faf7f0;
-  --vault-line: #cfc3ae;
-  --vault-line-2: #b8aa95;
+  --paper-bg: #f3eee5;
+  --paper-bg-2: #e9e2d6;
+  --paper-panel: #faf7f0;
+  --paper-line: #cfc3ae;
+  --paper-line-2: #b8aa95;
   --ink: #262018;
   --ink-dim: #544a3d;
   --ink-mute: #7a6e5e;
@@ -31,10 +31,10 @@
 }
 
 @theme inline {
-  --color-vault-bg: var(--vault-bg);
-  --color-vault-bg-2: var(--vault-bg-2);
-  --color-vault-panel: var(--vault-panel);
-  --color-vault-line: var(--vault-line);
+  --color-paper-bg: var(--paper-bg);
+  --color-paper-bg-2: var(--paper-bg-2);
+  --color-paper-panel: var(--paper-panel);
+  --color-paper-line: var(--paper-line);
   --color-ink: var(--ink);
   --color-ink-dim: var(--ink-dim);
   --color-ink-mute: var(--ink-mute);
@@ -51,7 +51,7 @@
 }
 
 html, body {
-  background-color: var(--vault-bg);
+  background-color: var(--paper-bg);
   /* Faint blueprint-grid texture behind every page. */
   background-image:
     linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
@@ -107,8 +107,8 @@ html, body {
   letter-spacing: 0.01em;
 }
 
-/* Item titles in Counter, ATM, Drop triage, vault lists, Docket — sans, slightly larger than chrome */
-.vault-task-title {
+/* Item titles in Admin Tasks, Project Tasks, Field Notes triage, box lists, Docket — sans, slightly larger than chrome */
+.paper-task-title {
   font-family: var(--font-sans);
   font-weight: 400;
   letter-spacing: 0.01em;
@@ -117,7 +117,7 @@ html, body {
 }
 
 @media (min-width: 768px) {
-  .vault-task-title {
+  .paper-task-title {
     font-size: 17px;
   }
 }
@@ -125,11 +125,11 @@ html, body {
 /* /sealed only — navy drafting-room + cream ink (rest of app stays light).
    Palette pulled from The Blueprint mark: navy roll, cream ground, olive sprout. */
 .sealed-blueprint-scheme {
-  --vault-bg: #182338;
-  --vault-bg-2: #141d30;
-  --vault-panel: #1c2740;
-  --vault-line: #2b3652;
-  --vault-line-2: #3a4666;
+  --paper-bg: #182338;
+  --paper-bg-2: #141d30;
+  --paper-panel: #1c2740;
+  --paper-line: #2b3652;
+  --paper-line-2: #3a4666;
   --ink: #f0ece0;
   --ink-dim: #cfc9b4;
   --ink-mute: #8890a5;

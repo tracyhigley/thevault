@@ -36,7 +36,7 @@ export default async function ProjectPage({
       </Link>
 
       {/* Title block */}
-      <div className="mt-3 rounded-sm border border-vault-line-2 bg-vault-panel px-5 py-4">
+      <div className="mt-3 rounded-sm border border-paper-line-2 bg-paper-panel px-5 py-4">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="min-w-[240px] flex-1">
             <ProjectFieldEditor
@@ -115,7 +115,7 @@ export default async function ProjectPage({
         </Section>
       </div>
 
-      <div className="mt-8 flex justify-end border-t border-vault-line pt-4">
+      <div className="mt-8 flex justify-end border-t border-paper-line pt-4">
         <DeleteProjectButton projectId={project.id} backHref={backHref} />
       </div>
     </div>
@@ -130,7 +130,7 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-sm border border-vault-line bg-vault-panel px-4 py-3">
+    <div className="rounded-sm border border-paper-line bg-paper-panel px-4 py-3">
       <div className="mb-2 font-mono text-[10px] uppercase tracking-[0.2em] text-brass">
         {label}
       </div>

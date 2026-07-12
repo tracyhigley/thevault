@@ -38,7 +38,7 @@ export function DeleteProjectButton({
     <button
       onClick={remove}
       disabled={pending}
-      className="rounded-sm border border-vault-line px-3 py-1.5 font-mono text-[10px] tracking-[0.16em] text-ink-mute transition hover:border-rust hover:text-rust disabled:opacity-50"
+      className="rounded-sm border border-paper-line px-3 py-1.5 font-mono text-[10px] tracking-[0.16em] text-ink-mute transition hover:border-rust hover:text-rust disabled:opacity-50"
     >
       REMOVE FROM PROJECT PLANS
     </button>

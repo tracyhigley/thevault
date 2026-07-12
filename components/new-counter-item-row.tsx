@@ -49,7 +49,7 @@ export function NewCounterItemRow({
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-3 rounded-sm border border-dashed border-vault-line/60 bg-vault-panel/20 px-4 py-2 transition hover:border-brass/40">
+    <div className="flex flex-wrap items-center gap-3 rounded-sm border border-dashed border-paper-line/60 bg-paper-panel/20 px-4 py-2 transition hover:border-brass/40">
       <span className="font-mono text-[10px] tracking-wider text-ink-mute">+</span>
       <input
         value={title}
@@ -61,7 +61,7 @@ export function NewCounterItemRow({
           }
         }}
         placeholder="+ New admin task"
-        className="vault-task-title min-w-[220px] flex-1 bg-transparent text-ink placeholder:text-ink-mute outline-none"
+        className="paper-task-title min-w-[220px] flex-1 bg-transparent text-ink placeholder:text-ink-mute outline-none"
       />
       <Select
         value={area}
@@ -70,11 +70,11 @@ export function NewCounterItemRow({
         className="w-[13rem] shrink-0 px-2 py-1 font-mono text-[10px]"
         aria-label="Choose box for new admin task"
       >
-        <option value="" className="bg-vault-bg">
+        <option value="" className="bg-paper-bg">
           — choose box —
         </option>
         {boxes.map((b) => (
-          <option key={b.key} value={b.key} className="bg-vault-bg">
+          <option key={b.key} value={b.key} className="bg-paper-bg">
             {b.label}
           </option>
         ))}

@@ -279,11 +279,11 @@ export function DocketSchedule({
     return (
       <div className="mt-8 space-y-2">
         <div
-          className="h-[4.25rem] animate-pulse rounded-sm bg-vault-panel/30"
+          className="h-[4.25rem] animate-pulse rounded-sm bg-paper-panel/30"
           aria-hidden
         />
         <div
-          className="h-[4.25rem] animate-pulse rounded-sm bg-vault-panel/30"
+          className="h-[4.25rem] animate-pulse rounded-sm bg-paper-panel/30"
           aria-hidden
         />
         {children}
@@ -320,7 +320,7 @@ export function DocketSchedule({
           </p>
         )}
         {orderedBlocks.length === 0 && (
-          <p className="rounded-sm border border-dashed border-vault-line/60 bg-vault-panel/20 px-4 py-6 text-center text-ink-mute">
+          <p className="rounded-sm border border-dashed border-paper-line/60 bg-paper-panel/20 px-4 py-6 text-center text-ink-mute">
             Nothing scheduled. Add a custom block below, or rebuild the day.
           </p>
         )}
@@ -355,7 +355,7 @@ export function DocketSchedule({
                 type="button"
                 disabled={clearPending}
                 title="Permanently delete every completed task from Admin Tasks and Project Tasks"
-                className="shrink-0 rounded-sm border border-vault-line bg-vault-panel/40 px-3 py-1 font-mono text-[10px] tracking-[0.18em] text-ink-mute transition hover:border-rust/50 hover:text-rust disabled:opacity-40"
+                className="shrink-0 rounded-sm border border-paper-line bg-paper-panel/40 px-3 py-1 font-mono text-[10px] tracking-[0.18em] text-ink-mute transition hover:border-rust/50 hover:text-rust disabled:opacity-40"
                 onClick={() => {
                   const n = doneTodayItems.length;
                   if (
@@ -388,16 +388,16 @@ export function DocketSchedule({
             {doneTodayItems.map((it) => (
               <div
                 key={it.id}
-                className="rounded-sm border border-vault-line/40 bg-vault-panel/30 px-4 py-3 opacity-60"
+                className="rounded-sm border border-paper-line/40 bg-paper-panel/30 px-4 py-3 opacity-60"
               >
-                <div className="vault-task-title line-through text-ink-mute">
+                <div className="paper-task-title line-through text-ink-mute">
                   {it.title}
                 </div>
                 <div className="mt-0.5 flex items-center justify-between gap-3 text-[11px] text-ink-mute">
                   <span>{it.minutes ?? "—"} min</span>
                   <button
                     type="button"
-                    className="rounded-sm border border-vault-line/70 px-2 py-0.5 font-mono text-[10px] tracking-[0.14em] text-ink-mute transition hover:border-brass/50 hover:text-brass"
+                    className="rounded-sm border border-paper-line/70 px-2 py-0.5 font-mono text-[10px] tracking-[0.14em] text-ink-mute transition hover:border-brass/50 hover:text-brass"
                     onClick={() => {
                       startTransition(async () => {
                         try {
@@ -425,14 +425,14 @@ export function DocketSchedule({
             {skippedTodayItems.map((it) => (
               <div
                 key={it.id}
-                className="rounded-sm border border-vault-line/40 bg-vault-panel/30 px-4 py-3 opacity-60"
+                className="rounded-sm border border-paper-line/40 bg-paper-panel/30 px-4 py-3 opacity-60"
               >
-                <div className="vault-task-title text-ink-mute">{it.title}</div>
+                <div className="paper-task-title text-ink-mute">{it.title}</div>
                 <div className="mt-0.5 flex items-center justify-between gap-3 text-[11px] text-ink-mute">
                   <span>{it.minutes ?? "—"} min</span>
                   <button
                     type="button"
-                    className="rounded-sm border border-vault-line/70 px-2 py-0.5 font-mono text-[10px] tracking-[0.14em] text-ink-mute transition hover:border-brass/50 hover:text-brass"
+                    className="rounded-sm border border-paper-line/70 px-2 py-0.5 font-mono text-[10px] tracking-[0.14em] text-ink-mute transition hover:border-brass/50 hover:text-brass"
                     onClick={() => {
                       startTransition(async () => {
                         try {
@@ -481,7 +481,7 @@ function SortableScheduleRow({
         {...listeners}
         title="Drag to reorder"
         aria-label="Drag to reorder schedule item"
-        className="cursor-grab select-none rounded-sm border border-vault-line/60 bg-vault-panel/45 px-1.5 font-mono text-[14px] leading-none text-brass/80 hover:border-brass/60 hover:text-brass active:cursor-grabbing"
+        className="cursor-grab select-none rounded-sm border border-paper-line/60 bg-paper-panel/45 px-1.5 font-mono text-[14px] leading-none text-brass/80 hover:border-brass/60 hover:text-brass active:cursor-grabbing"
       >
         ⋮⋮
       </button>

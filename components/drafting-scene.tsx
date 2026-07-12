@@ -49,7 +49,7 @@ export function DraftingScene({
 
   return (
     <div
-      className="relative mx-auto w-full overflow-hidden rounded-lg border border-vault-line/40 shadow-[0_30px_60px_-20px_rgba(0,0,0,0.6)]"
+      className="relative mx-auto w-full overflow-hidden rounded-lg border border-paper-line/40 shadow-[0_30px_60px_-20px_rgba(0,0,0,0.6)]"
       style={{ maxWidth, aspectRatio: "1402 / 1122" }}
       aria-label={sealed ? "Lights out — plans filed" : "Lamp on — drafting"}
     >

@@ -93,7 +93,7 @@ function LoginForm() {
       <div className="eyebrow">— The Blueprint —</div>
       <h1 className="serif-h mt-2 text-[36px]">Open the door.</h1>
 
-      <div className="mt-6 flex gap-1 rounded-sm border border-vault-line p-0.5">
+      <div className="mt-6 flex gap-1 rounded-sm border border-paper-line p-0.5">
         <Tab active={mode === "signin"} onClick={() => setMode("signin")}>
           Sign in
         </Tab>
@@ -110,7 +110,7 @@ function LoginForm() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="you@example.com"
-          className="w-full rounded-sm border border-vault-line bg-vault-panel/60 px-4 py-3 text-ink outline-none focus:border-brass"
+          className="w-full rounded-sm border border-paper-line bg-paper-panel/60 px-4 py-3 text-ink outline-none focus:border-brass"
         />
         <input
           type="password"
@@ -124,7 +124,7 @@ function LoginForm() {
           placeholder={
             mode === "signup" ? "Choose a password (8+ chars)" : "Password"
           }
-          className="w-full rounded-sm border border-vault-line bg-vault-panel/60 px-4 py-3 text-ink outline-none focus:border-brass"
+          className="w-full rounded-sm border border-paper-line bg-paper-panel/60 px-4 py-3 text-ink outline-none focus:border-brass"
         />
         <button
           type="submit"

@@ -6,7 +6,7 @@ import { BoxCard } from "@/components/box-card";
 import { BoxStorageList } from "@/components/box-storage-list";
 import type { BoxKey, Item } from "@/lib/types";
 
-export type VaultBoxTile = {
+export type BoxTile = {
   key: string;
   label: string;
   count: number;
@@ -18,9 +18,9 @@ const GRID =
 
 function findTile(
   key: string | null,
-  rows: (VaultBoxTile | null)[][],
-  orphans: VaultBoxTile[],
-): VaultBoxTile | undefined {
+  rows: (BoxTile | null)[][],
+  orphans: BoxTile[],
+): BoxTile | undefined {
   if (!key) return undefined;
   for (const row of rows) {
     for (const c of row) {
@@ -43,21 +43,21 @@ function NewBoxLink({ href, label }: { href: string; label: string }) {
   return (
     <Link
       href={href}
-      className="flex min-h-[96px] w-full min-w-0 flex-col items-center justify-center gap-1 rounded-sm border border-dashed border-vault-line px-2 py-2 text-center text-ink-mute transition hover:border-brass/40 hover:text-brass sm:min-h-[100px]"
+      className="flex min-h-[96px] w-full min-w-0 flex-col items-center justify-center gap-1 rounded-sm border border-dashed border-paper-line px-2 py-2 text-center text-ink-mute transition hover:border-brass/40 hover:text-brass sm:min-h-[100px]"
     >
       <span className="serif-h text-[16px] leading-tight sm:text-[17px]">{label}</span>
     </Link>
   );
 }
 
-export function VaultBoxesSection({
+export function BoxesSection({
   rows,
   orphanTiles,
   itemsByBox,
   newBox,
 }: {
-  rows: (VaultBoxTile | null)[][];
-  orphanTiles: VaultBoxTile[];
+  rows: (BoxTile | null)[][];
+  orphanTiles: BoxTile[];
   itemsByBox: Record<string, Item[]>;
   newBox: { href: string; label: string };
 }) {
@@ -140,11 +140,11 @@ export function VaultBoxesSection({
 
       {open && (
         <section
-          id="vault-box-panel"
+          id="box-panel"
           aria-label={`Items in ${open.label}`}
-          className="rounded-sm border border-vault-line/80 bg-vault-panel/30 p-4 md:p-6"
+          className="rounded-sm border border-paper-line/80 bg-paper-panel/30 p-4 md:p-6"
         >
-          <div className="flex flex-wrap items-start justify-between gap-3 border-b border-vault-line/50 pb-4">
+          <div className="flex flex-wrap items-start justify-between gap-3 border-b border-paper-line/50 pb-4">
             <div>
               <div className="eyebrow text-ink-mute">— In this box —</div>
               <h2 className="serif-h mt-1 text-[26px] leading-tight text-ink md:text-[30px]">
@@ -158,14 +158,14 @@ export function VaultBoxesSection({
             <div className="flex flex-wrap items-center gap-2">
               <Link
                 href={`/boxes/${open.slug}`}
-                className="rounded-sm border border-vault-line px-3 py-1.5 font-mono text-[10px] tracking-[0.16em] text-ink-mute transition hover:border-brass/40 hover:text-brass"
+                className="rounded-sm border border-paper-line px-3 py-1.5 font-mono text-[10px] tracking-[0.16em] text-ink-mute transition hover:border-brass/40 hover:text-brass"
               >
                 Open full page
               </Link>
               <button
                 type="button"
                 onClick={() => setOpenKey(null)}
-                className="rounded-sm border border-vault-line px-3 py-1.5 font-mono text-[10px] tracking-[0.16em] text-ink-mute transition hover:border-brass/40 hover:text-brass"
+                className="rounded-sm border border-paper-line px-3 py-1.5 font-mono text-[10px] tracking-[0.16em] text-ink-mute transition hover:border-brass/40 hover:text-brass"
               >
                 Close
               </button>

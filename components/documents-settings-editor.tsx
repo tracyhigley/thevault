@@ -131,33 +131,33 @@ export function DocumentsSettingsEditor({
       {rows.map((r, i) => (
         <div
           key={i}
-          className="flex flex-wrap items-center gap-2 rounded-sm border border-vault-line bg-vault-panel/40 px-4 py-3"
+          className="flex flex-wrap items-center gap-2 rounded-sm border border-paper-line bg-paper-panel/40 px-4 py-3"
         >
           <input
             type="color"
             value={r.color ?? "#b5853a"}
             onChange={(e) => update(i, { color: e.target.value })}
-            className="h-7 w-7 cursor-pointer rounded-sm border border-vault-line bg-transparent"
+            className="h-7 w-7 cursor-pointer rounded-sm border border-paper-line bg-transparent"
             title="Color"
           />
           <input
             value={r.label}
             onChange={(e) => changeLabel(i, e.target.value)}
             placeholder="Label (e.g. Notes)"
-            className="min-w-[140px] flex-1 rounded-sm border border-vault-line bg-vault-bg/60 px-2 py-1 text-ink outline-none focus:border-brass"
+            className="min-w-[140px] flex-1 rounded-sm border border-paper-line bg-paper-bg/60 px-2 py-1 text-ink outline-none focus:border-brass"
           />
           <input
             value={r.meta ?? ""}
             onChange={(e) => update(i, { meta: e.target.value })}
             placeholder="Subtitle, e.g. Measurements & doses"
-            className="min-w-[160px] flex-1 rounded-sm border border-vault-line bg-vault-bg/60 px-2 py-1 font-mono text-[13px] text-ink-mute outline-none focus:border-brass"
+            className="min-w-[160px] flex-1 rounded-sm border border-paper-line bg-paper-bg/60 px-2 py-1 font-mono text-[13px] text-ink-mute outline-none focus:border-brass"
           />
           <select
             value={r.folder ?? "misc"}
             onChange={(e) =>
               update(i, { folder: e.target.value as DocumentType["folder"] })
             }
-            className="w-[110px] rounded-sm border border-vault-line bg-vault-bg/60 px-2 py-1 font-mono text-[12px] text-ink outline-none focus:border-brass"
+            className="w-[110px] rounded-sm border border-paper-line bg-paper-bg/60 px-2 py-1 font-mono text-[12px] text-ink outline-none focus:border-brass"
           >
             {FOLDERS.map((f) => (
               <option key={f.key} value={f.key}>
@@ -169,11 +169,11 @@ export function DocumentsSettingsEditor({
             value={r.key}
             onChange={(e) => changeKey(i, e.target.value)}
             placeholder="auto"
-            className="w-[110px] rounded-sm border border-vault-line bg-vault-bg/60 px-2 py-1 font-mono text-[12px] text-brass outline-none focus:border-brass"
+            className="w-[110px] rounded-sm border border-paper-line bg-paper-bg/60 px-2 py-1 font-mono text-[12px] text-brass outline-none focus:border-brass"
           />
           <button
             onClick={() => remove(i)}
-            className="rounded-sm border border-vault-line px-2 py-1 font-mono text-[11px] tracking-wider text-ink-mute hover:border-rust hover:text-rust"
+            className="rounded-sm border border-paper-line px-2 py-1 font-mono text-[11px] tracking-wider text-ink-mute hover:border-rust hover:text-rust"
           >
             REMOVE
           </button>

@@ -11,7 +11,7 @@ export function ShortcutsHintBar() {
   return (
     <button
       onClick={() => setCheatOpen(true)}
-      className="fixed bottom-3 left-3 z-30 hidden items-center gap-2 rounded-full border border-vault-line/60 bg-vault-panel/70 px-3 py-1.5 font-mono text-[10px] tracking-wider text-ink-mute backdrop-blur transition hover:border-brass/40 hover:text-brass md:inline-flex"
+      className="fixed bottom-3 left-3 z-30 hidden items-center gap-2 rounded-full border border-paper-line/60 bg-paper-panel/70 px-3 py-1.5 font-mono text-[10px] tracking-wider text-ink-mute backdrop-blur transition hover:border-brass/40 hover:text-brass md:inline-flex"
       title="Keyboard shortcuts"
     >
       <Kbd keys="?" size="xs" />

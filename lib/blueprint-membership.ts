@@ -1,12 +1,12 @@
 import { supabaseServer } from "./supabase/server";
 
-export type VaultMembership = {
+export type BlueprintMembership = {
   vaultId: string;
   name: string;
   role: "owner" | "editor";
 };
 
-export async function getCurrentVaultId(): Promise<string | null> {
+export async function getCurrentBlueprintId(): Promise<string | null> {
   const sb = await supabaseServer();
   const { data } = await sb
     .from("vault_members")
@@ -17,7 +17,7 @@ export async function getCurrentVaultId(): Promise<string | null> {
   return data?.vault_id ?? null;
 }
 
-export async function getMyVaults(): Promise<VaultMembership[]> {
+export async function getMyBlueprints(): Promise<BlueprintMembership[]> {
   const sb = await supabaseServer();
   const { data, error } = await sb
     .from("vault_members")

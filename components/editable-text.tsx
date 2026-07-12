@@ -49,7 +49,7 @@ export function EditableText({
   }
 
   const sharedClassName = clsx(
-    "bg-transparent outline-none focus:bg-vault-bg/40 focus:ring-1 focus:ring-brass/40 rounded-sm px-1",
+    "bg-transparent outline-none focus:bg-paper-bg/40 focus:ring-1 focus:ring-brass/40 rounded-sm px-1",
     pending && "opacity-50",
     className,
   );

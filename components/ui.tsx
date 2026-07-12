@@ -1,5 +1,5 @@
 // Shared input primitives so every surface that takes input feels the
-// same. Calm vault aesthetic — subtle borders at rest, brass on focus,
+// same. Calm blueprint aesthetic — subtle borders at rest, brass on focus,
 // monospace metadata, serif content.
 
 import clsx from "clsx";
@@ -34,7 +34,7 @@ export function Field({
 }
 
 const inputBase =
-  "rounded-sm border border-vault-line bg-vault-bg/60 px-2.5 py-1.5 text-ink outline-none transition focus:border-brass focus:bg-vault-bg/80";
+  "rounded-sm border border-paper-line bg-paper-bg/60 px-2.5 py-1.5 text-ink outline-none transition focus:border-brass focus:bg-paper-bg/80";
 
 export function TextInput({
   className,
@@ -61,7 +61,7 @@ export function NumberField({
   return (
     <span
       className={clsx(
-        "inline-flex items-baseline gap-1 rounded-sm border border-vault-line bg-vault-bg/60 px-2 py-1 transition focus-within:border-brass focus-within:bg-vault-bg/80",
+        "inline-flex items-baseline gap-1 rounded-sm border border-paper-line bg-paper-bg/60 px-2 py-1 transition focus-within:border-brass focus-within:bg-paper-bg/80",
         width,
         className,
       )}
@@ -121,11 +121,11 @@ export function Card({
   return (
     <div
       className={clsx(
-        "relative overflow-hidden rounded-sm border bg-vault-panel/40 transition",
+        "relative overflow-hidden rounded-sm border bg-paper-panel/40 transition",
         accent === "rust" && "border-rust/30",
         accent === "teal" && "border-teal/30",
         accent === "brass" && "border-brass/30",
-        !accent && "border-vault-line/60 hover:border-brass/30",
+        !accent && "border-paper-line/60 hover:border-brass/30",
         className,
       )}
     >
@@ -169,7 +169,7 @@ export function Pill({
     "rounded-sm border px-3 py-1 font-mono text-[10px] tracking-wider transition",
     active
       ? toneActive
-      : "border-vault-line text-ink-mute hover:border-brass/40 hover:text-brass",
+      : "border-paper-line text-ink-mute hover:border-brass/40 hover:text-brass",
   );
   if (href) {
     // Caller passes a string href; the Drawer page already wraps these in <Link>.

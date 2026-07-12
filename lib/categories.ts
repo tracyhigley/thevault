@@ -99,7 +99,7 @@ export async function getBuildings(): Promise<Building[]> {
   return raw.map(normalize).filter((b): b is Building => b !== null);
 }
 
-// Convert a BUILDING_KEY → slug-case for URLs (mirrors the vault hub).
+// Convert a BUILDING_KEY → slug-case for URLs (mirrors the boxes hub).
 export function buildingSlug(key: string): string {
   return key.toLowerCase().replace(/_/g, "-").replace(/\//g, "-");
 }

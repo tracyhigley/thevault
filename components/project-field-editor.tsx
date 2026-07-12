@@ -44,7 +44,7 @@ export function ProjectFieldEditor({
   }
 
   const sharedClassName = clsx(
-    "w-full bg-transparent text-[14px] leading-relaxed text-ink outline-none focus:bg-vault-bg/40 focus:ring-1 focus:ring-brass/40 rounded-sm px-1 placeholder:text-ink-mute/60",
+    "w-full bg-transparent text-[14px] leading-relaxed text-ink outline-none focus:bg-paper-bg/40 focus:ring-1 focus:ring-brass/40 rounded-sm px-1 placeholder:text-ink-mute/60",
     pending && "opacity-50",
     className,
   );

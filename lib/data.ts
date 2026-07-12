@@ -100,7 +100,7 @@ export async function getSettings() {
   return data;
 }
 
-export async function getCurrentVault() {
+export async function getCurrentBlueprint() {
   if (!envReady()) return null;
   const sb = await supabaseServer();
   const { data } = await sb

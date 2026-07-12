@@ -1,6 +1,6 @@
 import { supabaseServer, supabaseAdmin } from "@/lib/supabase/server";
-import { inviteMember, renameVault } from "@/lib/actions";
-import { getCurrentVault } from "@/lib/data";
+import { inviteMember, renameBlueprint } from "@/lib/actions";
+import { getCurrentBlueprint } from "@/lib/data";
 import { RoleControl } from "@/components/role-control";
 import { RemoveMemberButton } from "@/components/remove-member-button";
 import { SettingsSubnav } from "@/components/settings-subnav";
@@ -11,7 +11,7 @@ export default async function MembersPage() {
     data: { user },
   } = await sb.auth.getUser();
 
-  // Find current vault.
+  // Find current blueprint.
   const { data: membership } = await sb
     .from("vault_members")
     .select("vault_id, role")
@@ -43,7 +43,7 @@ export default async function MembersPage() {
     }
   }
 
-  const vault = await getCurrentVault();
+  const vault = await getCurrentBlueprint();
 
   return (
     <div className="mx-auto max-w-[800px] px-6 py-8 md:px-10">
@@ -60,15 +60,15 @@ export default async function MembersPage() {
         <form
           action={async (fd) => {
             "use server";
-            await renameVault((fd.get("name") as string) ?? vault.name);
+            await renameBlueprint((fd.get("name") as string) ?? vault.name);
           }}
-          className="mt-6 flex flex-wrap items-center gap-3 rounded-sm border border-vault-line bg-vault-panel/40 px-4 py-3"
+          className="mt-6 flex flex-wrap items-center gap-3 rounded-sm border border-paper-line bg-paper-panel/40 px-4 py-3"
         >
           <span className="eyebrow">Blueprint name</span>
           <input
             name="name"
             defaultValue={vault.name}
-            className="flex-1 min-w-[200px] rounded-sm border border-vault-line bg-vault-bg/60 px-3 py-1.5 text-ink outline-none focus:border-brass"
+            className="flex-1 min-w-[200px] rounded-sm border border-paper-line bg-paper-bg/60 px-3 py-1.5 text-ink outline-none focus:border-brass"
           />
           <button
             type="submit"
@@ -79,7 +79,7 @@ export default async function MembersPage() {
         </form>
       )}
 
-      <div className="mt-8 divide-y divide-vault-line rounded-sm border border-vault-line bg-vault-panel/40">
+      <div className="mt-8 divide-y divide-paper-line rounded-sm border border-paper-line bg-paper-panel/40">
         {rows.map((m) => (
           <div
             key={m.user_id}
@@ -121,17 +121,17 @@ export default async function MembersPage() {
               name="email"
               required
               placeholder="email@example.com"
-              className="flex-1 rounded-sm border border-vault-line bg-vault-panel/60 px-3 py-2 outline-none focus:border-brass"
+              className="flex-1 rounded-sm border border-paper-line bg-paper-panel/60 px-3 py-2 outline-none focus:border-brass"
             />
             <select
               name="role"
               defaultValue="editor"
-              className="rounded-sm border border-vault-line bg-vault-panel/60 px-3 py-2"
+              className="rounded-sm border border-paper-line bg-paper-panel/60 px-3 py-2"
             >
-              <option className="bg-vault-bg" value="editor">
+              <option className="bg-paper-bg" value="editor">
                 Editor
               </option>
-              <option className="bg-vault-bg" value="owner">
+              <option className="bg-paper-bg" value="owner">
                 Owner
               </option>
             </select>

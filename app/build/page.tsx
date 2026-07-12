@@ -7,7 +7,7 @@ import { classify } from "@/lib/daily-plan";
 import { getBoxes, getEnergies } from "@/lib/categories";
 import { BuildWizard } from "@/components/build-wizard";
 import type { DayInputs } from "@/lib/types";
-import { vaultTodayYmd } from "@/lib/vault-day";
+import { todayYmd } from "@/lib/day-timezone";
 
 export default async function BuildDayPage({
   searchParams,
@@ -15,7 +15,7 @@ export default async function BuildDayPage({
   searchParams: Promise<{ step?: string }>;
 }) {
   const { step: stepParam } = await searchParams;
-  const date = vaultTodayYmd();
+  const date = todayYmd();
   let s = Number(stepParam ?? 1);
   if (!Number.isFinite(s) || s < 1) s = 1;
   const step = Math.max(1, Math.min(4, s));

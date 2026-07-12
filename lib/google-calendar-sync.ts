@@ -52,22 +52,22 @@ function eventToTitle(event: GCalEvent): string {
 
 /**
  * Import today’s events from the connected calendar into the Drop (deduped).
- * Uses each vault’s timezone to decide what “today” is.
+ * Uses each blueprint’s timezone to decide what “today” is.
  */
-export async function syncAllVaultCalendarsToDrop(): Promise<{
+export async function syncAllCalendarsToFieldNotes(): Promise<{
   ok: boolean;
   vaults: number;
   imported: number;
   errors: string[];
 }> {
-  return syncAllVaultCalendarsToDropWithOptions();
+  return syncAllCalendarsToFieldNotesWithOptions();
 }
 
 function localHourInTz(tz: string): number {
   return Number(formatInTimeZone(new Date(), tz, "H"));
 }
 
-export async function syncAllVaultCalendarsToDropWithOptions(opts?: {
+export async function syncAllCalendarsToFieldNotesWithOptions(opts?: {
   localHourOnly?: number;
 }): Promise<{
   ok: boolean;

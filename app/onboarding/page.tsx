@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { supabaseServer } from "@/lib/supabase/server";
-import { createMyVault } from "@/lib/actions";
+import { createMyBlueprint } from "@/lib/actions";
 
 export default async function OnboardingPage() {
   const sb = await supabaseServer();
@@ -33,10 +33,10 @@ export default async function OnboardingPage() {
       <form
         action={async (fd) => {
           "use server";
-          await createMyVault((fd.get("name") as string) ?? "The Blueprint");
+          await createMyBlueprint((fd.get("name") as string) ?? "The Blueprint");
           redirect("/");
         }}
-        className="mt-10 rounded-sm border border-vault-line bg-vault-panel/40 p-5"
+        className="mt-10 rounded-sm border border-paper-line bg-paper-panel/40 p-5"
       >
         <h2 className="serif-h text-[22px]">Start a new blueprint</h2>
         <p className="mt-1 text-[13px] text-ink-dim">
@@ -47,7 +47,7 @@ export default async function OnboardingPage() {
             name="name"
             placeholder="The Blueprint"
             defaultValue="The Blueprint"
-            className="flex-1 min-w-[200px] rounded-sm border border-vault-line bg-vault-bg/60 px-3 py-2 text-ink outline-none focus:border-brass"
+            className="flex-1 min-w-[200px] rounded-sm border border-paper-line bg-paper-bg/60 px-3 py-2 text-ink outline-none focus:border-brass"
           />
           <button
             type="submit"
@@ -58,7 +58,7 @@ export default async function OnboardingPage() {
         </div>
       </form>
 
-      <div className="mt-8 rounded-sm border border-dashed border-vault-line p-5 text-[13px] text-ink-mute">
+      <div className="mt-8 rounded-sm border border-dashed border-paper-line p-5 text-[13px] text-ink-mute">
         Waiting on an invite? Ask the blueprint owner to add you under{" "}
         <span className="text-brass">Settings → Members</span>. The link will
         come to your email.

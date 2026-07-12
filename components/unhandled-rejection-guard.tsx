@@ -23,7 +23,7 @@ export function UnhandledRejectionGuard() {
       }
       const reason = raw as { message?: string; stack?: string };
       // eslint-disable-next-line no-console
-      console.error("[vault] unhandled promise rejection", {
+      console.error("[blueprint] unhandled promise rejection", {
         reason: raw,
         message: reason.message,
         stack: reason.stack,
