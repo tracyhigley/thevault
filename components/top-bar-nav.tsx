@@ -50,12 +50,14 @@ function buildItems(fiftyFdHref: string): NavItem[] {
       match: (p) =>
         p === "/documents" ||
         (p.startsWith("/documents/") && !p.startsWith(fiftyFdHref)),
+      button: true,
     },
     {
       href: "/calendar",
-      label: "Calendar",
+      label: "CALENDAR",
       hint: "g k",
       match: (p) => p.startsWith("/calendar"),
+      button: true,
     },
     {
       href: "/project-plans",
@@ -83,9 +85,10 @@ function buildItems(fiftyFdHref: string): NavItem[] {
     },
     {
       href: "/settings",
-      label: "Settings",
+      label: "SETTINGS",
       hint: "g s",
       match: (p) => p.startsWith("/settings"),
+      button: true,
     },
     {
       href: fiftyFdHref,
@@ -115,7 +118,7 @@ export function TopBarNav({ fiftyFdHref }: { fiftyFdHref: string }) {
             className={
               item.button
                 ? clsx(
-                    "shrink-0 whitespace-nowrap rounded-sm border px-2.5 py-1 font-mono text-[10px] tracking-[0.14em] transition md:px-3 md:text-[11px]",
+                    "shrink-0 rounded-sm border px-2.5 py-1 text-center font-mono text-[10px] leading-tight tracking-[0.14em] transition md:px-3 md:text-[11px]",
                     active
                       ? "border-brass bg-brass/10 text-brass"
                       : "border-paper-line text-ink-mute hover:border-brass/40 hover:text-brass",
@@ -133,7 +136,13 @@ export function TopBarNav({ fiftyFdHref }: { fiftyFdHref: string }) {
                 : undefined
             }
           >
-            {item.label}
+            {item.button
+              ? item.label.split(" ").map((word, i) => (
+                  <span key={i} className="block">
+                    {word}
+                  </span>
+                ))
+              : item.label}
           </Link>
         );
       })}
