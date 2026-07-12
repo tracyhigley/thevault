@@ -56,7 +56,7 @@ export function NewProjectRow({ building }: { building: string }) {
       <button
         onClick={add}
         disabled={pending || !title.trim()}
-        className="brass-button px-3 py-1.5 font-mono text-[10px] tracking-[0.16em] text-[#2a1c08] disabled:opacity-50"
+        className="brass-button px-3 py-1.5 font-mono text-[10px] tracking-[0.16em] disabled:opacity-50"
       >
         ADD
       </button>

@@ -40,7 +40,7 @@ export default async function DropPage() {
             {boxes.length === 0 && (
               <Link
                 href="/settings/boxes"
-                className="brass-button px-4 py-2 font-mono text-[10px] tracking-[0.18em] text-[#2a1c08]"
+                className="brass-button px-4 py-2 font-mono text-[10px] tracking-[0.18em]"
               >
                 + ADD BOXES
               </Link>
@@ -48,7 +48,7 @@ export default async function DropPage() {
             {energies.length === 0 && (
               <Link
                 href="/settings/energies"
-                className="brass-button px-4 py-2 font-mono text-[10px] tracking-[0.18em] text-[#2a1c08]"
+                className="brass-button px-4 py-2 font-mono text-[10px] tracking-[0.18em]"
               >
                 + ADD ENERGIES
               </Link>

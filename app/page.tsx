@@ -102,7 +102,7 @@ function BuildPrompt() {
         </p>
         <Link
           href="/build?step=1"
-          className="brass-button mt-10 inline-block px-8 py-3 font-mono text-[10px] tracking-[0.24em] text-[#2a1c08]"
+          className="brass-button mt-10 inline-block px-8 py-3 font-mono text-[10px] tracking-[0.24em]"
         >
           BUILD TODAY
         </Link>

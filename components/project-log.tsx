@@ -75,7 +75,7 @@ export function ProjectLog({
         <button
           onClick={add}
           disabled={pending || !text.trim()}
-          className="brass-button px-4 py-1.5 font-mono text-[10px] tracking-[0.2em] text-[#2a1c08] disabled:opacity-50"
+          className="brass-button px-4 py-1.5 font-mono text-[10px] tracking-[0.2em] disabled:opacity-50"
         >
           ADD
         </button>

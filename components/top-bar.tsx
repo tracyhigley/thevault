@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { getDocuments } from "@/lib/categories";
 import { fiftyFdDocumentHref } from "@/lib/document-folders";
 import { getSettings } from "@/lib/data";
@@ -35,14 +36,15 @@ export async function TopBar() {
 
   return (
     <header className="relative z-10 flex items-center justify-between gap-3 border-b border-vault-line/50 bg-vault-bg/85 px-4 py-3 backdrop-blur md:px-10 md:py-4">
-      <VaultHomeLink className="flex shrink-0 items-center gap-2.5">
-        <svg width="20" height="20" viewBox="0 0 22 22" fill="none">
-          <circle cx="11" cy="11" r="9.5" stroke="#B5853A" strokeWidth="1.4" />
-          <circle cx="11" cy="11" r="4" stroke="#B5853A" strokeWidth="1.4" />
-        </svg>
-        <span className="serif-h hidden text-[20px] text-ink md:inline md:text-[22px]">
-          The Vault
-        </span>
+      <VaultHomeLink className="flex shrink-0 items-center">
+        <Image
+          src="/brand-logo.png"
+          alt="The Blueprint"
+          width={1721}
+          height={914}
+          priority
+          className="h-8 w-auto md:h-10"
+        />
       </VaultHomeLink>
 
       <TopBarNav fiftyFdHref={fiftyFdHref} />
@@ -50,7 +52,7 @@ export async function TopBar() {
       <div className="flex shrink-0 items-center gap-2">
         <Link
           href="/deposit"
-          className="rounded-sm border border-brass/40 px-3 py-1.5 font-mono text-[10px] tracking-[0.18em] text-brass hover:bg-brass/10"
+          className="rounded-sm border border-gold/40 px-3 py-1.5 font-mono text-[10px] tracking-[0.18em] text-gold hover:bg-gold/10"
           title="Deposit"
         >
           + DEPOSIT

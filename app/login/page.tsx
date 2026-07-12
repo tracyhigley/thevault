@@ -129,7 +129,7 @@ function LoginForm() {
         <button
           type="submit"
           disabled={pending}
-          className="brass-button w-full px-6 py-3 font-mono text-[10px] tracking-[0.24em] text-[#2a1c08] disabled:opacity-50"
+          className="brass-button w-full px-6 py-3 font-mono text-[10px] tracking-[0.24em] disabled:opacity-50"
         >
           {pending
             ? "..."

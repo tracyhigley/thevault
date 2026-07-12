@@ -180,7 +180,7 @@ export function BoxesEditor({
         <button
           onClick={save}
           disabled={pending}
-          className="brass-button px-6 py-2 font-mono text-[10px] tracking-[0.24em] text-[#2a1c08] disabled:opacity-50"
+          className="brass-button px-6 py-2 font-mono text-[10px] tracking-[0.24em] disabled:opacity-50"
         >
           SAVE {plural}
         </button>

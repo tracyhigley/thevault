@@ -76,7 +76,7 @@ export default async function SettingsPage() {
         <div className="flex justify-end">
           <button
             type="submit"
-            className="brass-button px-6 py-2 font-mono text-[10px] tracking-[0.24em] text-[#2a1c08]"
+            className="brass-button px-6 py-2 font-mono text-[10px] tracking-[0.24em]"
           >
             SAVE
           </button>

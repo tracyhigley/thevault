@@ -261,7 +261,7 @@ export function DropTriageRow({
             onClick={send}
             disabled={pending || !boxKey}
             title="Press Enter"
-            className="brass-button flex items-center gap-1.5 px-3 py-1 font-mono text-[10px] tracking-[0.18em] text-[#2a1c08] disabled:opacity-40"
+            className="brass-button flex items-center gap-1.5 px-3 py-1 font-mono text-[10px] tracking-[0.18em] disabled:opacity-40"
           >
             {pending ? (
               "..."

@@ -45,7 +45,7 @@ export default function MagicLinkPage() {
         />
         <button
           type="submit"
-          className="brass-button w-full px-6 py-3 font-mono text-[10px] tracking-[0.24em] text-[#2a1c08]"
+          className="brass-button w-full px-6 py-3 font-mono text-[10px] tracking-[0.24em]"
         >
           SEND MAGIC LINK
         </button>

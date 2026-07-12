@@ -91,7 +91,7 @@ export function CmdK() {
             type="button"
             onClick={() => void submit()}
             disabled={pending}
-            className="brass-button px-4 py-1.5 text-[10px] tracking-[0.24em] text-[#2a1c08] disabled:opacity-50"
+            className="brass-button px-4 py-1.5 text-[10px] tracking-[0.24em] disabled:opacity-50"
           >
             DEPOSIT
           </button>

@@ -167,7 +167,7 @@ export function SealedScreen({
               <button
                 onClick={unseal}
                 disabled={pending}
-                className="brass-button flex items-center gap-2 px-6 py-3 font-mono text-[10px] tracking-[0.24em] text-[#2a1c08] disabled:opacity-50"
+                className="brass-button flex items-center gap-2 px-6 py-3 font-mono text-[10px] tracking-[0.24em] disabled:opacity-50"
               >
                 <span aria-hidden>↑</span>
                 TURN THE LIGHTS BACK ON
@@ -177,7 +177,7 @@ export function SealedScreen({
                 <button
                   onClick={seal}
                   disabled={pending}
-                  className="brass-button flex items-center gap-2 px-6 py-3 font-mono text-[10px] tracking-[0.24em] text-[#2a1c08] disabled:opacity-50"
+                  className="brass-button flex items-center gap-2 px-6 py-3 font-mono text-[10px] tracking-[0.24em] disabled:opacity-50"
                 >
                   <span aria-hidden>↓</span>
                   LIGHTS OUT
