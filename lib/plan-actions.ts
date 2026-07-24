@@ -34,7 +34,10 @@ const BuildingConfig = z.object({
   key: z.string().min(1).max(40),
   label: z.string().min(1).max(60),
   meta: z.string().max(60).optional().default(""),
-  color: z.string().regex(/^#[0-9a-fA-F]{6}$/).optional(),
+  color: z
+    .string()
+    .regex(/^#[0-9a-fA-F]{6}$/)
+    .optional(),
 });
 
 export async function saveBuildingConfig(
@@ -183,20 +186,26 @@ export async function addProjectLog(id: string, text: string, date: string) {
 function normalizeTasks(raw: unknown): {
   id: string;
   text: string;
+  minutes: number | null;
   onTaskList: boolean;
   done: boolean;
   createdAt: string;
 }[] {
   if (!Array.isArray(raw)) return [];
   return raw
-    .filter((t: any) => t && typeof t.id === "string" && typeof t.text === "string")
+    .filter(
+      (t: any) => t && typeof t.id === "string" && typeof t.text === "string",
+    )
     .map((t: any) => ({
       id: t.id,
       text: t.text,
+      minutes: typeof t.minutes === "number" ? t.minutes : null,
       onTaskList: !!t.onTaskList,
       done: !!t.done,
       createdAt:
-        typeof t.createdAt === "string" ? t.createdAt : new Date().toISOString(),
+        typeof t.createdAt === "string"
+          ? t.createdAt
+          : new Date().toISOString(),
     }));
 }
 
@@ -214,6 +223,7 @@ export async function addProjectTask(projectId: string, text: string) {
   const task = {
     id: crypto.randomUUID(),
     text: clean,
+    minutes: null,
     onTaskList: false,
     done: false,
     createdAt: new Date().toISOString(),
@@ -274,8 +284,18 @@ export async function markProjectTaskDone(projectId: string, taskId: string) {
     .update({ tasks, modified_at: new Date().toISOString() })
     .eq("id", projectId);
   if (updateError) throw new Error(updateError.message);
+  // Finishing it here means it's done everywhere — clear out a linked
+  // Today item too, rather than leaving a stale obligation behind.
+  await sb
+    .from("items")
+    .update({ deleted_at: new Date().toISOString() })
+    .eq("source_project_id", projectId)
+    .eq("source_task_id", taskId)
+    .is("deleted_at", null);
   revalidatePath("/project-plans", "layout");
   revalidatePath("/project-tasks");
+  revalidatePath("/");
+  revalidatePath("/admin-tasks");
 }
 
 export async function deleteProjectTask(projectId: string, taskId: string) {
@@ -292,8 +312,18 @@ export async function deleteProjectTask(projectId: string, taskId: string) {
     .update({ tasks, modified_at: new Date().toISOString() })
     .eq("id", projectId);
   if (updateError) throw new Error(updateError.message);
+  // The task is gone for good — don't leave an orphaned Today item pointing
+  // at it.
+  await sb
+    .from("items")
+    .update({ deleted_at: new Date().toISOString() })
+    .eq("source_project_id", projectId)
+    .eq("source_task_id", taskId)
+    .is("deleted_at", null);
   revalidatePath("/project-plans", "layout");
   revalidatePath("/project-tasks");
+  revalidatePath("/");
+  revalidatePath("/admin-tasks");
 }
 
 // Soft delete — reversible from the DB, same as items.
@@ -305,4 +335,154 @@ export async function deleteProject(id: string) {
     .eq("id", id);
   if (error) throw new Error(error.message);
   revalidatePath("/project-plans", "layout");
+}
+
+// ─── Project Tasks × Today (deliberate, narrow exception) ──────────────────
+// Everything above is intentionally decoupled from items/today_order (see
+// the file header). "Add to Today" on the Project Tasks page is the one
+// place that bridges the two systems: it creates a real Item (so the task
+// actually shows up on the Today docket, same mechanism as any Admin Tasks
+// row) tagged with source_project_id/source_task_id so it can be toggled
+// back off cleanly and can never be duplicated (see migration
+// 0018_project_task_today_link).
+
+export async function getProjectTaskTodayLinks(): Promise<
+  Record<string, { itemId: string; onToday: boolean }>
+> {
+  const { sb } = await requireUser();
+  const { data, error } = await sb
+    .from("items")
+    .select("id, source_task_id, today_order")
+    .not("source_task_id", "is", null)
+    .is("deleted_at", null);
+  if (error) throw new Error(error.message);
+  const map: Record<string, { itemId: string; onToday: boolean }> = {};
+  for (const row of data ?? []) {
+    if (!row.source_task_id) continue;
+    map[row.source_task_id] = {
+      itemId: row.id,
+      onToday: row.today_order !== null,
+    };
+  }
+  return map;
+}
+
+// Creates (or revives) the linked Today item for a project task and puts
+// it on today's plan. Safe to call more than once — the unique index on
+// (source_project_id, source_task_id) plus this existence check keep it
+// from ever creating a second row.
+export async function addProjectTaskToToday(
+  projectId: string,
+  taskId: string,
+  text: string,
+  minutes: number | null,
+) {
+  const { sb, user } = await requireUser();
+  const vaultId = await currentVaultId();
+  if (!vaultId) throw new Error("No vault");
+
+  const { data: existing, error: existingError } = await sb
+    .from("items")
+    .select("id, today_order")
+    .eq("source_project_id", projectId)
+    .eq("source_task_id", taskId)
+    .is("deleted_at", null)
+    .maybeSingle();
+  if (existingError) throw new Error(existingError.message);
+
+  const { data: max } = await sb
+    .from("items")
+    .select("today_order")
+    .not("today_order", "is", null)
+    .order("today_order", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const nextOrder = Number(max?.today_order ?? 0) + 1;
+
+  if (existing) {
+    if (existing.today_order === null) {
+      const { error } = await sb
+        .from("items")
+        .update({ today_order: nextOrder })
+        .eq("id", existing.id);
+      if (error) throw new Error(error.message);
+    }
+  } else {
+    const { error } = await sb.from("items").insert({
+      vault_id: vaultId,
+      user_id: user.id,
+      box: "COUNTER",
+      title: text,
+      minutes,
+      urgent: false,
+      must: false,
+      should: false,
+      today_order: nextOrder,
+      source_project_id: projectId,
+      source_task_id: taskId,
+    });
+    if (error) throw new Error(error.message);
+  }
+
+  revalidatePath("/");
+  revalidatePath("/project-tasks");
+  revalidatePath("/admin-tasks");
+  revalidatePath("/build");
+}
+
+// Pulls a project task back off today's plan by removing its linked Item
+// entirely (soft delete) — it was only ever created for this purpose, so
+// there's nothing worth keeping once it's off Today. The task itself is
+// untouched on the project's checklist.
+export async function removeProjectTaskFromToday(
+  projectId: string,
+  taskId: string,
+) {
+  const { sb } = await requireUser();
+  const { error } = await sb
+    .from("items")
+    .update({ deleted_at: new Date().toISOString() })
+    .eq("source_project_id", projectId)
+    .eq("source_task_id", taskId)
+    .is("deleted_at", null);
+  if (error) throw new Error(error.message);
+  revalidatePath("/");
+  revalidatePath("/project-tasks");
+  revalidatePath("/admin-tasks");
+  revalidatePath("/build");
+}
+
+// Edits a project task's minutes estimate from the Project Tasks page, and
+// keeps a linked Today item (if any) in sync so the two never disagree.
+export async function updateProjectTaskMinutes(
+  projectId: string,
+  taskId: string,
+  minutes: number | null,
+) {
+  const { sb } = await requireUser();
+  const { data, error } = await sb
+    .from("projects")
+    .select("tasks")
+    .eq("id", projectId)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  const tasks = normalizeTasks(data?.tasks).map((t) =>
+    t.id === taskId ? { ...t, minutes } : t,
+  );
+  const { error: updateError } = await sb
+    .from("projects")
+    .update({ tasks, modified_at: new Date().toISOString() })
+    .eq("id", projectId);
+  if (updateError) throw new Error(updateError.message);
+
+  await sb
+    .from("items")
+    .update({ minutes })
+    .eq("source_project_id", projectId)
+    .eq("source_task_id", taskId)
+    .is("deleted_at", null);
+
+  revalidatePath("/project-tasks");
+  revalidatePath("/");
+  revalidatePath("/admin-tasks");
 }

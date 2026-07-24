@@ -1,50 +1,59 @@
-// Project Tasks — a rollup of whatever you've checked off as active on
-// projects that are currently under construction, grouped by building.
-// Deliberately mirrors the Project Plans look (color bar, serif heading)
-// since this is meant to feel like the same system, just filtered down to
-// "what to actually pull from right now."
+// Project Tasks — a flat rollup of whatever you've checked off as active on
+// projects that are currently under construction. Deliberately styled like
+// Admin Tasks (same row chrome, minutes, Today/Done/delete) since this is
+// meant to feel like the same system, just filtered down to "what to
+// actually pull from right now" — with each task's building shown as a
+// small tag on the row itself instead of grouping tasks under it.
 
 import Link from "next/link";
 import { getBuildings } from "@/lib/categories";
 import { getProjects } from "@/lib/projects";
+import { getProjectTaskTodayLinks } from "@/lib/plan-actions";
 import { ProjectTaskRollupItem } from "@/components/project-task-rollup-item";
 
 type Row = {
   projectId: string;
   taskId: string;
   text: string;
+  minutes: number | null;
+  createdAt: string;
+  buildingLabel: string;
+  buildingColor?: string;
+  onToday: boolean;
 };
 
 export default async function ProjectTasksPage() {
-  const [buildings, projects] = await Promise.all([
+  const [buildings, projects, todayLinks] = await Promise.all([
     getBuildings(),
     getProjects(),
+    getProjectTaskTodayLinks(),
   ]);
 
+  const buildingByKey = new Map(buildings.map((b) => [b.key, b]));
   const active = projects.filter((p) => p.phase === "building");
 
-  const byBuilding = new Map<string, Row[]>();
+  const rows: Row[] = [];
   for (const p of active) {
-    const onList = p.tasks.filter((t) => t.onTaskList);
-    if (onList.length === 0) continue;
-    const rows = byBuilding.get(p.building) ?? [];
-    for (const t of onList) {
+    const building = buildingByKey.get(p.building);
+    for (const t of p.tasks) {
+      if (!t.onTaskList) continue;
       rows.push({
         projectId: p.id,
         taskId: t.id,
         text: t.text,
+        minutes: t.minutes,
+        createdAt: t.createdAt,
+        buildingLabel: building?.label ?? p.building,
+        buildingColor: building?.color,
+        onToday: todayLinks[t.id]?.onToday ?? false,
       });
     }
-    byBuilding.set(p.building, rows);
   }
 
-  const buildingsWithTasks = buildings.filter(
-    (b) => (byBuilding.get(b.key)?.length ?? 0) > 0,
-  );
-  const totalTasks = [...byBuilding.values()].reduce(
-    (sum, rows) => sum + rows.length,
-    0,
-  );
+  // One flat list, oldest-pulled first — no grouping by building.
+  rows.sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+
+  const buildingCount = new Set(rows.map((r) => r.buildingLabel)).size;
 
   return (
     <div className="mx-auto max-w-[1100px] px-4 py-8 md:px-10">
@@ -54,7 +63,7 @@ export default async function ProjectTasksPage() {
       </h1>
       <p className="text-ink-dim mt-1 text-[13px]">Current Project Tasks</p>
 
-      {buildingsWithTasks.length === 0 ? (
+      {rows.length === 0 ? (
         <div className="border-paper-line bg-paper-panel/40 mt-10 rounded-sm border border-dashed p-8 text-center">
           <p className="text-ink-dim">
             Nothing pulled onto the page right now.
@@ -71,42 +80,27 @@ export default async function ProjectTasksPage() {
           </Link>
         </div>
       ) : (
-        <div className="mt-8 grid grid-cols-1 gap-4 lg:grid-cols-2">
-          {buildingsWithTasks.map((b) => {
-            const rows = byBuilding.get(b.key) ?? [];
-            return (
-              <div
-                key={b.key}
-                className="border-paper-line bg-paper-panel rounded-sm border px-4 py-4"
-              >
-                <div
-                  className="h-1.5 w-6 rounded-full"
-                  style={{ background: b.color ?? "#b5853a" }}
-                />
-                <div className="serif-h text-ink mt-3 text-[19px] leading-snug">
-                  {b.label}
-                </div>
-                <div className="mt-3 space-y-2">
-                  {rows.map((r) => (
-                    <ProjectTaskRollupItem
-                      key={r.taskId}
-                      projectId={r.projectId}
-                      taskId={r.taskId}
-                      text={r.text}
-                    />
-                  ))}
-                </div>
-              </div>
-            );
-          })}
+        <div className="mt-8 space-y-2">
+          {rows.map((r) => (
+            <ProjectTaskRollupItem
+              key={r.taskId}
+              projectId={r.projectId}
+              taskId={r.taskId}
+              text={r.text}
+              minutes={r.minutes}
+              buildingLabel={r.buildingLabel}
+              buildingColor={r.buildingColor}
+              onToday={r.onToday}
+            />
+          ))}
         </div>
       )}
 
-      {totalTasks > 0 ? (
+      {rows.length > 0 ? (
         <p className="text-ink-mute mt-6 text-[13px]">
-          {totalTasks} task{totalTasks === 1 ? "" : "s"} pulled from{" "}
-          {buildingsWithTasks.length} building
-          {buildingsWithTasks.length === 1 ? "" : "s"}.
+          {rows.length} task{rows.length === 1 ? "" : "s"} pulled from{" "}
+          {buildingCount} building
+          {buildingCount === 1 ? "" : "s"}.
         </p>
       ) : null}
     </div>

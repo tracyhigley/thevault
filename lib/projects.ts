@@ -2,10 +2,18 @@
 // projects" — separate from items, deliberately outside the daily engine.
 
 import { supabaseServer } from "./supabase/server";
-import type { ProjectPhase, ProjectLogEntry, ProjectTask } from "./project-phases";
+import type {
+  ProjectPhase,
+  ProjectLogEntry,
+  ProjectTask,
+} from "./project-phases";
 
 export { PHASES, phaseLabel } from "./project-phases";
-export type { ProjectPhase, ProjectLogEntry, ProjectTask } from "./project-phases";
+export type {
+  ProjectPhase,
+  ProjectLogEntry,
+  ProjectTask,
+} from "./project-phases";
 
 export type Project = {
   id: string;
@@ -35,8 +43,7 @@ function normalizeLog(raw: unknown): ProjectLogEntry[] {
   if (!Array.isArray(raw)) return [];
   return raw
     .filter(
-      (e: any) =>
-        e && typeof e.date === "string" && typeof e.text === "string",
+      (e: any) => e && typeof e.date === "string" && typeof e.text === "string",
     )
     .map((e: any) => ({ date: e.date, text: e.text }));
 }
@@ -44,13 +51,19 @@ function normalizeLog(raw: unknown): ProjectLogEntry[] {
 function normalizeTasks(raw: unknown): ProjectTask[] {
   if (!Array.isArray(raw)) return [];
   return raw
-    .filter((t: any) => t && typeof t.id === "string" && typeof t.text === "string")
+    .filter(
+      (t: any) => t && typeof t.id === "string" && typeof t.text === "string",
+    )
     .map((t: any) => ({
       id: t.id,
       text: t.text,
+      minutes: typeof t.minutes === "number" ? t.minutes : null,
       onTaskList: !!t.onTaskList,
       done: !!t.done,
-      createdAt: typeof t.createdAt === "string" ? t.createdAt : new Date().toISOString(),
+      createdAt:
+        typeof t.createdAt === "string"
+          ? t.createdAt
+          : new Date().toISOString(),
     }));
 }
 
