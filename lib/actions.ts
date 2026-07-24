@@ -895,6 +895,23 @@ export async function appendDocument(labelRaw: string, folderKey: string) {
   await saveDocumentConfig([...docs, row]);
 }
 
+
+/**
+ * Delete a note category from within the note itself. Removes the
+ * settings.documents entry (so the note disappears from the hub, its
+ * building, and stops resolving at /documents/<slug>) but — same as the
+ * old Settings > Notes REMOVE button — leaves the underlying item/body
+ * alone. Nothing is hard-deleted here.
+ */
+export async function deleteDocument(key: string) {
+  const docs = await getDocuments();
+  const next = docs.filter((d) => d.key !== key);
+  if (next.length === docs.length) return;
+  await saveDocumentConfig(next);
+  revalidatePath("/documents", "layout");
+}
+
+
 // Capture token — generated, persisted on the settings row, surfaced in /settings.
 export async function rotateCaptureToken() {
   const { sb } = await requireUser();
