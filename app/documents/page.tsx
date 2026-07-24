@@ -18,7 +18,7 @@ export default async function DocumentsHubPage() {
   );
 
   return (
-    <div className="mx-auto max-w-[1100px] px-4 py-8 md:px-10">
+    <div className="mx-auto max-w-[1400px] px-4 py-8 md:px-10">
       <div className="eyebrow">— Notes —</div>
       <h1 className="serif-h mt-2 text-[28px] leading-tight md:text-[36px]">
         Notes

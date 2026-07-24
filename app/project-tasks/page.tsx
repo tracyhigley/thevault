@@ -56,7 +56,7 @@ export default async function ProjectTasksPage() {
   const buildingCount = new Set(rows.map((r) => r.buildingLabel)).size;
 
   return (
-    <div className="mx-auto max-w-[1100px] px-4 py-8 md:px-10">
+    <div className="mx-auto max-w-[1400px] px-4 py-8 md:px-10">
       <div className="eyebrow">— Project Tasks —</div>
       <h1 className="serif-h mt-2 text-[28px] leading-tight md:text-[36px]">
         What you&apos;ve pulled off the drafting table.

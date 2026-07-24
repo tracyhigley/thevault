@@ -30,7 +30,7 @@ export default async function MasterPlanPage() {
   }
 
   return (
-    <div className="mx-auto max-w-[1100px] px-4 py-8 md:px-10">
+    <div className="mx-auto max-w-[1400px] px-4 py-8 md:px-10">
       <div className="eyebrow">— Master Project Plans —</div>
       <h1 className="serif-h mt-2 text-[28px] leading-tight md:text-[36px]">
         Everything you&apos;re building.

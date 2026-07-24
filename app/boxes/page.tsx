@@ -36,7 +36,7 @@ export default async function BoxesPage() {
   const orphanTiles = orphans.map(toTile);
 
   return (
-    <div className="mx-auto max-w-[1100px] px-4 py-8 md:px-10">
+    <div className="mx-auto max-w-[1400px] px-4 py-8 md:px-10">
       <h1 className="serif-h text-[28px] leading-tight md:text-[36px]">
         The Boxes
       </h1>

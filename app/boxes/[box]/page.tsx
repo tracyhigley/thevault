@@ -51,7 +51,7 @@ export default async function BoxPage({
   const title = meta.label;
 
   return (
-    <div className="mx-auto max-w-[1100px] px-4 py-8 md:px-10">
+    <div className="mx-auto max-w-[1400px] px-4 py-8 md:px-10">
       <div className="eyebrow">— Storage box —</div>
       <h1 className="serif-h mt-2 text-[36px] leading-tight md:text-[40px]">
         {title}

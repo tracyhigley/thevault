@@ -99,7 +99,7 @@ export function BuildWizard({
   );
 
   return (
-    <div className="relative mx-auto flex min-h-[80vh] max-w-[640px] flex-col px-4 py-12 md:px-10">
+    <div className="relative mx-auto flex min-h-[80vh] max-w-[1100px] flex-col px-4 py-12 md:px-10">
       <Progress step={step} total={total} />
 
       <div className="mt-12 flex-1">
