@@ -16,7 +16,7 @@ function BuildingTag({ label, color }: { label: string; color?: string }) {
   return (
     <span
       title={label}
-      className="border-brass/40 bg-paper-bg/20 text-ink-mute flex h-7 max-w-[9.25rem] shrink-0 items-center gap-1.5 rounded-sm border px-1.5 py-0.5 font-mono text-[9px] leading-tight tracking-wide uppercase"
+      className="border-brass/40 bg-paper-bg/20 text-ink-mute flex h-7 w-[9.25rem] shrink-0 items-center gap-1.5 rounded-sm border px-1.5 py-0.5 font-mono text-[9px] leading-tight tracking-wide uppercase"
     >
       <span
         className="h-1.5 w-1.5 shrink-0 rounded-full"
