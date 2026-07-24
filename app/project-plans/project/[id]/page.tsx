@@ -8,6 +8,7 @@ import { getProject } from "@/lib/projects";
 import { ProjectFieldEditor } from "@/components/project-field-editor";
 import { ProjectPhaseControl } from "@/components/project-phase-control";
 import { ProjectLog } from "@/components/project-log";
+import { ProjectTaskEditor } from "@/components/project-task-editor";
 import { DeleteProjectButton } from "@/components/delete-project-button";
 
 export default async function ProjectPage({
@@ -80,6 +81,12 @@ export default async function ProjectPage({
             multiline
             placeholder="The finish line, in plain words. When this is true, it's complete."
           />
+        </Section>
+      </div>
+
+      <div className="mt-3">
+        <Section label="Tasks">
+          <ProjectTaskEditor projectId={project.id} initial={project.tasks} />
         </Section>
       </div>
 
