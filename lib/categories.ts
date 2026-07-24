@@ -113,23 +113,16 @@ export type DocumentType = {
   label: string;
   color?: string;
   meta?: string;
-  folder?:
-    | "health"
-    | "read-watch"
-    | "misc"
-    | "ecom-ecoship"
-    | "friends-family"
-    | "home-garden"
-    | "stonewater-books"
-    | "leisure"
-    | "writing"
-    | "travel";
+  // Building key from settings.buildings (e.g. "THE_GYMNASIUM") — same
+  // buildings Project Plans and Project Tasks use. Legacy pre-rebuild
+  // folder values are translated forward on read; see document-folders.ts.
+  folder?: string;
 };
 
 function normalizeDocument(raw: any): DocumentType | null {
   const n = normalize(raw);
   if (!n) return null;
-  const folderRaw = typeof raw?.folder === "string" ? raw.folder.toLowerCase() : undefined;
+  const folderRaw = typeof raw?.folder === "string" ? raw.folder : undefined;
   const folder = normalizeDocumentFolderKey(folderRaw);
   return { ...n, folder };
 }

@@ -5,24 +5,25 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { appendDocument } from "@/lib/actions";
 import { Select } from "@/components/ui";
-import { DOCUMENT_FOLDERS } from "@/lib/document-folders";
 
 export function NewDocumentRow({
-  initialFolder = "",
+  buildings,
+  initialBuilding = "",
 }: {
-  initialFolder?: string;
+  buildings: { key: string; label: string }[];
+  initialBuilding?: string;
 }) {
   const router = useRouter();
   const [label, setLabel] = useState("");
-  const [folder, setFolder] = useState(initialFolder);
+  const [building, setBuilding] = useState(initialBuilding);
   const [pending, startTransition] = useTransition();
 
   function add() {
     const t = label.trim();
-    if (!t || !folder) return;
+    if (!t || !building) return;
     startTransition(async () => {
       try {
-        await appendDocument(t, folder);
+        await appendDocument(t, building);
         setLabel("");
         router.refresh();
         toast.success("Note added.");
@@ -52,25 +53,25 @@ export function NewDocumentRow({
         className="paper-task-title min-w-[220px] flex-1 bg-transparent text-ink placeholder:text-ink-mute outline-none"
       />
       <Select
-        value={folder}
-        onChange={(e) => setFolder(e.target.value)}
+        value={building}
+        onChange={(e) => setBuilding(e.target.value)}
         tone="brass"
         className="w-[14rem] shrink-0 px-2 py-1 font-mono text-[10px]"
-        aria-label="Folder for new note"
+        aria-label="Building for new note"
       >
         <option value="" className="bg-paper-bg">
-          — choose folder —
+          — choose building —
         </option>
-        {DOCUMENT_FOLDERS.map((f) => (
-          <option key={f.key} value={f.key} className="bg-paper-bg">
-            {f.label}
+        {buildings.map((b) => (
+          <option key={b.key} value={b.key} className="bg-paper-bg">
+            {b.label}
           </option>
         ))}
       </Select>
       <button
         type="button"
         onClick={add}
-        disabled={pending || !label.trim() || !folder}
+        disabled={pending || !label.trim() || !building}
         className="rounded-sm border border-brass/40 px-3 py-1 font-mono text-[10px] tracking-[0.16em] text-brass transition hover:bg-brass/10 disabled:opacity-40"
       >
         ADD

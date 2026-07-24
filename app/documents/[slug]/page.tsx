@@ -9,10 +9,9 @@
 
 import Link from "next/link";
 import { getItemsByBox } from "@/lib/data";
-import { getDocuments, getBuildings } from "@/lib/categories";
+import { getDocuments, getBuildings, buildingSlug } from "@/lib/categories";
 import { DocumentsEditor } from "@/components/documents-editor";
 import { ConvertToProjectButton } from "@/components/convert-to-project-button";
-import { DOCUMENT_FOLDERS, folderForDocument } from "@/lib/document-folders";
 import type { BoxKey } from "@/lib/types";
 
 function slugToKey(slug: string): string {
@@ -61,17 +60,20 @@ export default async function DocumentPage({
     getBuildings(),
   ]);
   const doc = items[0];
-  const folderKey = folderForDocument(meta);
-  const folderMeta = DOCUMENT_FOLDERS.find((f) => f.key === folderKey)!;
+  const building = buildings.find((b) => b.key === meta.folder);
 
   return (
     <div className="mx-auto max-w-[800px] px-10 py-8">
       <div className="mb-6">
         <Link
-          href={`/documents/folders/${folderKey}`}
+          href={
+            building
+              ? `/documents/folders/${buildingSlug(building.key)}`
+              : "/documents"
+          }
           className="rounded-sm border border-paper-line px-3 py-1 font-mono text-[11px] tracking-[0.18em] text-ink-mute transition hover:border-brass/40 hover:text-brass"
         >
-          ← BACK TO {folderMeta.label}
+          ← BACK TO {building ? building.label.toUpperCase() : "NOTES"}
         </Link>
       </div>
       <div className="eyebrow">— Note —</div>
