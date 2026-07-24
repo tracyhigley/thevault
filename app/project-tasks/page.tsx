@@ -11,7 +11,6 @@ import { ProjectTaskRollupItem } from "@/components/project-task-rollup-item";
 
 type Row = {
   projectId: string;
-  projectTitle: string;
   taskId: string;
   text: string;
 };
@@ -32,7 +31,6 @@ export default async function ProjectTasksPage() {
     for (const t of onList) {
       rows.push({
         projectId: p.id,
-        projectTitle: p.title,
         taskId: t.id,
         text: t.text,
       });
@@ -88,15 +86,13 @@ export default async function ProjectTasksPage() {
                 <div className="serif-h text-ink mt-3 text-[19px] leading-snug">
                   {b.label}
                 </div>
-                <div className="divide-paper-line/50 mt-3 divide-y">
+                <div className="mt-3 space-y-2">
                   {rows.map((r) => (
                     <ProjectTaskRollupItem
                       key={r.taskId}
                       projectId={r.projectId}
                       taskId={r.taskId}
                       text={r.text}
-                      projectTitle={r.projectTitle}
-                      projectHref={`/project-plans/project/${r.projectId}`}
                     />
                   ))}
                 </div>

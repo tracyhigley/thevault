@@ -2,9 +2,13 @@
 // One task row on the Project Tasks page. "Done" marks the task done (it
 // shows struck through back on the project's own checklist) and takes it
 // off this page — the task itself isn't deleted, so nothing gets lost.
+//
+// Row chrome deliberately matches the Admin Tasks row (`CounterRow`): same
+// bordered card, same title treatment, same Done button styling. The project
+// this task came from isn't shown here — the building header above already
+// gives the grouping that matters on this page.
 
 import { useState, useTransition } from "react";
-import Link from "next/link";
 import { toast } from "sonner";
 import { markProjectTaskDone } from "@/lib/plan-actions";
 
@@ -12,14 +16,10 @@ export function ProjectTaskRollupItem({
   projectId,
   taskId,
   text,
-  projectTitle,
-  projectHref,
 }: {
   projectId: string;
   taskId: string;
   text: string;
-  projectTitle: string;
-  projectHref: string;
 }) {
   const [hidden, setHidden] = useState(false);
   const [pending, startTransition] = useTransition();
@@ -39,22 +39,17 @@ export function ProjectTaskRollupItem({
   }
 
   return (
-    <div className="flex items-start justify-between gap-3 py-2 text-[13px]">
-      <div className="min-w-0">
-        <div className="text-ink">{text}</div>
-        <Link
-          href={projectHref}
-          className="text-ink-mute hover:text-brass mt-0.5 inline-block font-mono text-[10px] tracking-[0.12em]"
-        >
-          {projectTitle.toUpperCase()}
-        </Link>
-      </div>
+    <div className="border-paper-line/60 bg-paper-panel/40 flex min-w-0 items-center gap-3 rounded-sm border px-3 py-2 transition">
+      <span className="paper-task-title text-ink min-w-0 flex-1 truncate">
+        {text}
+      </span>
       <button
+        type="button"
         onClick={done}
         disabled={pending}
-        className="border-paper-line text-ink-mute hover:border-brass/40 hover:text-brass shrink-0 rounded-sm border px-2.5 py-1 font-mono text-[10px] tracking-[0.14em] transition disabled:opacity-50"
+        className="shrink-0 rounded-sm border border-emerald-600/35 px-1.5 py-0.5 font-mono text-[10px] tracking-wider text-emerald-700 transition hover:bg-emerald-600/10 hover:text-emerald-800 disabled:opacity-40"
       >
-        DONE
+        Done
       </button>
     </div>
   );
