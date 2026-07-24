@@ -5,12 +5,13 @@ import Link from "next/link";
 import clsx from "clsx";
 import { toast } from "sonner";
 import { formatEndOfDay12h, parseTimeOnDate } from "@/lib/daily-plan";
-import { saveDayInputsPartial, applyAtmBoxBudgets } from "@/lib/actions";
+import { saveDayInputsPartial } from "@/lib/actions";
 import { markPreferTodayOverDropLanding } from "@/lib/nav-client";
 import { DropTriageRow } from "@/components/drop-triage-row";
 import { EditableText } from "@/components/editable-text";
 import { NewCounterItemRow } from "@/components/new-counter-item-row";
 import { TodayToggle } from "./today-toggle";
+import { ProjectTaskRollupItem } from "./project-task-rollup-item";
 import type { DayInputs, Item } from "@/lib/types";
 import type { Box, EnergyType } from "@/lib/categories";
 import { useShortcut } from "@/lib/shortcuts";
@@ -21,32 +22,43 @@ const STEPS = [
   { n: 2, title: "Field Notes" },
   { n: 3, title: "Admin Tasks" },
   { n: 4, title: "Project Tasks" },
+  { n: 5, title: "Time Left" },
 ] as const;
+
+export type ProjectTaskRow = {
+  projectId: string;
+  taskId: string;
+  text: string;
+  minutes: number | null;
+  buildingLabel: string;
+  buildingColor?: string;
+  onToday: boolean;
+};
 
 export function BuildWizard({
   step,
   inputs,
   dropItems,
   counterItems,
-  atmItems,
-  boxes,
+  buildings,
   energies,
   stressors,
   timeSensitive,
   mustDo,
   otherAdmin,
+  projectRows,
 }: {
   step: number;
   inputs: DayInputs;
   dropItems: Item[];
   counterItems: Item[];
-  atmItems: Item[];
-  boxes: Box[];
+  buildings: Box[];
   energies: EnergyType[];
   stressors: Item[];
   timeSensitive: Item[];
   mustDo: Item[];
   otherAdmin: Item[];
+  projectRows: ProjectTaskRow[];
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -77,12 +89,12 @@ export function BuildWizard({
   useShortcut(
     "enter",
     () => {
-      if (step === 3) next();
+      if (step === 3 || step === 4) next();
     },
     {
       label: "Continue",
       group: "Build day",
-      options: { enabled: step === 3 },
+      options: { enabled: step === 3 || step === 4 },
     },
   );
 
@@ -101,11 +113,16 @@ export function BuildWizard({
           />
         )}
         {step === 2 && (
-          <DropStep dropItems={dropItems} boxes={boxes} energies={energies} onNext={next} />
+          <DropStep
+            dropItems={dropItems}
+            buildings={buildings}
+            energies={energies}
+            onNext={next}
+          />
         )}
         {step === 3 && (
           <ReviewStep
-            boxes={boxes}
+            buildings={buildings}
             stressors={stressors}
             timeSensitive={timeSensitive}
             mustDo={mustDo}
@@ -113,21 +130,20 @@ export function BuildWizard({
             onNext={next}
           />
         )}
-        {step === 4 && (
-          <AtmStep
-            atm={atmItems}
-            counterItems={counterItems}
+        {step === 4 && <ProjectTasksStep rows={projectRows} onNext={next} />}
+        {step === 5 && (
+          <TimeLeftStep
             inputs={inputs}
-            boxes={boxes}
+            counterItems={counterItems}
             onFinish={finish}
           />
         )}
       </div>
 
-      <div className="mt-8 flex items-center justify-between font-mono text-[10px] tracking-[0.18em] text-ink-mute">
+      <div className="text-ink-mute mt-8 flex items-center justify-between font-mono text-[10px] tracking-[0.18em]">
         <button
           onClick={prev}
-          className="flex items-center gap-2 hover:text-brass"
+          className="hover:text-brass flex items-center gap-2"
           disabled={pending}
         >
           <Kbd keys="escape" size="xs" />
@@ -193,7 +209,8 @@ function DaySetupStep({
       normalizedEnd = formatEndOfDay12h(endOfDay.trim(), date);
       const end = parseTimeOnDate(normalizedEnd, date);
       const ms = end.getTime() - Date.now();
-      hoursAvailable = Math.round(Math.max(0, Math.min(24, ms / 3_600_000)) * 100) / 100;
+      hoursAvailable =
+        Math.round(Math.max(0, Math.min(24, ms / 3_600_000)) * 100) / 100;
     } catch {
       toast.error("Couldn’t read that time — try 4:30 PM.");
       return;
@@ -230,7 +247,7 @@ function DaySetupStep({
           onChange={(e) => setEndOfDay(e.target.value)}
           placeholder="e.g. 4:30 PM"
           autoComplete="off"
-          className="mt-3 w-full rounded-sm border border-paper-line bg-paper-panel/60 px-4 py-3 font-mono text-[18px] text-ink outline-none placeholder:text-ink-mute focus:border-brass"
+          className="border-paper-line bg-paper-panel/60 text-ink placeholder:text-ink-mute focus:border-brass mt-3 w-full rounded-sm border px-4 py-3 font-mono text-[18px] outline-none"
         />
       </div>
     </Step>
@@ -239,12 +256,12 @@ function DaySetupStep({
 
 function DropStep({
   dropItems,
-  boxes,
+  buildings,
   energies,
   onNext,
 }: {
   dropItems: Item[];
-  boxes: Box[];
+  buildings: Box[];
   energies: EnergyType[];
   onNext: () => void;
 }) {
@@ -264,7 +281,7 @@ function DropStep({
       title="Clear Field Notes first"
       hint={
         hasDrop
-          ? "For each Field Notes item, choose Project Tasks or Admin Tasks, set minutes and box/area, then send it (or delete it)."
+          ? "For each Field Notes item, choose Project Tasks or Admin Tasks, set minutes and building, then send it (or delete it)."
           : "Field Notes is clear. Continue to choose what is already on your Admin Tasks."
       }
       submitLabel="ON TO ADMIN TASKS →"
@@ -277,16 +294,16 @@ function DropStep({
             <DropTriageRow
               key={item.id}
               item={item}
-              boxes={boxes}
+              boxes={buildings}
               energies={energies}
             />
           ))}
-          <p className="pt-2 text-[12px] text-ink-mute">
+          <p className="text-ink-mute pt-2 text-[12px]">
             Finish triaging or deleting all Field Notes items to continue.
           </p>
         </div>
       ) : (
-        <p className="rounded-sm border border-dashed border-paper-line/60 px-4 py-5 text-center text-ink-mute">
+        <p className="border-paper-line/60 text-ink-mute rounded-sm border border-dashed px-4 py-5 text-center">
           No pending items in Field Notes.
         </p>
       )}
@@ -296,14 +313,14 @@ function DropStep({
 
 // Step 3: Admin Tasks review.
 function ReviewStep({
-  boxes,
+  buildings,
   stressors,
   timeSensitive,
   mustDo,
   otherAdmin,
   onNext,
 }: {
-  boxes: Box[];
+  buildings: Box[];
   stressors: Item[];
   timeSensitive: Item[];
   mustDo: Item[];
@@ -324,19 +341,35 @@ function ReviewStep({
       onSubmit={onNext}
     >
       <div className="mb-4">
-        <NewCounterItemRow boxes={boxes} />
+        <NewCounterItemRow boxes={buildings} />
       </div>
       <Group label="Stressors" tone="rust">
-        {stressors.length === 0 ? <Empty /> : stressors.map((it) => <Row key={it.id} item={it} />)}
+        {stressors.length === 0 ? (
+          <Empty />
+        ) : (
+          stressors.map((it) => <Row key={it.id} item={it} />)
+        )}
       </Group>
       <Group label="Time-sensitive" tone="amber">
-        {timeSensitive.length === 0 ? <Empty /> : timeSensitive.map((it) => <Row key={it.id} item={it} />)}
+        {timeSensitive.length === 0 ? (
+          <Empty />
+        ) : (
+          timeSensitive.map((it) => <Row key={it.id} item={it} />)
+        )}
       </Group>
       <Group label="Must-do" tone="sky">
-        {mustDo.length === 0 ? <Empty /> : mustDo.map((it) => <Row key={it.id} item={it} />)}
+        {mustDo.length === 0 ? (
+          <Empty />
+        ) : (
+          mustDo.map((it) => <Row key={it.id} item={it} />)
+        )}
       </Group>
       <Group label="Everything else" tone="brass">
-        {otherAdmin.length === 0 ? <Empty /> : otherAdmin.map((it) => <Row key={it.id} item={it} />)}
+        {otherAdmin.length === 0 ? (
+          <Empty />
+        ) : (
+          otherAdmin.map((it) => <Row key={it.id} item={it} />)
+        )}
       </Group>
     </Step>
   );
@@ -347,12 +380,12 @@ function Row({ item }: { item: Item }) {
   return (
     <div
       className={clsx(
-        "flex items-center gap-3 rounded-sm border bg-paper-panel/40 px-3 py-2 transition",
+        "bg-paper-panel/40 flex items-center gap-3 rounded-sm border px-3 py-2 transition",
         onToday ? "border-brass/40" : "border-paper-line/60",
       )}
     >
       {item.area && (
-        <span className="shrink-0 rounded-sm border border-brass/40 px-1.5 py-0.5 font-mono text-[9px] tracking-wider text-brass">
+        <span className="border-brass/40 text-brass shrink-0 rounded-sm border px-1.5 py-0.5 font-mono text-[9px] tracking-wider">
           {item.area}
         </span>
       )}
@@ -366,12 +399,12 @@ function Row({ item }: { item: Item }) {
         )}
         placeholder="(no title)"
       />
-      <span className="flex shrink-0 items-baseline justify-end gap-1 whitespace-nowrap font-mono text-[11px] text-ink-mute tabular-nums">
+      <span className="text-ink-mute flex shrink-0 items-baseline justify-end gap-1 font-mono text-[11px] whitespace-nowrap tabular-nums">
         <EditableText
           itemId={item.id}
           field="minutes"
           initial={item.minutes}
-          className="min-w-[3.25rem] w-16 max-w-[4.5rem] bg-transparent px-0 text-right text-[11px] tabular-nums"
+          className="w-16 max-w-[4.5rem] min-w-[3.25rem] bg-transparent px-0 text-right text-[11px] tabular-nums"
           numeric
           placeholder="—"
         />
@@ -398,14 +431,14 @@ function Group({
           className={clsx(
             "h-2 w-2",
             tone === "rust"
-              ? "rounded-full bg-rust"
+              ? "bg-rust rounded-full"
               : tone === "rust-soft"
-                ? "rounded-full bg-rust/50"
+                ? "bg-rust/50 rounded-full"
                 : tone === "amber"
                   ? "rounded-full bg-amber-500"
                   : tone === "sky"
                     ? "rounded-sm bg-sky-600"
-                    : "rounded-sm bg-brass",
+                    : "bg-brass rounded-sm",
           )}
         />
         <h3 className="eyebrow">{label}</h3>
@@ -416,7 +449,7 @@ function Group({
 }
 
 function Empty() {
-  return <div className="text-[12px] italic text-ink-mute">(nothing here)</div>;
+  return <div className="text-ink-mute text-[12px] italic">(nothing here)</div>;
 }
 
 function roundHoursToMinutes(h: number): number {
@@ -432,310 +465,111 @@ function formatDurationFromMinutes(totalMin: number): string {
   return `${m} min`;
 }
 
-function formatHoursProse(totalHours: number): string {
-  return formatDurationFromMinutes(roundHoursToMinutes(totalHours));
-}
-
-function atmBoxLabel(category: string, boxes: Box[]): string {
-  return boxes.find((b) => b.key === category)?.label ?? category;
-}
-
-// Step 4: Project Tasks box-first withdrawals.
-function AtmStep({
-  atm,
-  counterItems,
-  inputs,
-  boxes,
-  onFinish,
+// Step 4: pull tasks off Project Plans, same row + + TODAY toggle as the
+// standalone Project Tasks page.
+function ProjectTasksStep({
+  rows,
+  onNext,
 }: {
-  atm: Item[];
-  counterItems: Item[];
-  inputs: DayInputs;
-  boxes: Box[];
-  onFinish: () => void;
+  rows: ProjectTaskRow[];
+  onNext: () => void;
 }) {
-  const [pending, startTransition] = useTransition();
-  const categories = Array.from(
-    new Set(
-      atm
-        .map((item) => item.category?.trim())
-        .filter((category): category is string => Boolean(category)),
-    ),
-  );
-  const dayBudgetHours = Math.max(0, inputs.hoursAvailable);
-  const windowMinutes = roundHoursToMinutes(dayBudgetHours);
-  const counterOnTodayItems = counterItems.filter(
-    (i) => (i.todayOrder ?? null) !== null,
-  );
-  const counterOnTodayMinutes = counterOnTodayItems.reduce(
-    (s, i) => s + (i.minutes ?? 0),
-    0,
-  );
-  const counterOnTodayHours = counterOnTodayMinutes / 60;
-  /** Time left for Project Tasks after Admin Tasks items marked “on Today” in step 3. */
-  const atmPoolHours = Math.max(0, dayBudgetHours - counterOnTodayHours);
-  const counterExceedsWindow = counterOnTodayMinutes > windowMinutes;
-
-  const [selected, setSelected] = useState<string[]>(() =>
-    counterExceedsWindow ? [] : categories.slice(0, 1),
-  );
-  /** % of ATM pool to the first selected box when two are chosen (0–100). */
-  const [splitPct, setSplitPct] = useState(50);
-  /** % of ATM pool for the lone selected box (0–100). */
-  const [singleUsePct, setSingleUsePct] = useState(100);
-
-  function toggleCategory(category: string) {
-    setSelected((prev) => {
-      const exists = prev.includes(category);
-      if (exists) return prev.filter((c) => c !== category);
-      if (prev.length >= 2) return prev;
-      const next = [...prev, category];
-      if (next.length === 2) setSplitPct(50);
-      return next;
-    });
-  }
-
-  function hoursBudgetFor(category: string): number {
-    if (selected.length === 0) return 0;
-    if (selected.length === 1) {
-      return selected[0] === category
-        ? (atmPoolHours * singleUsePct) / 100
-        : 0;
-    }
-    const [a, b] = selected;
-    if (category === a) return (atmPoolHours * splitPct) / 100;
-    if (category === b) return (atmPoolHours * (100 - splitPct)) / 100;
-    return 0;
-  }
-
-  function estimateFill(category: string, hours: number) {
-    const budget = Math.max(0, Math.round(hours * 60));
-    const items = atm
-      .filter((item) => item.category === category && (item.minutes ?? 0) > 0)
-      .sort((a, b) => {
-        const ao = a.atmOrder ?? Number.MAX_SAFE_INTEGER;
-        const bo = b.atmOrder ?? Number.MAX_SAFE_INTEGER;
-        return ao === bo ? a.createdAt.localeCompare(b.createdAt) : ao - bo;
-      });
-    let used = 0;
-    let picked = 0;
-    for (const it of items) {
-      const m = it.minutes ?? 0;
-      if (m <= 0) continue;
-      if (used + m > budget) continue;
-      used += m;
-      picked += 1;
-      if (used >= budget) break;
-    }
-    return { used, picked };
-  }
-
-  const totalAllocated = selected.reduce(
-    (sum, c) => sum + hoursBudgetFor(c),
-    0,
-  );
-  const leftoverHours = Math.max(
-    0,
-    dayBudgetHours - counterOnTodayHours - totalAllocated,
-  );
-  const atmSharePercent =
-    atmPoolHours > 0 ? Math.round((totalAllocated / atmPoolHours) * 100) : 0;
-
-  function submit() {
-    const payload = selected.map((category) => ({
-      category,
-      hours: hoursBudgetFor(category),
-    }));
-    const withBudget = payload.filter((p) => p.hours > 0);
-    startTransition(async () => {
-      try {
-        await applyAtmBoxBudgets(withBudget);
-        onFinish();
-      } catch (e: any) {
-        toast.error(e?.message ?? "Couldn't apply Project Tasks box budgets.");
-      }
-    });
-  }
-
   return (
     <Step
-      title="Pick 1-2 Project Tasks boxes"
-      submitLabel="BUILD THE DAY"
-      onSubmit={submit}
-      pending={pending}
+      title="Anything to pull from Project Plans?"
+      hint={
+        rows.length === 0
+          ? "Nothing pulled onto Project Tasks yet — check off a task on a project that's under construction, or continue with none."
+          : "Tap + TODAY on anything you want to work on today."
+      }
+      submitLabel="ON TO TIME LEFT →"
+      onSubmit={onNext}
     >
-      {categories.length === 0 ? (
-        <p className="rounded-sm border border-dashed border-paper-line/60 px-4 py-6 text-center text-ink-mute">
-          No Project Tasks boxes found yet.
+      {rows.length === 0 ? (
+        <p className="border-paper-line/60 text-ink-mute rounded-sm border border-dashed px-4 py-6 text-center">
+          Nothing on Project Tasks right now.
         </p>
       ) : (
-        <div className="space-y-4">
-          <div className="flex flex-wrap gap-2">
-            {categories.map((category) => (
-              <button
-                key={category}
-                type="button"
-                onClick={() => toggleCategory(category)}
-                className={clsx(
-                  "rounded-sm border px-3 py-2 text-[12px] transition",
-                  selected.includes(category)
-                    ? "border-brass bg-brass/10 text-brass-bright"
-                    : "border-paper-line/60 text-ink-mute hover:border-brass/40 hover:text-brass",
-                )}
-              >
-                {atmBoxLabel(category, boxes)}
-              </button>
-            ))}
-          </div>
-
-          {counterExceedsWindow && (
-            <p className="rounded-sm border border-rust/40 bg-rust/5 px-3 py-2 text-[12px] text-ink-dim">
-              Admin Tasks on Today is longer than your day window. Project Tasks budget is 0
-              until you take items off Today or move your end time (step 1). You
-              can still build the day without picking Project Tasks boxes.
-            </p>
-          )}
-
-          {selected.length > 0 && (
-            <div className="space-y-4">
-              {selected.length === 1 && atmPoolHours > 0 && (
-                <div className="rounded-sm border border-paper-line/60 bg-paper-panel/30 p-4">
-                  <label className="block">
-                    <span className="font-mono text-[10px] tracking-wider text-ink-mute">
-                      How much of your Project Tasks time goes to{" "}
-                      <span className="text-ink">
-                        {atmBoxLabel(selected[0], boxes)}
-                      </span>
-                      ?
-                    </span>
-                    <input
-                      type="range"
-                      min={0}
-                      max={100}
-                      step={1}
-                      value={singleUsePct}
-                      onChange={(e) =>
-                        setSingleUsePct(Number(e.target.value))
-                      }
-                      className="mt-3 w-full accent-brass"
-                      aria-valuetext={`${singleUsePct}% of Project Tasks pool`}
-                    />
-                    <div className="mt-2 flex flex-wrap items-baseline justify-between gap-2 text-[13px] text-ink">
-                      <span>
-                        <span className="text-brass-bright">
-                          {formatHoursProse(hoursBudgetFor(selected[0]))}
-                        </span>{" "}
-                        <span className="text-ink-dim">for Project Tasks</span>
-                      </span>
-                      <span className="font-mono text-[11px] text-ink-mute">
-                        {singleUsePct}% of {formatHoursProse(atmPoolHours)}
-                      </span>
-                    </div>
-                  </label>
-                </div>
-              )}
-
-              {selected.length === 2 && atmPoolHours > 0 && (
-                <div className="rounded-sm border border-paper-line/60 bg-paper-panel/30 p-4">
-                  <p className="font-mono text-[10px] tracking-wider text-ink-mute">
-                    SPLIT YOUR {formatHoursProse(atmPoolHours)} PROJECT TASKS BUDGET
-                  </p>
-                  <input
-                    type="range"
-                    min={0}
-                    max={100}
-                    step={1}
-                    value={splitPct}
-                    onChange={(e) => setSplitPct(Number(e.target.value))}
-                    className="mt-3 w-full accent-brass"
-                    aria-valuetext={`${splitPct}% to ${atmBoxLabel(selected[0], boxes)}`}
-                  />
-                  <div className="mt-3 flex flex-wrap items-start justify-between gap-3 text-[13px]">
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate font-medium text-ink">
-                        {atmBoxLabel(selected[0], boxes)}
-                      </p>
-                      <p className="mt-0.5 text-brass-bright">
-                        {formatHoursProse(hoursBudgetFor(selected[0]))}
-                      </p>
-                    </div>
-                    <div className="min-w-0 flex-1 text-right">
-                      <p className="truncate font-medium text-ink">
-                        {atmBoxLabel(selected[1], boxes)}
-                      </p>
-                      <p className="mt-0.5 text-brass-bright">
-                        {formatHoursProse(hoursBudgetFor(selected[1]))}
-                      </p>
-                    </div>
-                  </div>
-                  <p className="mt-2 text-[11px] text-ink-mute">
-                    Slide toward a box to give it more of the total; the other
-                    shrinks automatically.
-                  </p>
-                </div>
-              )}
-
-              {dayBudgetHours <= 0 && (
-                <p className="rounded-sm border border-dashed border-rust/40 bg-rust/5 px-3 py-2 text-[12px] text-ink-dim">
-                  No hours left in your day window (step 1). Adjust end time or
-                  continue — you can still build, but Project Tasks budgets will be 0
-                  until that changes.
-                </p>
-              )}
-
-              {dayBudgetHours > 0 && atmPoolHours <= 0 && !counterExceedsWindow && (
-                <p className="rounded-sm border border-dashed border-paper-line/80 bg-paper-panel/30 px-3 py-2 text-[12px] text-ink-dim">
-                  No time left for Project Tasks: Admin Tasks on Today already fills your day
-                  window. Take something off Today (step 3) or extend your end
-                  time (step 1) to free Project Tasks budget.
-                </p>
-              )}
-
-              {selected.map((category) => {
-                const hours = hoursBudgetFor(category);
-                const { used, picked } = estimateFill(category, hours);
-                return (
-                  <div
-                    key={category}
-                    className="rounded-sm border border-paper-line/60 bg-paper-panel/40 p-3"
-                  >
-                    <p className="font-mono text-[11px] tracking-wider text-ink">
-                      {atmBoxLabel(category, boxes)}
-                    </p>
-                    <p className="mt-2 text-[12px] text-ink-dim">
-                      Likely fill (in list order, min &gt; 0):{" "}
-                      <span className="text-ink">
-                        {picked} task{picked === 1 ? "" : "s"} ·{" "}
-                        {formatDurationFromMinutes(used)}
-                      </span>
-                    </p>
-                  </div>
-                );
-              })}
-
-              <div className="rounded-sm border border-paper-line/50 bg-paper-bg/30 px-3 py-2.5 text-[12px] text-ink-dim">
-                <p>
-                  <span className="text-ink">Project Tasks pulls: </span>
-                  {formatHoursProse(totalAllocated)}
-                  {atmPoolHours > 0 ? (
-                    <span className="text-ink-mute">
-                      {" "}
-                      ({atmSharePercent}% of Project Tasks pool)
-                    </span>
-                  ) : null}
-                </p>
-                {leftoverHours > 0.0001 && (
-                  <p className="mt-1">
-                    <span className="text-ink">Unscheduled in your window: </span>
-                    {formatHoursProse(leftoverHours)} (slack / overrun room)
-                  </p>
-                )}
-              </div>
-            </div>
-          )}
+        <div className="space-y-2">
+          {rows.map((r) => (
+            <ProjectTaskRollupItem
+              key={r.taskId}
+              projectId={r.projectId}
+              taskId={r.taskId}
+              text={r.text}
+              minutes={r.minutes}
+              buildingLabel={r.buildingLabel}
+              buildingColor={r.buildingColor}
+              onToday={r.onToday}
+            />
+          ))}
         </div>
       )}
     </Step>
+  );
+}
+
+// Step 5: no more slider — just the leftover time in the day window, with
+// a way to go pull more from Project Plans or head straight to Today.
+function TimeLeftStep({
+  inputs,
+  counterItems,
+  onFinish,
+}: {
+  inputs: DayInputs;
+  counterItems: Item[];
+  onFinish: () => void;
+}) {
+  const windowMinutes = roundHoursToMinutes(Math.max(0, inputs.hoursAvailable));
+  const onTodayMinutes = counterItems
+    .filter((i) => (i.todayOrder ?? null) !== null)
+    .reduce((s, i) => s + (i.minutes ?? 0), 0);
+  const leftoverMinutes = windowMinutes - onTodayMinutes;
+
+  return (
+    <div>
+      <h1 className="serif-h text-[28px] leading-tight md:text-[36px]">
+        {leftoverMinutes > 0
+          ? "Time left in your day"
+          : leftoverMinutes === 0
+            ? "Your day is fully booked"
+            : "You're over your day window"}
+      </h1>
+      <p className="text-ink-dim mt-2">
+        {leftoverMinutes > 0
+          ? `${formatDurationFromMinutes(leftoverMinutes)} still open after Admin Tasks and Project Tasks on Today.`
+          : leftoverMinutes === 0
+            ? "Admin Tasks and Project Tasks on Today exactly fill your day window."
+            : `Admin Tasks and Project Tasks on Today run ${formatDurationFromMinutes(-leftoverMinutes)} past your day window.`}
+      </p>
+
+      <div className="border-paper-line/60 bg-paper-panel/40 mt-10 rounded-sm border p-6 text-center">
+        <p className="text-ink-mute font-mono text-[10px] tracking-[0.2em]">
+          ON TODAY SO FAR
+        </p>
+        <p className="serif-h text-ink mt-2 text-[32px]">
+          {formatDurationFromMinutes(onTodayMinutes)}
+        </p>
+        <p className="text-ink-mute mt-1 text-[12px]">
+          of {formatDurationFromMinutes(windowMinutes)} available
+        </p>
+      </div>
+
+      <div className="mt-12 flex flex-wrap justify-end gap-3">
+        <Link
+          href="/project-plans"
+          className="border-paper-line text-ink-mute hover:border-brass/40 hover:text-brass rounded-sm border px-6 py-3 text-center font-mono text-[10px] tracking-[0.2em] transition"
+        >
+          ADD MORE FROM PROJECT PLANS
+        </Link>
+        <button
+          onClick={onFinish}
+          className="brass-button px-8 py-3 font-mono text-[10px] tracking-[0.24em]"
+        >
+          GO TO TODAY →
+        </button>
+      </div>
+    </div>
   );
 }
 
@@ -762,7 +596,7 @@ function Step({
       <h1 className="serif-h text-[28px] leading-tight md:text-[36px]">
         {title}
       </h1>
-      {hint ? <p className="mt-2 text-ink-dim">{hint}</p> : null}
+      {hint ? <p className="text-ink-dim mt-2">{hint}</p> : null}
       <div className={hint ? "mt-10" : "mt-6"}>{children}</div>
       <div className="mt-12 flex justify-end">
         <button
@@ -776,4 +610,3 @@ function Step({
     </div>
   );
 }
-
