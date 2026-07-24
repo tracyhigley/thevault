@@ -172,6 +172,101 @@ export async function addProjectLog(id: string, text: string, date: string) {
   revalidatePath("/project-plans", "layout");
 }
 
+// ─── Project tasks ───────────────────────────────────────────────────────────
+// Lightweight checklist per project, stored the same way as `log`. A task's
+// `onTaskList` flag decides whether it currently surfaces on the Project
+// Tasks page — it's a visibility toggle, not a "done" state. Finishing a
+// task means removing it (deleteProjectTask), or on the Project Tasks page
+// itself, unchecking it (setProjectTaskOnList(..., false)) just pulls it
+// back off the page without losing it from the project's checklist.
+
+function normalizeTasks(raw: unknown): {
+  id: string;
+  text: string;
+  onTaskList: boolean;
+  createdAt: string;
+}[] {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .filter((t: any) => t && typeof t.id === "string" && typeof t.text === "string")
+    .map((t: any) => ({
+      id: t.id,
+      text: t.text,
+      onTaskList: !!t.onTaskList,
+      createdAt:
+        typeof t.createdAt === "string" ? t.createdAt : new Date().toISOString(),
+    }));
+}
+
+export async function addProjectTask(projectId: string, text: string) {
+  const { sb } = await requireUser();
+  const clean = text.trim();
+  if (!clean) throw new Error("Give the task a name first");
+  const { data, error } = await sb
+    .from("projects")
+    .select("tasks")
+    .eq("id", projectId)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  const tasks = normalizeTasks(data?.tasks);
+  const task = {
+    id: crypto.randomUUID(),
+    text: clean,
+    onTaskList: false,
+    createdAt: new Date().toISOString(),
+  };
+  const { error: updateError } = await sb
+    .from("projects")
+    .update({ tasks: [...tasks, task], modified_at: new Date().toISOString() })
+    .eq("id", projectId);
+  if (updateError) throw new Error(updateError.message);
+  revalidatePath("/project-plans", "layout");
+  revalidatePath("/project-tasks");
+  return task;
+}
+
+export async function setProjectTaskOnList(
+  projectId: string,
+  taskId: string,
+  onTaskList: boolean,
+) {
+  const { sb } = await requireUser();
+  const { data, error } = await sb
+    .from("projects")
+    .select("tasks")
+    .eq("id", projectId)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  const tasks = normalizeTasks(data?.tasks).map((t) =>
+    t.id === taskId ? { ...t, onTaskList } : t,
+  );
+  const { error: updateError } = await sb
+    .from("projects")
+    .update({ tasks, modified_at: new Date().toISOString() })
+    .eq("id", projectId);
+  if (updateError) throw new Error(updateError.message);
+  revalidatePath("/project-plans", "layout");
+  revalidatePath("/project-tasks");
+}
+
+export async function deleteProjectTask(projectId: string, taskId: string) {
+  const { sb } = await requireUser();
+  const { data, error } = await sb
+    .from("projects")
+    .select("tasks")
+    .eq("id", projectId)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  const tasks = normalizeTasks(data?.tasks).filter((t) => t.id !== taskId);
+  const { error: updateError } = await sb
+    .from("projects")
+    .update({ tasks, modified_at: new Date().toISOString() })
+    .eq("id", projectId);
+  if (updateError) throw new Error(updateError.message);
+  revalidatePath("/project-plans", "layout");
+  revalidatePath("/project-tasks");
+}
+
 // Soft delete — reversible from the DB, same as items.
 export async function deleteProject(id: string) {
   const { sb } = await requireUser();
