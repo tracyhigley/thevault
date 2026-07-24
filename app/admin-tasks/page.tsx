@@ -1,7 +1,7 @@
 import Link from "next/link";
 import clsx from "clsx";
 import { getItemsByBox } from "@/lib/data";
-import { getBoxes } from "@/lib/categories";
+import { getBuildings } from "@/lib/categories";
 import { EditableText, EditableFlag } from "@/components/editable-text";
 import { AreaPill } from "@/components/area-pill";
 import { NewCounterItemRow } from "@/components/new-counter-item-row";
@@ -56,9 +56,7 @@ function formatMinutesShort(totalMinutes: number): string {
 }
 
 /** Next may pass a single string or repeated keys as `string[]`. */
-function firstQuery(
-  v: string | string[] | undefined,
-): string | undefined {
+function firstQuery(v: string | string[] | undefined): string | undefined {
   if (v === undefined) return undefined;
   return Array.isArray(v) ? v[0] : v;
 }
@@ -123,12 +121,12 @@ export default async function CounterPage({
   const sp = await searchParams;
   const active = coerceFilter(firstQuery(sp.filter));
   const area = firstQuery(sp.area);
-  const [all, boxes] = await Promise.all([
+  const [all, buildings] = await Promise.all([
     getItemsByBox("COUNTER"),
-    getBoxes(),
+    getBuildings(),
   ]);
   const filtered = applyFilter(all, active, area);
-  const areas = boxes
+  const areas = buildings
     .filter((b) => all.some((it) => it.area === b.key))
     .map((b) => ({ key: b.key, label: b.label }));
   const filterTotals: Partial<Record<Filter, number>> = {
@@ -140,7 +138,7 @@ export default async function CounterPage({
     quick: sumMinutes(applyFilter(all, "quick")),
   };
 
-  const boxOpts = boxes.map((b) => ({ key: b.key, label: b.label }));
+  const boxOpts = buildings.map((b) => ({ key: b.key, label: b.label }));
   const { stress, urgent, must, should, plain } =
     partitionCounterItemsPreservingOrder(filtered);
 
@@ -211,12 +209,12 @@ export default async function CounterPage({
       <h1 className="serif-h text-[28px] leading-tight md:text-[36px]">
         Admin Tasks
       </h1>
-      <p className="mt-1 text-[13px] text-ink-dim">
+      <p className="text-ink-dim mt-1 text-[13px]">
         Obligations — what has to happen.
       </p>
 
       <details className="group mt-6" open>
-        <summary className="cursor-pointer list-none font-mono text-[10px] tracking-[0.24em] text-ink-mute hover:text-brass">
+        <summary className="text-ink-mute hover:text-brass cursor-pointer list-none font-mono text-[10px] tracking-[0.24em]">
           <span className="inline-block transition-transform group-open:rotate-90">
             ›
           </span>{" "}
@@ -227,7 +225,11 @@ export default async function CounterPage({
             {FILTERS.map((f) => (
               <Link
                 key={f.key}
-                href={f.key === "all" ? "/admin-tasks" : `/admin-tasks?filter=${f.key}`}
+                href={
+                  f.key === "all"
+                    ? "/admin-tasks"
+                    : `/admin-tasks?filter=${f.key}`
+                }
                 className={clsx(
                   "rounded-sm border px-4 py-1.5 font-mono text-[11px] tracking-wider transition",
                   active === f.key
@@ -241,18 +243,18 @@ export default async function CounterPage({
           </div>
           {areas.length > 0 && (
             <div className="flex flex-wrap gap-2">
-          {areas.map((a) => (
+              {areas.map((a) => (
                 <Link
-              key={a.key}
-              href={`/admin-tasks?filter=byarea&area=${encodeURIComponent(a.key)}`}
+                  key={a.key}
+                  href={`/admin-tasks?filter=byarea&area=${encodeURIComponent(a.key)}`}
                   className={clsx(
                     "rounded-sm border px-4 py-1.5 font-mono text-[11px] tracking-wider transition",
-                active === "byarea" && area === a.key
+                    active === "byarea" && area === a.key
                       ? "border-brass bg-brass/10 text-brass"
                       : "border-paper-line text-ink-mute hover:border-brass/40 hover:text-brass",
                   )}
                 >
-              {a.label}
+                  {a.label}
                 </Link>
               ))}
             </div>
@@ -265,7 +267,7 @@ export default async function CounterPage({
           <NewCounterItemRow boxes={boxOpts} initialArea={area ?? ""} />
         </div>
         {filtered.length === 0 ? (
-          <p className="mt-4 text-[13px] text-ink-mute">
+          <p className="text-ink-mute mt-4 text-[13px]">
             {active === "all"
               ? "Nothing on Admin Tasks yet."
               : "No items match this filter."}
@@ -274,10 +276,7 @@ export default async function CounterPage({
           <CounterSectionedLists
             listKey={`${active}:${area ?? ""}`}
             syncSignature={counterGroups
-              .map(
-                (g) =>
-                  `${g.key}:${g.items.map((i) => i.id).join(",")}`,
-              )
+              .map((g) => `${g.key}:${g.items.map((i) => i.id).join(",")}`)
               .join("|")}
             groups={counterGroups}
           />
@@ -307,7 +306,7 @@ function CounterRow({
   return (
     <div
       className={clsx(
-        "flex min-w-0 items-start gap-3 rounded-sm border bg-paper-panel/40 px-3 py-2 transition",
+        "bg-paper-panel/40 flex min-w-0 items-start gap-3 rounded-sm border px-3 py-2 transition",
         onToday
           ? "border-brass/40"
           : stressor
@@ -318,7 +317,7 @@ function CounterRow({
                 ? "border-amber-500/45"
                 : shouldOnly
                   ? "border-emerald-600/40"
-                : "border-paper-line/60",
+                  : "border-paper-line/60",
       )}
     >
       {stressor || item.urgent || item.must || item.should ? (
@@ -354,12 +353,12 @@ function CounterRow({
             )}
             placeholder="(no title)"
           />
-          <span className="flex shrink-0 items-baseline justify-end gap-1 whitespace-nowrap font-mono text-[11px] text-ink-mute tabular-nums">
+          <span className="text-ink-mute flex shrink-0 items-baseline justify-end gap-1 font-mono text-[11px] whitespace-nowrap tabular-nums">
             <EditableText
               itemId={item.id}
               field="minutes"
               initial={item.minutes}
-              className="min-w-[3.25rem] w-16 max-w-[4.5rem] bg-transparent px-0 text-right text-[11px] tabular-nums"
+              className="w-16 max-w-[4.5rem] min-w-[3.25rem] bg-transparent px-0 text-right text-[11px] tabular-nums"
               numeric
               placeholder="—"
             />

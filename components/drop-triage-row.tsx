@@ -12,7 +12,7 @@ import type { Item } from "@/lib/types";
 
 // Field Notes row, two compact lines:
 //
-//   [edge]  [PROJECT TASKS|ADMIN TASKS]  Title (editable)              [Box ▼]
+//   [edge]  [PROJECT TASKS|ADMIN TASKS]  Title (editable)          [Building ▼]
 //           ⏱ 30m   urgent / must / should (Admin Tasks)     Delete · Send
 //
 // 4-px coloured left edge tracks the destination so a glance reads where
@@ -94,7 +94,7 @@ export function DropTriageRow({
     options: { enabled: focused },
   });
   useShortcut("b", () => boxSelectRef.current?.focus(), {
-    label: "Focus box dropdown",
+    label: "Focus building dropdown",
     group: "Field Notes",
     options: { enabled: focused },
   });
@@ -165,31 +165,31 @@ export function DropTriageRow({
       tabIndex={0}
       data-drop-row="true"
       className={clsx(
-        "group relative overflow-hidden rounded-sm border bg-paper-panel/40 transition hover:bg-paper-panel/60 outline-none",
+        "group bg-paper-panel/40 hover:bg-paper-panel/60 relative overflow-hidden rounded-sm border transition outline-none",
         // The whole row is focusable. When the wrapper itself is focused
         // (j/k navigation), give it a strong brass ring so the user sees
         // exactly which thought is "armed". When focus is on a child
         // input, dim it.
-        "focus:ring-2 focus:ring-brass focus-within:ring-1 focus-within:ring-brass/40",
+        "focus:ring-brass focus-within:ring-brass/40 focus-within:ring-1 focus:ring-2",
         dest === "COUNTER" ? "border-rust/30" : "border-teal/30",
       )}
     >
       {/* Coloured left edge — the at-a-glance signal */}
       <div
         className={clsx(
-          "absolute left-0 top-0 bottom-0 w-[4px]",
+          "absolute top-0 bottom-0 left-0 w-[4px]",
           dest === "COUNTER" ? "bg-rust" : "bg-teal",
         )}
       />
 
       {/* Line 1 — destination + title + box (the primary path) */}
-      <div className="flex items-center gap-3 pl-6 pr-4 py-2.5">
+      <div className="flex items-center gap-3 py-2.5 pr-4 pl-6">
         <DestSegment dest={dest} onChange={setDest} />
         <EditableText
           itemId={item.id}
           field="title"
           initial={item.title}
-          className="min-w-0 flex-1 paper-task-title"
+          className="paper-task-title min-w-0 flex-1"
           placeholder="(no title)"
         />
         <select
@@ -197,14 +197,14 @@ export function DropTriageRow({
           value={boxKey}
           onChange={(e) => setBoxKey(e.target.value)}
           className={clsx(
-            "shrink-0 rounded-sm border px-2 py-1 font-mono text-[11px] outline-none transition focus:border-brass",
+            "focus:border-brass shrink-0 rounded-sm border px-2 py-1 font-mono text-[11px] transition outline-none",
             boxKey
               ? "border-brass/50 text-brass"
               : "border-paper-line text-ink-mute",
           )}
         >
           <option value="" className="bg-paper-bg">
-            — pick box —
+            — pick building —
           </option>
           {boxes.map((b) => (
             <option key={b.key} value={b.key} className="bg-paper-bg">
@@ -215,7 +215,7 @@ export function DropTriageRow({
       </div>
 
       {/* Line 2 — metadata + actions, anchored right */}
-      <div className="flex flex-wrap items-center gap-3 border-t border-paper-line/30 bg-paper-bg/20 pl-6 pr-3 py-1.5">
+      <div className="border-paper-line/30 bg-paper-bg/20 flex flex-wrap items-center gap-3 border-t py-1.5 pr-3 pl-6">
         <Minutes
           value={minutes}
           onChange={setMinutes}
@@ -253,7 +253,7 @@ export function DropTriageRow({
             onClick={deleteThought}
             disabled={pending}
             title="Delete"
-            className="rounded-sm px-2 py-1 font-mono text-[10px] tracking-wider text-ink-mute/60 transition hover:bg-rust/10 hover:text-rust"
+            className="text-ink-mute/60 hover:bg-rust/10 hover:text-rust rounded-sm px-2 py-1 font-mono text-[10px] tracking-wider transition"
           >
             DELETE
           </button>
@@ -268,7 +268,9 @@ export function DropTriageRow({
             ) : (
               <>
                 <span>→ SEND</span>
-                {focused && <Kbd keys="enter" size="xs" className="text-[#2a1c08]/70" />}
+                {focused && (
+                  <Kbd keys="enter" size="xs" className="text-[#2a1c08]/70" />
+                )}
               </>
             )}
           </button>
@@ -288,7 +290,7 @@ function DestSegment({
   onChange: (next: Destination) => void;
 }) {
   return (
-    <div className="flex shrink-0 overflow-hidden rounded-sm border border-paper-line/60 bg-paper-bg/40">
+    <div className="border-paper-line/60 bg-paper-bg/40 flex shrink-0 overflow-hidden rounded-sm border">
       <SegmentButton
         active={dest === "ATM"}
         onClick={() => onChange("ATM")}
@@ -351,7 +353,7 @@ function Minutes({
   return (
     <span
       className={clsx(
-        "inline-flex shrink-0 items-baseline gap-1 rounded-sm border bg-paper-bg/40 px-1.5 py-0.5 transition focus-within:border-brass",
+        "bg-paper-bg/40 focus-within:border-brass inline-flex shrink-0 items-baseline gap-1 rounded-sm border px-1.5 py-0.5 transition",
         value ? "border-brass/40" : "border-paper-line",
       )}
     >
@@ -371,9 +373,9 @@ function Minutes({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder="—"
-        className="w-10 bg-transparent text-right font-mono text-[11px] text-ink outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:hidden [&::-webkit-outer-spin-button]:hidden"
+        className="text-ink w-10 [appearance:textfield] bg-transparent text-right font-mono text-[11px] outline-none [&::-webkit-inner-spin-button]:hidden [&::-webkit-outer-spin-button]:hidden"
       />
-      <span className="font-mono text-[9px] text-ink-mute/60">min</span>
+      <span className="text-ink-mute/60 font-mono text-[9px]">min</span>
     </span>
   );
 }

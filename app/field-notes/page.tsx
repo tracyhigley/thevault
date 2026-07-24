@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getItemsByBox } from "@/lib/data";
-import { getBoxes, getEnergies } from "@/lib/categories";
+import { getBuildings, getEnergies } from "@/lib/categories";
 import { NewItemRow } from "@/components/new-item-row";
 import { SortableList } from "@/components/sortable-list";
 import { DropTriageRow } from "@/components/drop-triage-row";
@@ -8,41 +8,41 @@ import { DropKeyboardController } from "@/components/drop-keyboard-controller";
 import { Kbd } from "@/components/kbd";
 
 export default async function DropPage() {
-  const [list, boxes, energies] = await Promise.all([
+  const [list, buildings, energies] = await Promise.all([
     getItemsByBox("DROP"),
-    getBoxes(),
+    getBuildings(),
     getEnergies(),
   ]);
 
-  const ready = boxes.length > 0 && energies.length > 0;
+  const ready = buildings.length > 0 && energies.length > 0;
 
   return (
     <div className="mx-auto max-w-[1100px] px-4 py-8 md:px-10">
       <h1 className="serif-h text-[28px] leading-tight md:text-[36px]">
         Field Notes
       </h1>
-      <p className="mt-1 text-[13px] text-ink-dim">
+      <p className="text-ink-dim mt-1 text-[13px]">
         {ready
-          ? "Triage each thought — pick a box, set time/flags/energy, send."
-          : "Untriaged captures. Set up your boxes and energies before triaging."}
+          ? "Triage each thought — pick a building, set time/flags/energy, send."
+          : "Untriaged captures. Set up your buildings and energies before triaging."}
       </p>
 
       {!ready && (
-        <div className="mt-6 rounded-sm border border-dashed border-brass/40 bg-paper-panel/30 p-6">
-          <h3 className="serif-h text-[18px] text-ink">
+        <div className="border-brass/40 bg-paper-panel/30 mt-6 rounded-sm border border-dashed p-6">
+          <h3 className="serif-h text-ink text-[18px]">
             Set up your blueprint first.
           </h3>
-          <p className="mt-1 text-[13px] text-ink-dim">
-            Triage needs at least one box (where things go) and one energy
+          <p className="text-ink-dim mt-1 text-[13px]">
+            Triage needs at least one building (where things go) and one energy
             (which decides Project Tasks vs Admin Tasks).
           </p>
           <div className="mt-4 flex flex-wrap gap-3">
-            {boxes.length === 0 && (
+            {buildings.length === 0 && (
               <Link
-                href="/settings/boxes"
+                href="/settings/buildings"
                 className="brass-button px-4 py-2 font-mono text-[10px] tracking-[0.18em]"
               >
-                + ADD BOXES
+                + ADD BUILDINGS
               </Link>
             )}
             {energies.length === 0 && (
@@ -58,13 +58,14 @@ export default async function DropPage() {
       )}
 
       {ready && list.length > 0 && (
-        <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 rounded-sm border border-paper-line/40 bg-paper-panel/20 px-3 py-2 font-mono text-[10px] tracking-wider text-ink-mute">
+        <div className="border-paper-line/40 bg-paper-panel/20 text-ink-mute mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 rounded-sm border px-3 py-2 font-mono text-[10px] tracking-wider">
           <span className="text-brass">Keyboard:</span>
           <span className="flex items-center gap-1.5">
             <Kbd keys="j" size="xs" /> <Kbd keys="k" size="xs" /> next/prev
           </span>
           <span className="flex items-center gap-1.5">
-            <Kbd keys="1" size="xs" /> Project Tasks <Kbd keys="2" size="xs" /> Admin Tasks
+            <Kbd keys="1" size="xs" /> Project Tasks <Kbd keys="2" size="xs" />{" "}
+            Admin Tasks
           </span>
           <span className="flex items-center gap-1.5">
             <Kbd keys="b" size="xs" /> box <Kbd keys="t" size="xs" /> time{" "}
@@ -93,19 +94,19 @@ export default async function DropPage() {
           items={list.map((it) => ({
             id: it.id,
             content: (
-              <DropTriageRow item={it} boxes={boxes} energies={energies} />
+              <DropTriageRow item={it} boxes={buildings} energies={energies} />
             ),
           }))}
         />
       </div>
 
-      <p className="mt-6 text-[11px] text-ink-mute">
+      <p className="text-ink-mute mt-6 text-[11px]">
         New captures land here from the iPhone Shortcut, Siri, or the{" "}
         <Link href="/field-notes/add" className="text-brass underline">
           Add a Field Note
         </Link>{" "}
-        page. Edit boxes and energies under{" "}
-        <Link href="/settings/boxes" className="text-brass underline">
+        page. Edit buildings and energies under{" "}
+        <Link href="/settings/buildings" className="text-brass underline">
           Settings
         </Link>
         .
