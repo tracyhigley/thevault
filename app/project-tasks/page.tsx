@@ -54,10 +54,7 @@ export default async function ProjectTasksPage() {
       <h1 className="serif-h mt-2 text-[28px] leading-tight md:text-[36px]">
         What you&apos;ve pulled off the drafting table.
       </h1>
-      <p className="text-ink-dim mt-1 text-[13px]">
-        Tasks checked off on a project that&apos;s under construction, grouped
-        by building.
-      </p>
+      <p className="text-ink-dim mt-1 text-[13px]">Current Project Tasks</p>
 
       {buildingsWithTasks.length === 0 ? (
         <div className="border-paper-line bg-paper-panel/40 mt-10 rounded-sm border border-dashed p-8 text-center">

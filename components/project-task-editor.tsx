@@ -1,7 +1,9 @@
 "use client";
 // Per-project task checklist. Checking a task pulls it onto the Project
-// Tasks page (grouped by building there) — it doesn't mark it "done".
-// There's no separate done state: finishing a task means removing it here.
+// Tasks page (grouped by building there). Marking a task done happens over
+// there (the DONE button) — it shows up here as struck through, so
+// finishing something is visible from the project too. Deleting a task
+// here is still how you clear it out for good.
 
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
@@ -39,18 +41,19 @@ export function ProjectTaskEditor({
   }
 
   function toggle(taskId: string, onTaskList: boolean) {
-    setTasks((prev) =>
-      prev.map((t) => (t.id === taskId ? { ...t, onTaskList } : t)),
+    const prev = tasks;
+    setTasks((p) =>
+      p.map((t) =>
+        t.id === taskId
+          ? { ...t, onTaskList, done: onTaskList ? false : t.done }
+          : t,
+      ),
     );
     startTransition(async () => {
       try {
         await setProjectTaskOnList(projectId, taskId, onTaskList);
       } catch (e: any) {
-        setTasks((prev) =>
-          prev.map((t) =>
-            t.id === taskId ? { ...t, onTaskList: !onTaskList } : t,
-          ),
-        );
+        setTasks(prev);
         toast.error(e?.message ?? "Couldn't update the task.");
       }
     });
@@ -89,14 +92,28 @@ export function ProjectTaskEditor({
                   onChange={(e) => toggle(t.id, e.target.checked)}
                   className="accent-brass"
                 />
-                <span className={t.onTaskList ? "text-ink" : "text-ink-dim"}>
+                <span
+                  className={
+                    t.done
+                      ? "text-ink-mute line-through"
+                      : t.onTaskList
+                        ? "text-ink"
+                        : "text-ink-dim"
+                  }
+                >
                   {t.text}
                 </span>
               </label>
-              {t.onTaskList && (
-                <span className="text-brass shrink-0 font-mono text-[9px] tracking-[0.14em]">
-                  ON PROJECT TASKS
+              {t.done ? (
+                <span className="text-teal shrink-0 font-mono text-[9px] tracking-[0.14em]">
+                  ✓ DONE
                 </span>
+              ) : (
+                t.onTaskList && (
+                  <span className="text-brass shrink-0 font-mono text-[9px] tracking-[0.14em]">
+                    ON PROJECT TASKS
+                  </span>
+                )
               )}
               <button
                 onClick={() => remove(t.id)}

@@ -49,6 +49,7 @@ function normalizeTasks(raw: unknown): ProjectTask[] {
       id: t.id,
       text: t.text,
       onTaskList: !!t.onTaskList,
+      done: !!t.done,
       createdAt: typeof t.createdAt === "string" ? t.createdAt : new Date().toISOString(),
     }));
 }

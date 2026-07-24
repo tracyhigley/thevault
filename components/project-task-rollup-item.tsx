@@ -1,13 +1,12 @@
 "use client";
-// One task row on the Project Tasks page. "Done" here just unchecks the
-// task's onTaskList flag — same non-destructive spirit as everywhere else
-// (the item stays put, it just stops surfacing). Deleting it for real
-// still happens back on the project's own checklist.
+// One task row on the Project Tasks page. "Done" marks the task done (it
+// shows struck through back on the project's own checklist) and takes it
+// off this page — the task itself isn't deleted, so nothing gets lost.
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { setProjectTaskOnList } from "@/lib/plan-actions";
+import { markProjectTaskDone } from "@/lib/plan-actions";
 
 export function ProjectTaskRollupItem({
   projectId,
@@ -31,7 +30,7 @@ export function ProjectTaskRollupItem({
     setHidden(true);
     startTransition(async () => {
       try {
-        await setProjectTaskOnList(projectId, taskId, false);
+        await markProjectTaskDone(projectId, taskId);
       } catch (e: any) {
         setHidden(false);
         toast.error(e?.message ?? "Couldn't update the task.");

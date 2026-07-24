@@ -29,5 +29,6 @@ export type ProjectTask = {
   id: string;
   text: string;
   onTaskList: boolean;
+  done: boolean; // finished via the Project Tasks page — shows struck through here
   createdAt: string; // ISO timestamp
 };
