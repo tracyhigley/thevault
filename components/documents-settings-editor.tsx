@@ -13,26 +13,16 @@ function deriveKey(label: string): string {
     .slice(0, 40);
 }
 
-const FOLDERS: Array<{ key: NonNullable<DocumentType["folder"]>; label: string }> = [
-  { key: "health", label: "HEALTH" },
-  { key: "read-watch", label: "READ & WATCH" },
-  { key: "misc", label: "MISC" },
-  { key: "ecom-ecoship", label: "ECOM & ECOSHIP" },
-  { key: "friends-family", label: "FRIENDS & FAMILY" },
-  { key: "home-garden", label: "HOME & GARDEN" },
-  { key: "stonewater-books", label: "STONEWATER BOOKS" },
-  { key: "leisure", label: "LEISURE" },
-  { key: "writing", label: "WRITING" },
-  { key: "travel", label: "TRAVEL" },
-];
-
 export function DocumentsSettingsEditor({
   initial,
+  buildings,
   onSave,
 }: {
   initial: DocumentType[];
+  buildings: { key: string; label: string }[];
   onSave: (rows: DocumentType[], keyMigrations?: DocumentKeyMigration[]) => Promise<unknown>;
 }) {
+  const defaultBuilding = buildings[0]?.key ?? "";
   const [rows, setRows] = useState<DocumentType[]>(initial);
   /** Document key for each row at last successful save (or server load). Drives items.box renames. */
   const [keyAtLastSave, setKeyAtLastSave] = useState(() =>
@@ -70,7 +60,7 @@ export function DocumentsSettingsEditor({
   function add() {
     setRows([
       ...rows,
-      { key: "", label: "", meta: "", color: "#b5853a", folder: "misc" },
+      { key: "", label: "", meta: "", color: "#b5853a", folder: defaultBuilding },
     ]);
     setKeyAtLastSave([...keyAtLastSave, ""]);
   }
@@ -96,7 +86,7 @@ export function DocumentsSettingsEditor({
     const cleaned = rows.map((r) => ({
       ...r,
       key: r.key || deriveKey(r.label) || "DOCUMENT",
-      folder: r.folder ?? "misc",
+      folder: r.folder || defaultBuilding,
     }));
     const keyMigrations: DocumentKeyMigration[] = [];
     for (let i = 0; i < cleaned.length; i++) {
@@ -124,7 +114,7 @@ export function DocumentsSettingsEditor({
         <span className="w-7" />
         <span className="min-w-[140px] flex-1">Label</span>
         <span className="min-w-[160px] flex-1">Meta</span>
-        <span className="w-[110px]">Folder</span>
+        <span className="w-[150px]">Building</span>
         <span className="w-[110px]">Key</span>
         <span className="w-[80px]" />
       </div>
@@ -153,15 +143,13 @@ export function DocumentsSettingsEditor({
             className="min-w-[160px] flex-1 rounded-sm border border-paper-line bg-paper-bg/60 px-2 py-1 font-mono text-[13px] text-ink-mute outline-none focus:border-brass"
           />
           <select
-            value={r.folder ?? "misc"}
-            onChange={(e) =>
-              update(i, { folder: e.target.value as DocumentType["folder"] })
-            }
-            className="w-[110px] rounded-sm border border-paper-line bg-paper-bg/60 px-2 py-1 font-mono text-[12px] text-ink outline-none focus:border-brass"
+            value={r.folder ?? defaultBuilding}
+            onChange={(e) => update(i, { folder: e.target.value })}
+            className="w-[150px] rounded-sm border border-paper-line bg-paper-bg/60 px-2 py-1 font-mono text-[12px] text-ink outline-none focus:border-brass"
           >
-            {FOLDERS.map((f) => (
-              <option key={f.key} value={f.key}>
-                {f.label}
+            {buildings.map((b) => (
+              <option key={b.key} value={b.key}>
+                {b.label}
               </option>
             ))}
           </select>

@@ -1,10 +1,13 @@
-import { getDocuments } from "@/lib/categories";
+import { getDocuments, getBuildings } from "@/lib/categories";
 import { saveDocumentConfig } from "@/lib/actions";
 import { DocumentsSettingsEditor } from "@/components/documents-settings-editor";
 import { SettingsSubnav } from "@/components/settings-subnav";
 
 export default async function DocumentsSettingsPage() {
-  const initial = await getDocuments();
+  const [initial, buildings] = await Promise.all([
+    getDocuments(),
+    getBuildings(),
+  ]);
 
   return (
     <div className="mx-auto max-w-[1000px] px-4 py-8 md:px-10">
@@ -26,6 +29,7 @@ export default async function DocumentsSettingsPage() {
 
       <DocumentsSettingsEditor
         initial={initial}
+        buildings={buildings}
         onSave={saveDocumentConfig}
       />
     </div>

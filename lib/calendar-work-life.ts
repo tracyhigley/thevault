@@ -1,41 +1,37 @@
 import type { Box } from "@/lib/categories";
-import {
-  DOCUMENT_FOLDERS,
-  type DocumentFolderKey,
-} from "@/lib/document-folders";
 import { hubSlotMatchesBox } from "@/lib/box-hub-layout";
 
 export type WorkLifeGroup = "work" | "other";
 
-const WORK_FOLDER_KEYS: DocumentFolderKey[] = [
+// These slot strings mirror the labels/keys the old Notes folders used
+// (Stonewater Books, Ecom & Ecoship, Writing / Travel, Leisure, Friends &
+// Family, Home & Garden). Kept as plain strings here — independent of the
+// Notes/buildings rework — since this is purely about matching calendar
+// project boxes for work/life coloring, not about notes at all.
+const WORK_SLOTS = [
   "stonewater-books",
+  "STONEWATER BOOKS",
   "ecom-ecoship",
+  "ECOM & ECOSHIP",
   "writing",
+  "WRITING",
+  "SWB",
+  "PCS",
+  "QCOM",
+  "ECOSHIP",
 ];
 
-const OTHER_FOLDER_KEYS: DocumentFolderKey[] = [
+const OTHER_SLOTS = [
   "travel",
+  "TRAVEL",
   "leisure",
+  "LEISURE",
   "friends-family",
+  "FRIENDS & FAMILY",
   "home-garden",
+  "HOME & GARDEN",
+  "F&F",
 ];
-
-/** Box hub abbreviations that map to document-folder groups on the calendar. */
-const WORK_EXTRA_SLOTS = ["SWB", "PCS", "QCOM", "ECOSHIP"] as const;
-const OTHER_EXTRA_SLOTS = ["F&F"] as const;
-
-function folderSlots(keys: DocumentFolderKey[]): string[] {
-  const slots: string[] = [];
-  for (const key of keys) {
-    slots.push(key);
-    const folder = DOCUMENT_FOLDERS.find((f) => f.key === key);
-    if (folder) slots.push(folder.label);
-  }
-  return slots;
-}
-
-const WORK_SLOTS = [...folderSlots(WORK_FOLDER_KEYS), ...WORK_EXTRA_SLOTS];
-const OTHER_SLOTS = [...folderSlots(OTHER_FOLDER_KEYS), ...OTHER_EXTRA_SLOTS];
 
 function matchesAnySlot(box: Box, slots: readonly string[]): boolean {
   return slots.some((slot) => hubSlotMatchesBox(box, slot));

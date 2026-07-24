@@ -7,12 +7,10 @@ import { parse } from "date-fns";
 import { fromZonedTime } from "date-fns-tz";
 import { parseTimeOnDate } from "@/lib/daily-plan";
 import { supabaseServer, supabaseAdmin } from "@/lib/supabase/server";
-import {
-  DOCUMENT_FOLDERS,
-  normalizeDocumentFolderKey,
-} from "@/lib/document-folders";
+import { normalizeDocumentFolderKey } from "@/lib/document-folders";
 import {
   getDocuments,
+  getBuildings,
   RESERVED_BOX_KEYS,
   type DocumentType,
 } from "@/lib/categories";
@@ -769,22 +767,12 @@ export async function saveEnergyConfig(
   revalidatePath("/", "layout");
 }
 
+// Folder now holds a building key (e.g. "THE_GYMNASIUM") from
+// settings.buildings, which is user-configurable — so this is a free string,
+// not a fixed enum. normalizeDocumentFolderKey still translates any leftover
+// legacy folder values forward on save.
 const DocumentConfig = BoxConfig.extend({
-  folder: z
-    .enum([
-      "health",
-      "read-watch",
-      "books",
-      "misc",
-      "ecom-ecoship",
-      "friends-family",
-      "home-garden",
-      "stonewater-books",
-      "leisure",
-      "writing",
-      "travel",
-    ])
-    .optional(),
+  folder: z.string().optional(),
 });
 
 export type DocumentKeyMigration = { from: string; to: string };
@@ -883,16 +871,13 @@ function nextUniqueDocumentKey(label: string, used: Set<string>): string {
   return candidate;
 }
 
-const DOCUMENT_FOLDER_KEYS = new Set<string>(
-  DOCUMENT_FOLDERS.map((f) => f.key),
-);
-
-/** Add one document category from the Documents hub (label + folder). */
+/** Add one document category from the Documents hub (label + building). */
 export async function appendDocument(labelRaw: string, folderKey: string) {
   const label = labelRaw.trim();
   if (!label) throw new Error("Enter a name for the note.");
-  if (!DOCUMENT_FOLDER_KEYS.has(folderKey)) {
-    throw new Error("Choose a folder.");
+  const buildings = await getBuildings();
+  if (!buildings.some((b) => b.key === folderKey)) {
+    throw new Error("Choose a building.");
   }
 
   const docs = await getDocuments();
