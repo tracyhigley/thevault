@@ -2,7 +2,7 @@
 //
 // The slug must match a document key in settings.documents (case-insensitive,
 // hyphen ↔ underscore). Anything else 404s with a deep link back to the
-// documents settings editor. Items are stored in the items table with box =
+// Notes hub. Items are stored in the items table with box =
 // the document key and a markdown body; we surface the most-recent item so
 // this stays one-document-per-slug. Later we can fan out to multiple
 // entries if needed.
@@ -12,6 +12,7 @@ import { getItemsByBox } from "@/lib/data";
 import { getDocuments, getBuildings, buildingSlug } from "@/lib/categories";
 import { DocumentsEditor } from "@/components/documents-editor";
 import { ConvertToProjectButton } from "@/components/convert-to-project-button";
+import { DeleteNoteButton } from "@/components/delete-note-button";
 import type { BoxKey } from "@/lib/types";
 
 function slugToKey(slug: string): string {
@@ -45,7 +46,7 @@ export default async function DocumentPage({
             ← BACK TO NOTES
           </Link>
           <Link
-            href="/settings/documents"
+            href="/documents"
             className="rounded-sm border border-brass/40 px-4 py-2 font-mono text-[11px] tracking-[0.18em] text-brass hover:bg-brass/10"
           >
             + ADD A NOTE
@@ -61,16 +62,15 @@ export default async function DocumentPage({
   ]);
   const doc = items[0];
   const building = buildings.find((b) => b.key === meta.folder);
+  const backHref = building
+    ? `/documents/folders/${buildingSlug(building.key)}`
+    : "/documents";
 
   return (
     <div className="mx-auto max-w-[800px] px-10 py-8">
       <div className="mb-6">
         <Link
-          href={
-            building
-              ? `/documents/folders/${buildingSlug(building.key)}`
-              : "/documents"
-          }
+          href={backHref}
           className="rounded-sm border border-paper-line px-3 py-1 font-mono text-[11px] tracking-[0.18em] text-ink-mute transition hover:border-brass/40 hover:text-brass"
         >
           ← BACK TO {building ? building.label.toUpperCase() : "NOTES"}
@@ -85,12 +85,13 @@ export default async function DocumentPage({
           {meta.meta}
         </p>
       )}
-      <div className="mt-4">
+      <div className="mt-4 flex flex-wrap items-center gap-2">
         <ConvertToProjectButton
           title={meta.label}
           body={doc?.body ?? ""}
           buildings={buildings}
         />
+        <DeleteNoteButton docKey={key} label={meta.label} backHref={backHref} />
       </div>
       <div className="mt-8">
         <DocumentsEditor
