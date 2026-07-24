@@ -68,10 +68,10 @@ export function NewCounterItemRow({
         onChange={(e) => setArea(e.target.value)}
         tone="brass"
         className="w-[13rem] shrink-0 px-2 py-1 font-mono text-[10px]"
-        aria-label="Choose box for new admin task"
+        aria-label="Pick building for new admin task"
       >
         <option value="" className="bg-paper-bg">
-          — choose box —
+          — pick building —
         </option>
         {boxes.map((b) => (
           <option key={b.key} value={b.key} className="bg-paper-bg">
