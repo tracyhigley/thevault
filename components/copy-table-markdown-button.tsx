@@ -8,7 +8,7 @@ export function CopyTableMarkdownButton() {
     void navigator.clipboard
       .writeText(DOCUMENT_TABLE_MARKDOWN)
       .then(() =>
-        toast.success("Copied. Open a document, tap EDIT, and paste."),
+        toast.success("Copied. Open a note, tap EDIT, and paste."),
       )
       .catch(() => toast.error("Couldn't copy."));
   }

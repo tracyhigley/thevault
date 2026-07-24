@@ -69,7 +69,7 @@ function buildItems(fiftyFdHref: string): NavItem[] {
     },
     {
       href: "/documents",
-      label: "DOCUMENTS",
+      label: "NOTES",
       hint: "g e",
       match: (p) =>
         p === "/documents" ||

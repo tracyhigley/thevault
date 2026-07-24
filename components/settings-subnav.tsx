@@ -9,7 +9,7 @@ const LINKS = [
   { href: "/settings/members", label: "MEMBERS" },
   { href: "/settings/boxes", label: "BOXES" },
   { href: "/settings/buildings", label: "BUILDINGS" },
-  { href: "/settings/documents", label: "DOCUMENTS" },
+  { href: "/settings/documents", label: "NOTES" },
   { href: "/settings/energies", label: "ENERGIES" },
   { href: "/settings/calendar", label: "CALENDAR" },
   { href: "/settings/connect", label: "CONNECT" },

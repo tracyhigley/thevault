@@ -868,7 +868,7 @@ function deriveDocumentKeyFromLabel(label: string): string {
 
 function nextUniqueDocumentKey(label: string, used: Set<string>): string {
   let base = deriveDocumentKeyFromLabel(label);
-  if (!base || RESERVED_BOX_KEYS.has(base)) base = "DOCUMENT";
+  if (!base || RESERVED_BOX_KEYS.has(base)) base = "NOTE";
   let candidate = base;
   let n = 2;
   while (used.has(candidate)) {
@@ -890,7 +890,7 @@ const DOCUMENT_FOLDER_KEYS = new Set<string>(
 /** Add one document category from the Documents hub (label + folder). */
 export async function appendDocument(labelRaw: string, folderKey: string) {
   const label = labelRaw.trim();
-  if (!label) throw new Error("Enter a name for the document.");
+  if (!label) throw new Error("Enter a name for the note.");
   if (!DOCUMENT_FOLDER_KEYS.has(folderKey)) {
     throw new Error("Choose a folder.");
   }

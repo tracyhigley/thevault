@@ -1,4 +1,4 @@
-// Document detail — markdown body for one configured document category.
+// Note detail — markdown body for one configured note category.
 //
 // The slug must match a document key in settings.documents (case-insensitive,
 // hyphen ↔ underscore). Anything else 404s with a deep link back to the
@@ -9,8 +9,9 @@
 
 import Link from "next/link";
 import { getItemsByBox } from "@/lib/data";
-import { getDocuments } from "@/lib/categories";
+import { getDocuments, getBuildings } from "@/lib/categories";
 import { DocumentsEditor } from "@/components/documents-editor";
+import { ConvertToProjectButton } from "@/components/convert-to-project-button";
 import { DOCUMENT_FOLDERS, folderForDocument } from "@/lib/document-folders";
 import type { BoxKey } from "@/lib/types";
 
@@ -31,10 +32,10 @@ export default async function DocumentPage({
   if (!meta) {
     return (
       <div className="mx-auto max-w-[640px] px-10 py-16 text-center">
-        <div className="eyebrow">— Document not found —</div>
+        <div className="eyebrow">— Note not found —</div>
         <h1 className="serif-h mt-2 text-[28px]">Nothing filed here.</h1>
         <p className="mt-2 text-[15px] text-ink-mute">
-          No document category called{" "}
+          No note category called{" "}
           <span className="font-mono text-brass">{key}</span>.
         </p>
         <div className="mt-6 flex justify-center gap-2">
@@ -42,20 +43,23 @@ export default async function DocumentPage({
             href="/documents"
             className="rounded-sm border border-paper-line px-4 py-2 font-mono text-[11px] tracking-[0.18em] text-ink-mute hover:border-brass/40 hover:text-brass"
           >
-            ← BACK TO DOCUMENTS
+            ← BACK TO NOTES
           </Link>
           <Link
             href="/settings/documents"
             className="rounded-sm border border-brass/40 px-4 py-2 font-mono text-[11px] tracking-[0.18em] text-brass hover:bg-brass/10"
           >
-            + ADD A DOCUMENT
+            + ADD A NOTE
           </Link>
         </div>
       </div>
     );
   }
 
-  const items = await getItemsByBox(key as BoxKey);
+  const [items, buildings] = await Promise.all([
+    getItemsByBox(key as BoxKey),
+    getBuildings(),
+  ]);
   const doc = items[0];
   const folderKey = folderForDocument(meta);
   const folderMeta = DOCUMENT_FOLDERS.find((f) => f.key === folderKey)!;
@@ -70,7 +74,7 @@ export default async function DocumentPage({
           ← BACK TO {folderMeta.label}
         </Link>
       </div>
-      <div className="eyebrow">— Document —</div>
+      <div className="eyebrow">— Note —</div>
       <h1 className="mt-2 font-sans text-[32px] font-semibold leading-tight tracking-tight text-ink md:text-[36px]">
         {meta.label}
       </h1>
@@ -79,6 +83,13 @@ export default async function DocumentPage({
           {meta.meta}
         </p>
       )}
+      <div className="mt-4">
+        <ConvertToProjectButton
+          title={meta.label}
+          body={doc?.body ?? ""}
+          buildings={buildings}
+        />
+      </div>
       <div className="mt-8">
         <DocumentsEditor
           box={key}

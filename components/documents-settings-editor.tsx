@@ -78,7 +78,7 @@ export function DocumentsSettingsEditor({
   function remove(i: number) {
     if (
       !confirm(
-        "Remove this document? Items already filed under it stay safe.",
+        "Remove this note? Items already filed under it stay safe.",
       )
     )
       return;
@@ -183,7 +183,7 @@ export function DocumentsSettingsEditor({
         onClick={add}
         className="w-full rounded-sm border border-dashed border-brass/40 py-3 font-mono text-[11px] tracking-[0.24em] text-brass/70 hover:border-brass"
       >
-        + ADD DOCUMENT
+        + ADD NOTE
       </button>
 
       <div className="flex items-center justify-between pt-3">
@@ -201,7 +201,7 @@ export function DocumentsSettingsEditor({
           disabled={pending}
           className="brass-button px-6 py-2 font-mono text-[11px] tracking-[0.24em] disabled:opacity-50"
         >
-          SAVE DOCUMENTS
+          SAVE NOTES
         </button>
       </div>
     </div>

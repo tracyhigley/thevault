@@ -25,10 +25,10 @@ export function NewDocumentRow({
         await appendDocument(t, folder);
         setLabel("");
         router.refresh();
-        toast.success("Document added.");
+        toast.success("Note added.");
       } catch (e: unknown) {
         toast.error(
-          e instanceof Error ? e.message : "Couldn’t add the document.",
+          e instanceof Error ? e.message : "Couldn’t add the note.",
         );
       }
     });
@@ -48,7 +48,7 @@ export function NewDocumentRow({
             add();
           }
         }}
-        placeholder="+ New document"
+        placeholder="+ New note"
         className="paper-task-title min-w-[220px] flex-1 bg-transparent text-ink placeholder:text-ink-mute outline-none"
       />
       <Select
@@ -56,7 +56,7 @@ export function NewDocumentRow({
         onChange={(e) => setFolder(e.target.value)}
         tone="brass"
         className="w-[14rem] shrink-0 px-2 py-1 font-mono text-[10px]"
-        aria-label="Folder for new document"
+        aria-label="Folder for new note"
       >
         <option value="" className="bg-paper-bg">
           — choose folder —

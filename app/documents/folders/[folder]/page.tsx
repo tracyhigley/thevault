@@ -36,8 +36,8 @@ export default async function DocumentsFolderPage({
       </h1>
       <p className="mt-1 text-[15px] text-ink-dim">
         {inFolder.length > 0
-          ? `Open a document in ${folderMeta.label}.`
-          : `No documents in ${folderMeta.label} yet.`}
+          ? `Open a note in ${folderMeta.label}.`
+          : `No notes in ${folderMeta.label} yet.`}
       </p>
 
       <div className="mt-4">
@@ -62,7 +62,7 @@ export default async function DocumentsFolderPage({
         </div>
       ) : (
         <p className="mt-8 text-[15px] text-ink-mute">
-          Add documents from Settings, then they&apos;ll appear here.
+          Add notes from Settings, then they&apos;ll appear here.
         </p>
       )}
     </div>

@@ -8,7 +8,7 @@ export default async function DocumentsSettingsPage() {
 
   return (
     <div className="mx-auto max-w-[1000px] px-4 py-8 md:px-10">
-      <div className="eyebrow">— Settings · documents —</div>
+      <div className="eyebrow">— Settings · notes —</div>
       <h1 className="serif-h mt-2 text-[36px] leading-tight md:text-[40px]">
         Long-form reference categories.
       </h1>
@@ -18,9 +18,9 @@ export default async function DocumentsSettingsPage() {
       </div>
 
       <p className="mt-6 text-[18px] text-ink-dim">
-        Documents are text-first reference — Notes, Measurements, Read &amp;
-        Research, Health Ideas. Distinct from boxes (which hold task-shaped
-        items). Each document gets a markdown page at{" "}
+        Notes are text-first reference — Measurements, Read &amp; Research,
+        Health Ideas, and anything else long-form. Distinct from boxes (which
+        hold task-shaped items). Each note gets a markdown page at{" "}
         <span className="font-mono text-brass">/documents/&lt;slug&gt;</span>.
       </p>
 

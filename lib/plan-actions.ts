@@ -74,6 +74,36 @@ export async function createProject(
   revalidatePath("/project-plans", "layout");
 }
 
+// Turns a note (a long-form write-up sitting in Notes) into a real project.
+// Always lands as an "idea" — the note's text becomes the project's sketch.
+// The note itself is left alone; nothing is deleted here.
+export async function createProjectFromNote(
+  building: string,
+  title: string,
+  sketch: string,
+) {
+  const { sb, user } = await requireUser();
+  const vaultId = await currentVaultId();
+  if (!vaultId) throw new Error("No vault");
+  const cleanTitle = title.trim();
+  if (!cleanTitle) throw new Error("Give it a name first");
+  const { data, error } = await sb
+    .from("projects")
+    .insert({
+      vault_id: vaultId,
+      user_id: user.id,
+      building,
+      title: cleanTitle,
+      phase: "idea",
+      sketch: sketch.trim() || null,
+    })
+    .select("id")
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  revalidatePath("/project-plans", "layout");
+  return data?.id as string | undefined;
+}
+
 const ProjectPatch = z.object({
   title: z.string().min(1).max(200).optional(),
   why: z.string().nullable().optional(),

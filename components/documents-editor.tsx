@@ -81,7 +81,7 @@ export function DocumentsEditor({
             <ReactMarkdown remarkPlugins={[remarkGfm]}>{body}</ReactMarkdown>
           ) : (
             <p className="italic text-ink-mute">
-              Empty document. Switch to EDIT to start writing.
+              Empty note. Switch to EDIT to start writing.
             </p>
           )}
         </article>

@@ -1,4 +1,4 @@
-// Documents hub — folder view for configured documents.
+// Notes hub — folder view for configured notes.
 
 import Link from "next/link";
 import { getDocuments } from "@/lib/categories";
@@ -13,11 +13,11 @@ export default async function DocumentsHubPage() {
   return (
     <div className="mx-auto max-w-[1100px] px-4 py-8 md:px-10">
       <h1 className="serif-h text-[28px] leading-tight md:text-[36px]">
-        Documents
+        Notes
       </h1>
       <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
         <p className="text-[15px] text-ink-dim">
-          Reference folders — open a folder to see the documents inside.
+          Reference folders — open a folder to see the notes inside.
         </p>
         <CopyTableMarkdownButton />
       </div>
@@ -31,7 +31,7 @@ export default async function DocumentsHubPage() {
           >
             Rename, keys, colors, or remove
           </Link>{" "}
-          documents in Settings.
+          notes in Settings.
         </p>
       </div>
 
@@ -71,7 +71,7 @@ function DocumentFolderCard({
       </div>
       <div className="absolute inset-0 rounded-sm bg-[linear-gradient(180deg,rgba(255,255,255,0.2),rgba(0,0,0,0.02))]" />
       <div className="absolute bottom-3 right-4 font-mono text-[11px] tracking-[0.16em] text-[#6f5a37]/80">
-        {count} DOCUMENT{count === 1 ? "" : "S"}
+        {count} NOTE{count === 1 ? "" : "S"}
       </div>
     </Link>
   );
