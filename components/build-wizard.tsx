@@ -73,6 +73,10 @@ export function BuildWizard({
     if (step === 1) {
       markPreferTodayOverDropLanding();
       router.push("/");
+    } else if (step === 3 && dropItems.length === 0) {
+      // Field Notes (step 2) is empty and auto-skipped going forward —
+      // skip it going backward too, or Back would just bounce off it.
+      router.push(`/build?step=1`);
     } else router.push(`/build?step=${step - 1}`);
   }
 

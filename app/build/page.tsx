@@ -89,6 +89,10 @@ export default async function BuildDayPage({
 
   if (step > 5) redirect("/");
 
+  // Nothing to triage — skip the dead Field Notes step in both directions
+  // (arriving fresh, or having just cleared the last item mid-step).
+  if (step === 2 && dropItems.length === 0) redirect("/build?step=3");
+
   return (
     <BuildWizard
       step={step}

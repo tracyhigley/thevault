@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { getItemsByBox } from "@/lib/data";
 import { getBuildings, getEnergies } from "@/lib/categories";
 import { NewItemRow } from "@/components/new-item-row";
@@ -13,6 +14,12 @@ export default async function DropPage() {
     getBuildings(),
     getEnergies(),
   ]);
+
+  // Nothing left to triage — hand back to "/", which decides what's next
+  // (build prompt if today isn't built yet, the schedule if it is).
+  if (list.length === 0) {
+    redirect("/");
+  }
 
   const ready = buildings.length > 0 && energies.length > 0;
 
