@@ -32,6 +32,7 @@ export type ProjectTaskRow = {
   minutes: number | null;
   buildingLabel: string;
   buildingColor?: string;
+  projectTitle: string;
   onToday: boolean;
 };
 
@@ -500,6 +501,7 @@ function ProjectTasksStep({
               minutes={r.minutes}
               buildingLabel={r.buildingLabel}
               buildingColor={r.buildingColor}
+              projectTitle={r.projectTitle}
               onToday={r.onToday}
             />
           ))}

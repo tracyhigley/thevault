@@ -3,7 +3,10 @@
 // Admin Tasks row (CounterRow): bordered card, same title treatment, same
 // button language — just swapped in a building tag (since this page mixes
 // tasks from every building) in place of Admin's editable area pill, and
-// Project-Tasks-specific actions underneath.
+// Project-Tasks-specific actions underneath. The source Project Plan's
+// title runs as a muted subtitle under the task text (not truncated — this
+// page never has too many rows at once, and full titles matter more than
+// density here).
 
 import { useState } from "react";
 import { EditableProjectTaskMinutes } from "./editable-project-task-minutes";
@@ -35,6 +38,7 @@ export function ProjectTaskRollupItem({
   minutes,
   buildingLabel,
   buildingColor,
+  projectTitle,
   onToday,
 }: {
   projectId: string;
@@ -43,6 +47,7 @@ export function ProjectTaskRollupItem({
   minutes: number | null;
   buildingLabel: string;
   buildingColor?: string;
+  projectTitle: string;
   onToday: boolean;
 }) {
   const [hidden, setHidden] = useState(false);
@@ -52,8 +57,11 @@ export function ProjectTaskRollupItem({
   return (
     <div className="border-paper-line/60 bg-paper-panel/40 flex min-w-0 items-center gap-3 rounded-sm border px-3 py-2 transition">
       <BuildingTag label={buildingLabel} color={buildingColor} />
-      <span className="paper-task-title text-ink min-w-0 flex-1 truncate">
-        {text}
+      <span className="min-w-0 flex-1">
+        <span className="paper-task-title text-ink block">{text}</span>
+        <span className="text-ink-mute mt-0.5 block font-mono text-[10px] tracking-wide">
+          {projectTitle}
+        </span>
       </span>
       <span className="text-ink-mute flex shrink-0 items-baseline justify-end gap-1 font-mono text-[11px] whitespace-nowrap tabular-nums">
         <EditableProjectTaskMinutes

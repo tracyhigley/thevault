@@ -19,6 +19,7 @@ type Row = {
   createdAt: string;
   buildingLabel: string;
   buildingColor?: string;
+  projectTitle: string;
   onToday: boolean;
 };
 
@@ -45,6 +46,7 @@ export default async function ProjectTasksPage() {
         createdAt: t.createdAt,
         buildingLabel: building?.label ?? p.building,
         buildingColor: building?.color,
+        projectTitle: p.title,
         onToday: todayLinks[t.id]?.onToday ?? false,
       });
     }
@@ -90,6 +92,7 @@ export default async function ProjectTasksPage() {
               minutes={r.minutes}
               buildingLabel={r.buildingLabel}
               buildingColor={r.buildingColor}
+              projectTitle={r.projectTitle}
               onToday={r.onToday}
             />
           ))}

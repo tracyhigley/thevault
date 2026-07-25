@@ -80,6 +80,7 @@ export default async function BuildDayPage({
             createdAt: t.createdAt,
             buildingLabel: building?.label ?? p.building,
             buildingColor: building?.color,
+            projectTitle: p.title,
             onToday: todayLinks[t.id]?.onToday ?? false,
           };
         }),
