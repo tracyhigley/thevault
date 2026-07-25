@@ -17,16 +17,16 @@ export default async function BuildingsSettingsPage() {
         <SettingsSubnav />
       </div>
 
-      <p className="mt-6 text-ink-dim">
+      <p className="text-ink-dim mt-6">
         Buildings are the big, ongoing areas of your life — each one holds
-        building projects on the Master Project Plans. They&apos;re separate from your
-        boxes: boxes serve the day-to-day, buildings hold the long view.
+        building projects on the Master Project Plans, and tags what you file
+        from Field Notes, Admin Tasks, and Calendar.
       </p>
-      <p className="mt-1 text-[13px] text-ink-dim">
+      <p className="text-ink-dim mt-1 text-[13px]">
         The <strong>label</strong> is the building&apos;s name. The{" "}
-        <strong>meta</strong> is an optional one-liner shown under it (what
-        this building is about). The <strong>key</strong> auto-derives from
-        the label as you type.
+        <strong>meta</strong> is an optional one-liner shown under it (what this
+        building is about). The <strong>key</strong> auto-derives from the label
+        as you type.
       </p>
 
       <BoxesEditor

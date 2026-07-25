@@ -16,7 +16,11 @@ import { SKIP_FIELD_NOTES_LANDING_COOKIE } from "@/lib/nav-cookies";
 import { BuildPromptGreeting } from "@/components/build-prompt-greeting";
 import { todayYmd, zonedDayOfMonth } from "@/lib/day-timezone";
 
-const DAY_GREETINGS = ["Today", "Today is going to be great!", "Have fun today"];
+const DAY_GREETINGS = [
+  "Today",
+  "Today is going to be great!",
+  "Have fun today",
+];
 
 export default async function DocketPage() {
   const date = todayYmd();
@@ -51,15 +55,14 @@ export default async function DocketPage() {
     endOfDay: dayRow.end_of_day,
   };
 
-  const greeting =
-    DAY_GREETINGS[zonedDayOfMonth() % DAY_GREETINGS.length];
+  const greeting = DAY_GREETINGS[zonedDayOfMonth() % DAY_GREETINGS.length];
 
   return (
     <div className="mx-auto max-w-[820px] px-4 py-6 md:px-10 md:py-10">
       <UnsealGlow />
       <div className="flex items-baseline justify-between">
         <div>
-          <div className="serif-h text-[28px] text-ink md:text-[32px]">
+          <div className="serif-h text-ink text-[28px] md:text-[32px]">
             {greeting}
           </div>
           <DocketDayRange
@@ -71,7 +74,7 @@ export default async function DocketPage() {
         <Link
           href="/build?step=1"
           title="Press g b"
-          className="font-mono text-[10px] tracking-[0.18em] text-ink-mute hover:text-brass"
+          className="text-ink-mute hover:text-brass font-mono text-[10px] tracking-[0.18em]"
         >
           ↻ REBUILD DAY
         </Link>
@@ -91,13 +94,13 @@ export default async function DocketPage() {
 function BuildPrompt() {
   return (
     <div className="relative mx-auto flex min-h-[80vh] max-w-[640px] flex-col items-start justify-center px-4 md:px-10">
-      <div className="absolute inset-0 -z-0 lamp-glow opacity-50" />
+      <div className="lamp-glow absolute inset-0 -z-0 opacity-50" />
       <div className="relative">
         <BuildPromptGreeting />
-        <h1 className="serif-h mt-3 text-[36px] leading-tight text-ink md:text-[48px]">
+        <h1 className="serif-h text-ink mt-3 text-[36px] leading-tight md:text-[48px]">
           Let&rsquo;s build today.
         </h1>
-        <p className="mt-3 max-w-[480px] text-ink-dim">
+        <p className="text-ink-dim mt-3 max-w-[480px]">
           Answer your questions to begin building your day.
         </p>
         <Link
@@ -106,15 +109,7 @@ function BuildPrompt() {
         >
           BUILD TODAY
         </Link>
-        <p className="mt-4 font-mono text-[10px] tracking-[0.18em] text-ink-mute">
-          Or{" "}
-          <Link href="/boxes" className="hover:text-brass">
-            open the boxes
-          </Link>{" "}
-          to browse without building.
-        </p>
       </div>
     </div>
   );
 }
-

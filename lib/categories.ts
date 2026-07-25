@@ -1,14 +1,14 @@
-// Boxes are user-defined categories — life/business/project axes. They
-// don't carry a destination on their own; a single box can hold both
-// Counter items (obligations) and ATM items (energy-matched pulls) at
-// the same time.
+// Shared category shape used by Buildings, Documents, and (formerly) Boxes.
+// Buildings are the categorization axis across Field Notes, Admin Tasks,
+// and Calendar — see getBuildings() below. Documents are a separate,
+// text-first storage category — see getDocuments().
 //
 // Destination is its own axis, picked explicitly per item at triage:
 //   ATM     — energy-matched pulls; carries `category`, `energy`, `minutes`
 //   COUNTER — obligations; carries `area`, `urgent`, `must`, `minutes`
 //
-// Boxes, documents, and energies all live in `settings` JSONB so they're
-// editable from the Settings UI. No defaults — vaults start empty.
+// Buildings, documents, and energies all live in `settings` JSONB so
+// they're editable from the Settings UI. No defaults — vaults start empty.
 
 import { normalizeDocumentFolderKey } from "@/lib/document-folders";
 import { supabaseServer } from "./supabase/server";
@@ -21,7 +21,7 @@ export type Box = {
 };
 
 // Reserved keys for the daily-action surfaces (top-level pages, not
-// categories). Stored on item.box but never valid as a settings.boxes
+// categories). Stored on item.box but never valid as a settings.buildings
 // or settings.documents entry.
 export const RESERVED_BOX_KEYS = new Set(["DROP", "ATM", "COUNTER", "DOCKET"]);
 
@@ -36,17 +36,6 @@ function normalize(raw: any): Box | null {
     color: typeof raw.color === "string" ? raw.color : undefined,
     meta: typeof raw.meta === "string" ? raw.meta : undefined,
   };
-}
-
-export async function getBoxes(): Promise<Box[]> {
-  const sb = await supabaseServer();
-  const { data } = await sb
-    .from("settings")
-    .select("boxes")
-    .maybeSingle();
-  const raw = (data?.boxes as any[]) ?? null;
-  if (!raw || !Array.isArray(raw)) return [];
-  return raw.map(normalize).filter((b): b is Box => b !== null);
 }
 
 export type Destination = "ATM" | "COUNTER";
@@ -71,15 +60,10 @@ function normalizeEnergy(raw: any): EnergyType | null {
 
 export async function getEnergies(): Promise<EnergyType[]> {
   const sb = await supabaseServer();
-  const { data } = await sb
-    .from("settings")
-    .select("energies")
-    .maybeSingle();
+  const { data } = await sb.from("settings").select("energies").maybeSingle();
   const raw = (data?.energies as any[]) ?? null;
   if (!raw || !Array.isArray(raw)) return [];
-  return raw
-    .map(normalizeEnergy)
-    .filter((e): e is EnergyType => e !== null);
+  return raw.map(normalizeEnergy).filter((e): e is EnergyType => e !== null);
 }
 
 // Buildings are the Master Project Plans' life domains (The Library, The Press, …) —
@@ -90,10 +74,7 @@ export type Building = Box;
 
 export async function getBuildings(): Promise<Building[]> {
   const sb = await supabaseServer();
-  const { data } = await sb
-    .from("settings")
-    .select("buildings")
-    .maybeSingle();
+  const { data } = await sb.from("settings").select("buildings").maybeSingle();
   const raw = (data?.buildings as any[]) ?? null;
   if (!raw || !Array.isArray(raw)) return [];
   return raw.map(normalize).filter((b): b is Building => b !== null);
@@ -135,5 +116,7 @@ export async function getDocuments(): Promise<DocumentType[]> {
   const row = data as { documents?: unknown; records?: unknown } | null;
   const raw = (row?.documents ?? row?.records) as unknown;
   if (!raw || !Array.isArray(raw)) return [];
-  return raw.map(normalizeDocument).filter((d): d is DocumentType => d !== null);
+  return raw
+    .map(normalizeDocument)
+    .filter((d): d is DocumentType => d !== null);
 }

@@ -7,7 +7,6 @@ import clsx from "clsx";
 const LINKS = [
   { href: "/settings", label: "GENERAL" },
   { href: "/settings/members", label: "MEMBERS" },
-  { href: "/settings/boxes", label: "BOXES" },
   { href: "/settings/buildings", label: "BUILDINGS" },
   { href: "/settings/energies", label: "ENERGIES" },
   { href: "/settings/calendar", label: "CALENDAR" },
