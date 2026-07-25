@@ -7,6 +7,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { supabaseServer } from "@/lib/supabase/server";
+import { describeZodError } from "@/lib/zod-error";
 
 async function requireUser() {
   const sb = await supabaseServer();
@@ -33,7 +34,7 @@ async function currentVaultId() {
 const BuildingConfig = z.object({
   key: z.string().min(1).max(40),
   label: z.string().min(1).max(60),
-  meta: z.string().max(60).optional().default(""),
+  meta: z.string().max(120).optional().default(""),
   color: z
     .string()
     .regex(/^#[0-9a-fA-F]{6}$/)
@@ -46,7 +47,12 @@ export async function saveBuildingConfig(
   const { sb } = await requireUser();
   const vaultId = await currentVaultId();
   if (!vaultId) throw new Error("No vault");
-  const parsed = buildings.map((b) => BuildingConfig.parse(b));
+  let parsed;
+  try {
+    parsed = buildings.map((b) => BuildingConfig.parse(b));
+  } catch (e) {
+    throw new Error(describeZodError(e) ?? "Invalid building settings.");
+  }
   await sb.from("settings").upsert({ vault_id: vaultId, buildings: parsed });
   revalidatePath("/project-plans", "layout");
   revalidatePath("/settings/buildings");

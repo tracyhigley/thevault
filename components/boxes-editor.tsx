@@ -7,6 +7,12 @@ import type { Box } from "@/lib/categories";
 // The Documents settings editor reuses this same component — same shape, same UX,
 // just routed to a different `onSave`. See app/settings/documents/page.tsx.
 
+// Keep in sync with BoxConfig / BuildingConfig in lib/actions.ts and
+// lib/plan-actions.ts — those are the source of truth (Zod), these just
+// let the input stop you before you hit the server-side limit.
+const LABEL_MAX = 60;
+const META_MAX = 120;
+
 // Auto-derived key from a label: uppercase, spaces → underscores, strip
 // punctuation. Mirrors the manual transform users were typing themselves.
 function deriveKey(label: string): string {
@@ -132,19 +138,31 @@ export function BoxesEditor({
             className="h-7 w-7 cursor-pointer rounded-sm border border-paper-line bg-transparent"
             title="Color"
           />
-          <input
-            value={b.label}
-            onChange={(e) => changeLabel(i, e.target.value)}
-            placeholder={labelPlaceholder}
-            className="min-w-[160px] flex-1 rounded-sm border border-paper-line bg-paper-bg/60 px-2 py-1 text-ink outline-none focus:border-brass"
-          />
-          <input
-            value={b.meta ?? ""}
-            onChange={(e) => update(i, { meta: e.target.value })}
-            placeholder={metaPlaceholder}
-            title="An optional one-liner to remind you what this box is — shows under the label on box cards."
-            className="min-w-[160px] flex-1 rounded-sm border border-paper-line bg-paper-bg/60 px-2 py-1 font-mono text-[11px] text-ink-mute outline-none focus:border-brass"
-          />
+          <span className="flex min-w-[160px] flex-1 items-center gap-1">
+            <input
+              value={b.label}
+              onChange={(e) => changeLabel(i, e.target.value)}
+              placeholder={labelPlaceholder}
+              maxLength={LABEL_MAX}
+              className="min-w-0 flex-1 rounded-sm border border-paper-line bg-paper-bg/60 px-2 py-1 text-ink outline-none focus:border-brass"
+            />
+            <span className="w-[40px] shrink-0 text-right font-mono text-[9px] text-ink-mute/50">
+              {b.label.length}/{LABEL_MAX}
+            </span>
+          </span>
+          <span className="flex min-w-[160px] flex-1 items-center gap-1">
+            <input
+              value={b.meta ?? ""}
+              onChange={(e) => update(i, { meta: e.target.value })}
+              placeholder={metaPlaceholder}
+              title="An optional one-liner to remind you what this box is — shows under the label on box cards."
+              maxLength={META_MAX}
+              className="min-w-0 flex-1 rounded-sm border border-paper-line bg-paper-bg/60 px-2 py-1 font-mono text-[11px] text-ink-mute outline-none focus:border-brass"
+            />
+            <span className="w-[40px] shrink-0 text-right font-mono text-[9px] text-ink-mute/50">
+              {(b.meta ?? "").length}/{META_MAX}
+            </span>
+          </span>
           <input
             value={b.key}
             onChange={(e) => changeKey(i, e.target.value)}

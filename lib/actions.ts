@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { parseTimeOnDate } from "@/lib/daily-plan";
+import { describeZodError } from "@/lib/zod-error";
 import { supabaseServer, supabaseAdmin } from "@/lib/supabase/server";
 import { normalizeDocumentFolderKey } from "@/lib/document-folders";
 import {
@@ -714,7 +715,7 @@ export async function createMyBlueprint(name: string) {
 const BoxConfig = z.object({
   key: z.string().min(1).max(40),
   label: z.string().min(1).max(60),
-  meta: z.string().max(40).optional().default(""),
+  meta: z.string().max(120).optional().default(""),
   color: z.string().regex(/^#[0-9a-fA-F]{6}$/).optional(),
 });
 
@@ -722,7 +723,12 @@ export async function saveBoxConfig(boxes: z.input<typeof BoxConfig>[]) {
   const { sb } = await requireUser();
   const vaultId = await currentVaultId();
   if (!vaultId) throw new Error("No vault");
-  const parsed = boxes.map((b) => BoxConfig.parse(b));
+  let parsed;
+  try {
+    parsed = boxes.map((b) => BoxConfig.parse(b));
+  } catch (e) {
+    throw new Error(describeZodError(e) ?? "Invalid box settings.");
+  }
   await sb.from("settings").upsert({ vault_id: vaultId, boxes: parsed });
   revalidatePath("/", "layout");
 }
@@ -779,11 +785,16 @@ export async function saveDocumentConfig(
   if (!vaultId) throw new Error("No vault");
   const prevDocs = await getDocuments();
   const prevKeys = new Set(prevDocs.map((d) => d.key));
-  const parsed = documents.map((d) => {
-    const row = DocumentConfig.parse(d);
-    const folder = normalizeDocumentFolderKey(row.folder);
-    return folder === row.folder ? row : { ...row, folder };
-  });
+  let parsed;
+  try {
+    parsed = documents.map((d) => {
+      const row = DocumentConfig.parse(d);
+      const folder = normalizeDocumentFolderKey(row.folder);
+      return folder === row.folder ? row : { ...row, folder };
+    });
+  } catch (e) {
+    throw new Error(describeZodError(e) ?? "Invalid document settings.");
+  }
   const nextKeys = new Set(parsed.map((d) => d.key));
 
   const { data: row } = await sb

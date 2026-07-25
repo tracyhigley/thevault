@@ -5,6 +5,12 @@ import { toast } from "sonner";
 import type { DocumentKeyMigration } from "@/lib/actions";
 import type { DocumentType } from "@/lib/categories";
 
+// Keep in sync with DocumentConfig (extends BoxConfig) in lib/actions.ts —
+// that's the source of truth (Zod), this just stops you before you hit the
+// server-side limit.
+const LABEL_MAX = 60;
+const META_MAX = 120;
+
 function deriveKey(label: string): string {
   return label
     .toUpperCase()
@@ -130,18 +136,30 @@ export function DocumentsSettingsEditor({
             className="h-7 w-7 cursor-pointer rounded-sm border border-paper-line bg-transparent"
             title="Color"
           />
-          <input
-            value={r.label}
-            onChange={(e) => changeLabel(i, e.target.value)}
-            placeholder="Label (e.g. Notes)"
-            className="min-w-[140px] flex-1 rounded-sm border border-paper-line bg-paper-bg/60 px-2 py-1 text-ink outline-none focus:border-brass"
-          />
-          <input
-            value={r.meta ?? ""}
-            onChange={(e) => update(i, { meta: e.target.value })}
-            placeholder="Subtitle, e.g. Measurements & doses"
-            className="min-w-[160px] flex-1 rounded-sm border border-paper-line bg-paper-bg/60 px-2 py-1 font-mono text-[13px] text-ink-mute outline-none focus:border-brass"
-          />
+          <span className="flex min-w-[140px] flex-1 items-center gap-1">
+            <input
+              value={r.label}
+              onChange={(e) => changeLabel(i, e.target.value)}
+              placeholder="Label (e.g. Notes)"
+              maxLength={LABEL_MAX}
+              className="min-w-0 flex-1 rounded-sm border border-paper-line bg-paper-bg/60 px-2 py-1 text-ink outline-none focus:border-brass"
+            />
+            <span className="w-[40px] shrink-0 text-right font-mono text-[9px] text-ink-mute/50">
+              {r.label.length}/{LABEL_MAX}
+            </span>
+          </span>
+          <span className="flex min-w-[160px] flex-1 items-center gap-1">
+            <input
+              value={r.meta ?? ""}
+              onChange={(e) => update(i, { meta: e.target.value })}
+              placeholder="Subtitle, e.g. Measurements & doses"
+              maxLength={META_MAX}
+              className="min-w-0 flex-1 rounded-sm border border-paper-line bg-paper-bg/60 px-2 py-1 font-mono text-[13px] text-ink-mute outline-none focus:border-brass"
+            />
+            <span className="w-[40px] shrink-0 text-right font-mono text-[9px] text-ink-mute/50">
+              {(r.meta ?? "").length}/{META_MAX}
+            </span>
+          </span>
           <select
             value={r.folder ?? defaultBuilding}
             onChange={(e) => update(i, { folder: e.target.value })}
