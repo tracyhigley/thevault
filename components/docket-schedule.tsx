@@ -58,16 +58,17 @@ function buildBlocksFromTodayOrder(
     if (!Number.isNaN(s.getTime())) pinById.set(it.id, s);
   }
 
+  // No minutes estimate yet? Still show it — as a zero-duration block —
+  // rather than silently dropping it off Today. A project task pulled onto
+  // Today before its time estimate is filled in should still show up.
   const pinned = todayItems
-    .filter((it) => pinById.has(it.id) && (it.minutes ?? 0) > 0)
+    .filter((it) => pinById.has(it.id))
     .sort(
       (a, b) =>
         pinById.get(a.id)!.getTime() - pinById.get(b.id)!.getTime(),
     );
 
-  const queue = todayItems.filter(
-    (it) => !pinById.has(it.id) && (it.minutes ?? 0) > 0,
-  );
+  const queue = todayItems.filter((it) => !pinById.has(it.id));
 
   let q = 0;
   let cursor = ceilToNextFiveMinuteLocal(dayStart);
