@@ -3,8 +3,6 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { parse } from "date-fns";
-import { fromZonedTime } from "date-fns-tz";
 import { parseTimeOnDate } from "@/lib/daily-plan";
 import { supabaseServer, supabaseAdmin } from "@/lib/supabase/server";
 import { normalizeDocumentFolderKey } from "@/lib/document-folders";
@@ -214,8 +212,8 @@ export async function saveDayInputsPartial(
     ignoreDuplicates: false,
   });
 
-  // Daily Anchors: Morning Workout always on Today (unpinned); Lunch pinned at
-  // local noon. Run whenever step 1 is saved so rebuilding updates anchors.
+  // Daily Anchors: Morning Workout always on Today (unpinned). Run whenever
+  // step 1 is saved so rebuilding updates anchors.
   if (parsed.end_of_day !== undefined || parsed.hours_available !== undefined) {
     try {
       await upsertDailyAnchor(sb, {
@@ -227,24 +225,6 @@ export async function saveDayInputsPartial(
           minutes: 45,
           order: 1,
           pinned: false,
-        },
-      });
-      const lunchStart =
-        parsed.reference_tz && parsed.reference_tz.trim()
-          ? fromZonedTime(
-              parse(`${parsed.date} 12:00:00`, "yyyy-MM-dd HH:mm:ss", new Date()),
-              parsed.reference_tz,
-            )
-          : parseTimeOnDate("12:00 PM", parsed.date);
-      await upsertDailyAnchor(sb, {
-        vaultId,
-        userId: user.id,
-        spec: {
-          tag: "__daily_anchor__:lunch",
-          title: "Lunch",
-          minutes: 30,
-          start: lunchStart,
-          order: 2,
         },
       });
     } catch {
