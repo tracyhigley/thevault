@@ -1,15 +1,17 @@
 "use client";
 // Per-project task checklist. Checking a task pulls it onto the Project
-// Tasks page (grouped by building there). Marking a task done happens over
-// there (the DONE button) — it shows up here as struck through, so
-// finishing something is visible from the project too. Deleting a task
-// here is still how you clear it out for good.
+// Tasks page (grouped by building there). A task can also be marked done
+// right here (same markProjectTaskDone action the Project Tasks page's DONE
+// button uses) — it shows struck through either way, so finishing something
+// is visible from both places. Deleting a task here is still how you clear
+// it out for good.
 
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import {
   addProjectTask,
   deleteProjectTask,
+  markProjectTaskDone,
   setProjectTaskOnList,
 } from "@/lib/plan-actions";
 import type { ProjectTask } from "@/lib/project-phases";
@@ -55,6 +57,23 @@ export function ProjectTaskEditor({
       } catch (e: any) {
         setTasks(prev);
         toast.error(e?.message ?? "Couldn't update the task.");
+      }
+    });
+  }
+
+  function markDone(taskId: string) {
+    const prev = tasks;
+    setTasks((p) =>
+      p.map((t) =>
+        t.id === taskId ? { ...t, done: true, onTaskList: false } : t,
+      ),
+    );
+    startTransition(async () => {
+      try {
+        await markProjectTaskDone(projectId, taskId);
+      } catch (e: any) {
+        setTasks(prev);
+        toast.error(e?.message ?? "Couldn't mark the task done.");
       }
     });
   }
@@ -109,11 +128,20 @@ export function ProjectTaskEditor({
                   ✓ DONE
                 </span>
               ) : (
-                t.onTaskList && (
-                  <span className="text-brass shrink-0 font-mono text-[9px] tracking-[0.14em]">
-                    ON PROJECT TASKS
-                  </span>
-                )
+                <>
+                  {t.onTaskList && (
+                    <span className="text-brass shrink-0 font-mono text-[9px] tracking-[0.14em]">
+                      ON PROJECT TASKS
+                    </span>
+                  )}
+                  <button
+                    onClick={() => markDone(t.id)}
+                    disabled={pending}
+                    className="border-emerald-600/35 text-emerald-700 hover:bg-emerald-600/10 hover:text-emerald-800 shrink-0 rounded-sm border px-1.5 py-0.5 font-mono text-[9px] tracking-wider transition disabled:opacity-40"
+                  >
+                    DONE
+                  </button>
+                </>
               )}
               <button
                 onClick={() => remove(t.id)}
