@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import {
   getDefaultCanonicalSiteUrl,
-  isLegacyVaultHost,
+  isLegacyProjectHost,
 } from "@/lib/site-url";
 
 const PUBLIC_PATHS = [
@@ -16,7 +16,7 @@ const PUBLIC_PATHS = [
 
 export async function proxy(req: NextRequest) {
   const host = (req.headers.get("host") ?? req.nextUrl.host).split(":")[0];
-  if (isLegacyVaultHost(host)) {
+  if (isLegacyProjectHost(host)) {
     const target = new URL(
       `${req.nextUrl.pathname}${req.nextUrl.search}`,
       getDefaultCanonicalSiteUrl(),

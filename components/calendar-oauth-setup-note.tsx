@@ -2,7 +2,7 @@ import { headers } from "next/headers";
 import {
   getDefaultCanonicalSiteUrl,
   getSiteUrlFromHeaders,
-  isLegacyVaultHost,
+  isLegacyProjectHost,
 } from "@/lib/site-url";
 
 /** Collapsed setup reference — uses canonical / current URL for OAuth. */
@@ -11,7 +11,7 @@ export async function CalendarOAuthSetupNote() {
   const requestHost = (h.get("x-forwarded-host") ?? h.get("host") ?? "")
     .split(",")[0]
     ?.trim();
-  const onLegacyHost = requestHost ? isLegacyVaultHost(requestHost) : false;
+  const onLegacyHost = requestHost ? isLegacyProjectHost(requestHost) : false;
   const siteUrl = onLegacyHost
     ? getDefaultCanonicalSiteUrl()
     : getSiteUrlFromHeaders(h);
