@@ -55,7 +55,11 @@ export default async function ProjectTasksPage() {
   // One flat list, oldest-pulled first — no grouping by building.
   rows.sort((a, b) => a.createdAt.localeCompare(b.createdAt));
 
-  const buildingCount = new Set(rows.map((r) => r.buildingLabel)).size;
+  const buildingLabelsWithTasks = new Set(rows.map((r) => r.buildingLabel));
+  const buildingCount = buildingLabelsWithTasks.size;
+  const emptyBuildings = buildings.filter(
+    (b) => !buildingLabelsWithTasks.has(b.label),
+  );
 
   return (
     <div className="mx-auto max-w-[1400px] px-4 py-8 md:px-10">
@@ -100,11 +104,19 @@ export default async function ProjectTasksPage() {
       )}
 
       {rows.length > 0 ? (
-        <p className="text-ink-mute mt-6 text-[13px]">
-          {rows.length} task{rows.length === 1 ? "" : "s"} pulled from{" "}
-          {buildingCount} building
-          {buildingCount === 1 ? "" : "s"}.
-        </p>
+        <>
+          <p className="text-ink-mute mt-6 text-[13px]">
+            {rows.length} task{rows.length === 1 ? "" : "s"} pulled from{" "}
+            {buildingCount} building
+            {buildingCount === 1 ? "" : "s"}.
+          </p>
+          {emptyBuildings.length > 0 ? (
+            <p className="text-ink-mute mt-1 text-[13px]">
+              Nothing pulled from{" "}
+              {emptyBuildings.map((b) => b.label).join(", ")}.
+            </p>
+          ) : null}
+        </>
       ) : null}
     </div>
   );
