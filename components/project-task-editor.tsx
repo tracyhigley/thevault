@@ -12,9 +12,11 @@ import {
   addProjectTask,
   deleteProjectTask,
   markProjectTaskDone,
+  reorderProjectTasks,
   setProjectTaskOnList,
 } from "@/lib/plan-actions";
 import type { ProjectTask } from "@/lib/project-phases";
+import { SortableList, type SortableItem } from "@/components/sortable-list";
 
 export function ProjectTaskEditor({
   projectId,
@@ -91,6 +93,79 @@ export function ProjectTaskEditor({
     });
   }
 
+  function reorder(next: SortableItem[]) {
+    const nextIds = next.map((i) => i.id);
+    const prev = tasks;
+    setTasks((p) => {
+      const byId = new Map(p.map((t) => [t.id, t]));
+      return nextIds
+        .map((id) => byId.get(id))
+        .filter((t): t is ProjectTask => !!t);
+    });
+    startTransition(async () => {
+      try {
+        await reorderProjectTasks(projectId, nextIds);
+      } catch (e: any) {
+        setTasks(prev);
+        toast.error(e?.message ?? "Couldn't reorder the tasks.");
+      }
+    });
+  }
+
+  const sortableItems: SortableItem[] = tasks.map((t) => ({
+    id: t.id,
+    content: (
+      <div className="flex items-center gap-3 py-2 text-[13px]">
+        <label className="flex flex-1 cursor-pointer items-center gap-2">
+          <input
+            type="checkbox"
+            checked={t.onTaskList}
+            onChange={(e) => toggle(t.id, e.target.checked)}
+            className="accent-brass"
+          />
+          <span
+            className={
+              t.done
+                ? "text-ink-mute line-through"
+                : t.onTaskList
+                  ? "text-ink"
+                  : "text-ink-dim"
+            }
+          >
+            {t.text}
+          </span>
+        </label>
+        {t.done ? (
+          <span className="text-teal shrink-0 font-mono text-[9px] tracking-[0.14em]">
+            ✓ DONE
+          </span>
+        ) : (
+          <>
+            {t.onTaskList && (
+              <span className="text-brass shrink-0 font-mono text-[9px] tracking-[0.14em]">
+                ON PROJECT TASKS
+              </span>
+            )}
+            <button
+              onClick={() => markDone(t.id)}
+              disabled={pending}
+              className="border-emerald-600/35 text-emerald-700 hover:bg-emerald-600/10 hover:text-emerald-800 shrink-0 rounded-sm border px-1.5 py-0.5 font-mono text-[9px] tracking-wider transition disabled:opacity-40"
+            >
+              DONE
+            </button>
+          </>
+        )}
+        <button
+          onClick={() => remove(t.id)}
+          aria-label="Remove task"
+          className="text-ink-mute shrink-0 font-mono text-[11px] hover:text-red-400"
+        >
+          ✕
+        </button>
+      </div>
+    ),
+  }));
+
   return (
     <div>
       {tasks.length === 0 ? (
@@ -98,61 +173,7 @@ export function ProjectTaskEditor({
           No tasks yet. Add one, then check it to pull it onto Project Tasks.
         </p>
       ) : (
-        <div className="divide-paper-line/50 divide-y">
-          {tasks.map((t) => (
-            <div
-              key={t.id}
-              className="flex items-center gap-3 py-2 text-[13px]"
-            >
-              <label className="flex flex-1 cursor-pointer items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={t.onTaskList}
-                  onChange={(e) => toggle(t.id, e.target.checked)}
-                  className="accent-brass"
-                />
-                <span
-                  className={
-                    t.done
-                      ? "text-ink-mute line-through"
-                      : t.onTaskList
-                        ? "text-ink"
-                        : "text-ink-dim"
-                  }
-                >
-                  {t.text}
-                </span>
-              </label>
-              {t.done ? (
-                <span className="text-teal shrink-0 font-mono text-[9px] tracking-[0.14em]">
-                  ✓ DONE
-                </span>
-              ) : (
-                <>
-                  {t.onTaskList && (
-                    <span className="text-brass shrink-0 font-mono text-[9px] tracking-[0.14em]">
-                      ON PROJECT TASKS
-                    </span>
-                  )}
-                  <button
-                    onClick={() => markDone(t.id)}
-                    disabled={pending}
-                    className="border-emerald-600/35 text-emerald-700 hover:bg-emerald-600/10 hover:text-emerald-800 shrink-0 rounded-sm border px-1.5 py-0.5 font-mono text-[9px] tracking-wider transition disabled:opacity-40"
-                  >
-                    DONE
-                  </button>
-                </>
-              )}
-              <button
-                onClick={() => remove(t.id)}
-                aria-label="Remove task"
-                className="text-ink-mute shrink-0 font-mono text-[11px] hover:text-red-400"
-              >
-                ✕
-              </button>
-            </div>
-          ))}
-        </div>
+        <SortableList items={sortableItems} onReorder={reorder} />
       )}
       <div className="mt-3 flex gap-2">
         <input

@@ -332,6 +332,37 @@ export async function deleteProjectTask(projectId: string, taskId: string) {
   revalidatePath("/admin-tasks");
 }
 
+// Reorders a project's task checklist to match the given id sequence.
+// Order lives purely in array position within the `tasks` JSON column, so
+// this just re-sorts that array — same shape as every other project-task
+// mutation here (read, transform, write whole array back).
+export async function reorderProjectTasks(projectId: string, taskIds: string[]) {
+  const { sb } = await requireUser();
+  const { data, error } = await sb
+    .from("projects")
+    .select("tasks")
+    .eq("id", projectId)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  const tasks = normalizeTasks(data?.tasks);
+  const byId = new Map(tasks.map((t) => [t.id, t]));
+  const reordered = taskIds
+    .map((id) => byId.get(id))
+    .filter((t): t is (typeof tasks)[number] => !!t);
+  // Any tasks not named in taskIds (shouldn't normally happen) stay put at
+  // the end so nothing silently disappears.
+  for (const t of tasks) {
+    if (!taskIds.includes(t.id)) reordered.push(t);
+  }
+  const { error: updateError } = await sb
+    .from("projects")
+    .update({ tasks: reordered, modified_at: new Date().toISOString() })
+    .eq("id", projectId);
+  if (updateError) throw new Error(updateError.message);
+  revalidatePath("/project-plans", "layout");
+  revalidatePath("/project-tasks");
+}
+
 // Soft delete — reversible from the DB, same as items.
 export async function deleteProject(id: string) {
   const { sb } = await requireUser();
