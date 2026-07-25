@@ -2,13 +2,13 @@
 // with the ability to override individual days. Pure planning data; doesn't
 // affect Today's schedule.
 
-import { getBoxes } from "@/lib/categories";
+import { getBuildings } from "@/lib/categories";
 import { getCalendarRange } from "@/lib/calendar-planning";
 import { CalendarBoard } from "@/components/calendar-board";
 
 export default async function CalendarPage() {
   const [boxes, weeks] = await Promise.all([
-    getBoxes(),
+    getBuildings(),
     getCalendarRange({ weeksBefore: 13, weeksAfter: 16 }),
   ]);
 
@@ -18,9 +18,9 @@ export default async function CalendarPage() {
       <h1 className="serif-h mt-2 text-[32px] leading-tight md:text-[40px]">
         Block out the weeks ahead.
       </h1>
-      <p className="mt-2 text-ink-dim">
-        Set a project for the whole week — every day inherits. Tap a single
-        day to override it just for that day.
+      <p className="text-ink-dim mt-2">
+        Set a project for the whole week — every day inherits. Tap a single day
+        to override it just for that day.
       </p>
 
       <CalendarBoard initialWeeks={weeks} boxes={boxes} />

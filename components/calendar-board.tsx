@@ -155,16 +155,16 @@ export function CalendarBoard({
 
   if (boxes.length === 0) {
     return (
-      <div className="mt-8 rounded-sm border border-dashed border-paper-line bg-paper-panel/40 p-6 text-center">
+      <div className="border-paper-line bg-paper-panel/40 mt-8 rounded-sm border border-dashed p-6 text-center">
         <p className="text-ink-dim">
-          You haven&apos;t set up any boxes yet — those are the projects you
+          You haven&apos;t set up any buildings yet — those are the projects you
           can block out weeks for.
         </p>
         <a
-          href="/settings/boxes"
-          className="mt-3 inline-block rounded-sm border border-brass/40 px-3 py-1.5 font-mono text-[10px] tracking-[0.18em] text-brass hover:border-brass"
+          href="/settings/buildings"
+          className="border-brass/40 text-brass hover:border-brass mt-3 inline-block rounded-sm border px-3 py-1.5 font-mono text-[10px] tracking-[0.18em]"
         >
-          + ADD BOXES
+          + ADD BUILDINGS
         </a>
       </div>
     );
@@ -181,7 +181,7 @@ export function CalendarBoard({
         <button
           type="button"
           onClick={() => setShowPast((v) => !v)}
-          className="block w-full rounded-sm border border-dashed border-paper-line bg-paper-panel/20 px-3 py-2 font-mono text-[10px] tracking-[0.18em] text-ink-mute hover:border-brass/40 hover:text-brass"
+          className="border-paper-line bg-paper-panel/20 text-ink-mute hover:border-brass/40 hover:text-brass block w-full rounded-sm border border-dashed px-3 py-2 font-mono text-[10px] tracking-[0.18em]"
         >
           {showPast
             ? `▴  HIDE EARLIER WEEKS (${pastWeeks.length})`

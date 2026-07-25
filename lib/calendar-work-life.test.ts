@@ -7,25 +7,39 @@ function box(label: string, key = label): Box {
 }
 
 describe("calendarWorkLifeGroup", () => {
-  it("classifies work categories by label and abbreviations", () => {
-    expect(calendarWorkLifeGroup(box("Stonewater Books"))).toBe("work");
-    expect(calendarWorkLifeGroup(box("SWB"))).toBe("work");
-    expect(calendarWorkLifeGroup(box("Ecom & Ecoship"))).toBe("work");
-    expect(calendarWorkLifeGroup(box("ECOSHIP"))).toBe("work");
-    expect(calendarWorkLifeGroup(box("PCS"))).toBe("work");
-    expect(calendarWorkLifeGroup(box("Writing"))).toBe("work");
+  it("classifies work buildings by label and key", () => {
+    expect(calendarWorkLifeGroup(box("The Press"))).toBe("work");
+    expect(calendarWorkLifeGroup(box("The Press", "THE_PRESS"))).toBe("work");
+    expect(calendarWorkLifeGroup(box("The Mercantile"))).toBe("work");
+    expect(calendarWorkLifeGroup(box("The Mercantile", "THE_MERCANTILE"))).toBe(
+      "work",
+    );
+    expect(calendarWorkLifeGroup(box("The Library"))).toBe("work");
+    expect(calendarWorkLifeGroup(box("The Library", "THE_LIBRARY"))).toBe(
+      "work",
+    );
   });
 
-  it("classifies other categories by label and abbreviations", () => {
-    expect(calendarWorkLifeGroup(box("Travel"))).toBe("other");
-    expect(calendarWorkLifeGroup(box("Leisure"))).toBe("other");
-    expect(calendarWorkLifeGroup(box("Friends & Family"))).toBe("other");
-    expect(calendarWorkLifeGroup(box("F&F"))).toBe("other");
-    expect(calendarWorkLifeGroup(box("Home & Garden"))).toBe("other");
+  it("classifies other buildings by label and key", () => {
+    expect(calendarWorkLifeGroup(box("The Port"))).toBe("other");
+    expect(calendarWorkLifeGroup(box("The Port", "THE_PORT"))).toBe("other");
+    expect(calendarWorkLifeGroup(box("The Family Lodge"))).toBe("other");
+    expect(
+      calendarWorkLifeGroup(box("The Family Lodge", "THE_FAMILY_LODGE")),
+    ).toBe("other");
+    expect(calendarWorkLifeGroup(box("The Grounds"))).toBe("other");
+    expect(calendarWorkLifeGroup(box("The Grounds", "THE_GROUNDS"))).toBe(
+      "other",
+    );
+    // Leisure had no direct building equivalent and was folded into The
+    // Gymnasium, so it's grouped "other" here too.
+    expect(calendarWorkLifeGroup(box("The Gymnasium"))).toBe("other");
+    expect(calendarWorkLifeGroup(box("The Gymnasium", "THE_GYMNASIUM"))).toBe(
+      "other",
+    );
   });
 
-  it("returns null for boxes outside work/life groups", () => {
-    expect(calendarWorkLifeGroup(box("Health"))).toBeNull();
-    expect(calendarWorkLifeGroup(box("Read / Watch"))).toBeNull();
+  it("returns null for buildings outside work/life groups", () => {
+    expect(calendarWorkLifeGroup(box("The Support Center"))).toBeNull();
   });
 });
