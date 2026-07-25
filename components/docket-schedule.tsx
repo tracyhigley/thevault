@@ -354,13 +354,13 @@ export function DocketSchedule({
               <button
                 type="button"
                 disabled={clearPending}
-                title="Permanently delete every completed task from Admin Tasks and Project Tasks"
+                title="Clear every completed task off Today. Ones pulled from a Project Plan are marked done and struck through there too; everything else is deleted for good."
                 className="shrink-0 rounded-sm border border-paper-line bg-paper-panel/40 px-3 py-1 font-mono text-[10px] tracking-[0.18em] text-ink-mute transition hover:border-rust/50 hover:text-rust disabled:opacity-40"
                 onClick={() => {
                   const n = doneTodayItems.length;
                   if (
                     !confirm(
-                      `Permanently delete all ${n} completed item${n === 1 ? "" : "s"}? This removes them from Admin Tasks and Project Tasks and cannot be undone.`,
+                      `Clear all ${n} completed item${n === 1 ? "" : "s"} from Today? Any pulled from a Project Plan will be marked done (struck through) there and removed from Project Tasks. The rest are deleted for good. Cannot be undone.`,
                     )
                   )
                     return;
@@ -370,7 +370,7 @@ export function DocketSchedule({
                         doneTodayItems.map((it) => it.id),
                       );
                       toast.success(
-                        `Permanently deleted ${r.deleted} completed item${r.deleted === 1 ? "" : "s"}.`,
+                        `Cleared ${r.deleted} completed item${r.deleted === 1 ? "" : "s"}.`,
                       );
                       router.refresh();
                     } catch (e: any) {

@@ -1,8 +1,12 @@
 "use server";
 
 // Server Actions for the Master Project Plans — buildings config + projects.
-// Kept separate from lib/actions.ts: the planning layer never touches
-// items or the daily schedule.
+// Kept separate from lib/actions.ts: the planning layer's own actions never
+// initiate changes to items or the daily schedule on their own. The two
+// narrow bridges are the "Project Tasks × Today" section below (adds/removes
+// a linked Today item) and markProjectTaskDoneCore, which lib/actions.ts
+// calls into from hardDeleteDoneTodayItems so that finishing a project-linked
+// item from Today's side stays in sync with its Project Plan checklist.
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
@@ -271,11 +275,18 @@ export async function setProjectTaskOnList(
   revalidatePath("/project-tasks");
 }
 
-// Called from the DONE button on the Project Tasks page. Marks the task
-// done (struck through on the project's checklist) and takes it off the
-// Project Tasks page — the task itself isn't deleted.
-export async function markProjectTaskDone(projectId: string, taskId: string) {
-  const { sb } = await requireUser();
+// Shared core of "mark done everywhere": struck through on the project's
+// checklist, off the Project Tasks page, and its linked Today item (if any)
+// cleared out. Takes a caller-supplied Supabase client so both the planning
+// layer (markProjectTaskDone, below) and the daily-engine layer
+// (hardDeleteDoneTodayItems in lib/actions.ts, reached when Today's "Clear
+// All Done" finalizes an item that started life as a project task) can
+// finish the same operation from whichever side the user acted on.
+export async function markProjectTaskDoneCore(
+  sb: Awaited<ReturnType<typeof supabaseServer>>,
+  projectId: string,
+  taskId: string,
+) {
   const { data, error } = await sb
     .from("projects")
     .select("tasks")
@@ -298,6 +309,14 @@ export async function markProjectTaskDone(projectId: string, taskId: string) {
     .eq("source_project_id", projectId)
     .eq("source_task_id", taskId)
     .is("deleted_at", null);
+}
+
+// Called from the DONE button on the Project Tasks page. Marks the task
+// done (struck through on the project's checklist) and takes it off the
+// Project Tasks page — the task itself isn't deleted.
+export async function markProjectTaskDone(projectId: string, taskId: string) {
+  const { sb } = await requireUser();
+  await markProjectTaskDoneCore(sb, projectId, taskId);
   revalidatePath("/project-plans", "layout");
   revalidatePath("/project-tasks");
   revalidatePath("/");

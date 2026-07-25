@@ -7,6 +7,7 @@ import { parseTimeOnDate } from "@/lib/daily-plan";
 import { describeZodError } from "@/lib/zod-error";
 import { supabaseServer, supabaseAdmin } from "@/lib/supabase/server";
 import { normalizeDocumentFolderKey } from "@/lib/document-folders";
+import { markProjectTaskDoneCore } from "@/lib/plan-actions";
 import {
   getDocuments,
   getBuildings,
@@ -311,14 +312,24 @@ export async function softDeleteItem(itemId: string) {
   revalidatePath("/boxes");
 }
 
-/** Permanently deletes rows that match Today’s “Done today” bucket: on today’s plan + state done. Ignores unrelated ids. */
+/**
+ * Clears Today’s “Done today” bucket: on today’s plan + state done. Ignores
+ * unrelated ids. Plain Admin/Counter items are hard-deleted outright. Items
+ * that trace back to a Project Task (source_project_id/source_task_id, set
+ * only via the Project Tasks page's "Add to Today") instead get finished
+ * through markProjectTaskDoneCore, so the same click also strikes the task
+ * through on its Project Plan checklist and drops it off the Project Tasks
+ * page — not just off Today. See markProjectTaskDone in lib/plan-actions.ts
+ * for the mirror-image version of this, triggered from that page's own DONE
+ * button.
+ */
 export async function hardDeleteDoneTodayItems(itemIds: string[]) {
   const { sb } = await requireUser();
   if (!itemIds.length) return { ok: true as const, deleted: 0 };
 
   const { data: rows, error: selErr } = await sb
     .from("items")
-    .select("id")
+    .select("id, source_project_id, source_task_id")
     .in("id", itemIds)
     .eq("state", "done")
     .not("today_order", "is", null)
@@ -326,20 +337,48 @@ export async function hardDeleteDoneTodayItems(itemIds: string[]) {
 
   if (selErr) throw new Error(selErr.message);
 
-  const validIds = (rows ?? []).map((r: { id: string }) => r.id);
-  if (!validIds.length) return { ok: true as const, deleted: 0 };
+  const validRows = rows ?? [];
+  if (!validRows.length) return { ok: true as const, deleted: 0 };
 
-  const { error: delErr } = await sb.from("items").delete().in("id", validIds);
+  const projectLinked = validRows.filter(
+    (r: { source_project_id: string | null; source_task_id: string | null }) =>
+      !!r.source_project_id && !!r.source_task_id,
+  );
+  const plainIds = validRows
+    .filter(
+      (r: { source_project_id: string | null; source_task_id: string | null }) =>
+        !r.source_project_id || !r.source_task_id,
+    )
+    .map((r: { id: string }) => r.id);
 
-  if (delErr) throw new Error(delErr.message);
+  // Project-linked items: finish them at the source. This both marks the
+  // task done (struck through) on the Project Plan and deletes this linked
+  // Today item as a side effect, so it never needs a separate delete call.
+  for (const r of projectLinked) {
+    await markProjectTaskDoneCore(
+      sb,
+      r.source_project_id as string,
+      r.source_task_id as string,
+    );
+  }
+
+  // Everything else: no project task to update, so just remove the item.
+  if (plainIds.length) {
+    const { error: delErr } = await sb
+      .from("items")
+      .delete()
+      .in("id", plainIds);
+    if (delErr) throw new Error(delErr.message);
+  }
 
   revalidatePath("/");
+  revalidatePath("/project-plans", "layout");
   revalidatePath("/project-tasks");
   revalidatePath("/admin-tasks");
   revalidatePath("/field-notes");
   revalidatePath("/boxes");
   revalidatePath("/documents");
-  return { ok: true as const, deleted: validIds.length };
+  return { ok: true as const, deleted: validRows.length };
 }
 
 /** Permanently removes the row (use sparingly; soft-delete is the default elsewhere). */
