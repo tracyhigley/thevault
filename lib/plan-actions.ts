@@ -508,6 +508,45 @@ export async function removeProjectTaskFromToday(
   revalidatePath("/build");
 }
 
+// Edits a project task's text from its checklist on the Project Plan page
+// (the only place task text is ever entered), keeping a linked Today item
+// (if any) in sync so the two never disagree.
+export async function updateProjectTaskText(
+  projectId: string,
+  taskId: string,
+  text: string,
+) {
+  const clean = text.trim();
+  if (!clean) throw new Error("Give the task a name first");
+  const { sb } = await requireUser();
+  const { data, error } = await sb
+    .from("projects")
+    .select("tasks")
+    .eq("id", projectId)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  const tasks = normalizeTasks(data?.tasks).map((t) =>
+    t.id === taskId ? { ...t, text: clean } : t,
+  );
+  const { error: updateError } = await sb
+    .from("projects")
+    .update({ tasks, modified_at: new Date().toISOString() })
+    .eq("id", projectId);
+  if (updateError) throw new Error(updateError.message);
+
+  await sb
+    .from("items")
+    .update({ title: clean })
+    .eq("source_project_id", projectId)
+    .eq("source_task_id", taskId)
+    .is("deleted_at", null);
+
+  revalidatePath("/project-plans", "layout");
+  revalidatePath("/project-tasks");
+  revalidatePath("/");
+  revalidatePath("/admin-tasks");
+}
+
 // Edits a project task's minutes estimate from the Project Tasks page, and
 // keeps a linked Today item (if any) in sync so the two never disagree.
 export async function updateProjectTaskMinutes(

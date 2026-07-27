@@ -8,15 +8,72 @@
 
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
+import clsx from "clsx";
 import {
   addProjectTask,
   deleteProjectTask,
   markProjectTaskDone,
   reorderProjectTasks,
   setProjectTaskOnList,
+  updateProjectTaskText,
 } from "@/lib/plan-actions";
 import type { ProjectTask } from "@/lib/project-phases";
 import { SortableList, type SortableItem } from "@/components/sortable-list";
+
+/** Inline-editable task text — same blend-in-until-focused pattern as
+ * EditableText / EditableProjectTaskMinutes, but writes through
+ * updateProjectTaskText (project.tasks jsonb) instead of an item field. */
+function EditableTaskText({
+  projectId,
+  taskId,
+  initial,
+  className,
+}: {
+  projectId: string;
+  taskId: string;
+  initial: string;
+  className?: string;
+}) {
+  const [value, setValue] = useState(initial);
+  const [pending, startTransition] = useTransition();
+
+  function commit() {
+    const clean = value.trim();
+    if (!clean) {
+      setValue(initial);
+      return;
+    }
+    if (clean === initial) {
+      setValue(clean);
+      return;
+    }
+    startTransition(async () => {
+      try {
+        await updateProjectTaskText(projectId, taskId, clean);
+      } catch (e: any) {
+        setValue(initial);
+        toast.error(e?.message ?? "Couldn't update the task.");
+      }
+    });
+  }
+
+  return (
+    <input
+      value={value}
+      onChange={(e) => setValue(e.target.value)}
+      onBlur={commit}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") (e.target as HTMLInputElement).blur();
+        if (e.key === "Escape") setValue(initial);
+      }}
+      className={clsx(
+        "bg-transparent outline-none focus:bg-paper-bg/40 focus:ring-brass/40 min-w-0 flex-1 rounded-sm px-1 focus:ring-1",
+        pending && "opacity-50",
+        className,
+      )}
+    />
+  );
+}
 
 export function ProjectTaskEditor({
   projectId,
@@ -116,14 +173,17 @@ export function ProjectTaskEditor({
     id: t.id,
     content: (
       <div className="flex items-center gap-3 py-2 text-[13px]">
-        <label className="flex flex-1 cursor-pointer items-center gap-2">
+        <div className="flex min-w-0 flex-1 items-center gap-2">
           <input
             type="checkbox"
             checked={t.onTaskList}
             onChange={(e) => toggle(t.id, e.target.checked)}
-            className="accent-brass"
+            className="accent-brass shrink-0"
           />
-          <span
+          <EditableTaskText
+            projectId={projectId}
+            taskId={t.id}
+            initial={t.text}
             className={
               t.done
                 ? "text-ink-mute line-through"
@@ -131,10 +191,8 @@ export function ProjectTaskEditor({
                   ? "text-ink"
                   : "text-ink-dim"
             }
-          >
-            {t.text}
-          </span>
-        </label>
+          />
+        </div>
         {t.done ? (
           <span className="text-teal shrink-0 font-mono text-[9px] tracking-[0.14em]">
             ✓ DONE
