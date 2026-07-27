@@ -1,26 +1,34 @@
-// Project Tasks — a flat rollup of whatever you've checked off as active on
+// Project Tasks — a rollup of whatever you've checked off as active on
 // projects that are currently under construction. Deliberately styled like
 // Admin Tasks (same row chrome, minutes, Today/Done/delete) since this is
 // meant to feel like the same system, just filtered down to "what to
-// actually pull from right now" — with each task's building shown as a
-// small tag on the row itself instead of grouping tasks under it.
+// actually pull from right now." Tasks are grouped under one card per
+// project (so a project with several tasks pulled shows one title header,
+// not a repeated one per row). Any project that's under construction but
+// has nothing checked off gets flagged at the bottom, so it doesn't quietly
+// fall off the radar.
 
 import Link from "next/link";
 import { getBuildings } from "@/lib/categories";
 import { getProjects } from "@/lib/projects";
 import { getProjectTaskTodayLinks } from "@/lib/plan-actions";
-import { ProjectTaskRollupItem } from "@/components/project-task-rollup-item";
+import { ProjectTaskGroupCard } from "@/components/project-task-group-card";
 
-type Row = {
-  projectId: string;
+type GroupTask = {
   taskId: string;
   text: string;
   minutes: number | null;
   createdAt: string;
+  onToday: boolean;
+};
+
+type Group = {
+  projectId: string;
+  projectTitle: string;
   buildingLabel: string;
   buildingColor?: string;
-  projectTitle: string;
-  onToday: boolean;
+  tasks: GroupTask[];
+  earliestCreatedAt: string;
 };
 
 export default async function ProjectTasksPage() {
@@ -33,32 +41,47 @@ export default async function ProjectTasksPage() {
   const buildingByKey = new Map(buildings.map((b) => [b.key, b]));
   const active = projects.filter((p) => p.phase === "building");
 
-  const rows: Row[] = [];
+  const groups: Group[] = [];
   for (const p of active) {
+    const pulled = p.tasks.filter((t) => t.onTaskList);
+    if (pulled.length === 0) continue;
     const building = buildingByKey.get(p.building);
-    for (const t of p.tasks) {
-      if (!t.onTaskList) continue;
-      rows.push({
-        projectId: p.id,
+    const tasks: GroupTask[] = pulled
+      .map((t) => ({
         taskId: t.id,
         text: t.text,
         minutes: t.minutes,
         createdAt: t.createdAt,
-        buildingLabel: building?.label ?? p.building,
-        buildingColor: building?.color,
-        projectTitle: p.title,
         onToday: todayLinks[t.id]?.onToday ?? false,
-      });
-    }
+      }))
+      .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+    groups.push({
+      projectId: p.id,
+      projectTitle: p.title,
+      buildingLabel: building?.label ?? p.building,
+      buildingColor: building?.color,
+      tasks,
+      earliestCreatedAt: tasks[0].createdAt,
+    });
   }
 
-  // One flat list, oldest-pulled first — no grouping by building.
-  rows.sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+  // Oldest-pulled project first — same feel as the old flat, oldest-first
+  // sort, just applied at the group level.
+  groups.sort((a, b) =>
+    a.earliestCreatedAt.localeCompare(b.earliestCreatedAt),
+  );
 
-  const buildingLabelsWithTasks = new Set(rows.map((r) => r.buildingLabel));
+  const totalTasks = groups.reduce((n, g) => n + g.tasks.length, 0);
+  const buildingLabelsWithTasks = new Set(groups.map((g) => g.buildingLabel));
   const buildingCount = buildingLabelsWithTasks.size;
   const emptyBuildings = buildings.filter(
     (b) => !buildingLabelsWithTasks.has(b.label),
+  );
+
+  // Under-construction projects with nothing pulled onto this page — the
+  // gap this page exists to catch.
+  const unflaggedProjects = active.filter(
+    (p) => !p.tasks.some((t) => t.onTaskList),
   );
 
   return (
@@ -69,7 +92,7 @@ export default async function ProjectTasksPage() {
       </h1>
       <p className="text-ink-dim mt-1 text-[13px]">Current Project Tasks</p>
 
-      {rows.length === 0 ? (
+      {groups.length === 0 ? (
         <div className="border-paper-line bg-paper-panel/40 mt-10 rounded-sm border border-dashed p-8 text-center">
           <p className="text-ink-dim">
             Nothing pulled onto the page right now.
@@ -86,27 +109,24 @@ export default async function ProjectTasksPage() {
           </Link>
         </div>
       ) : (
-        <div className="mt-8 space-y-2">
-          {rows.map((r) => (
-            <ProjectTaskRollupItem
-              key={r.taskId}
-              projectId={r.projectId}
-              taskId={r.taskId}
-              text={r.text}
-              minutes={r.minutes}
-              buildingLabel={r.buildingLabel}
-              buildingColor={r.buildingColor}
-              projectTitle={r.projectTitle}
-              onToday={r.onToday}
+        <div className="mt-8 space-y-3">
+          {groups.map((g) => (
+            <ProjectTaskGroupCard
+              key={g.projectId}
+              projectId={g.projectId}
+              projectTitle={g.projectTitle}
+              buildingLabel={g.buildingLabel}
+              buildingColor={g.buildingColor}
+              tasks={g.tasks}
             />
           ))}
         </div>
       )}
 
-      {rows.length > 0 ? (
+      {groups.length > 0 ? (
         <>
           <p className="text-ink-mute mt-6 text-[13px]">
-            {rows.length} task{rows.length === 1 ? "" : "s"} pulled from{" "}
+            {totalTasks} task{totalTasks === 1 ? "" : "s"} pulled from{" "}
             {buildingCount} building
             {buildingCount === 1 ? "" : "s"}.
           </p>
@@ -117,6 +137,31 @@ export default async function ProjectTasksPage() {
             </p>
           ) : null}
         </>
+      ) : null}
+
+      {unflaggedProjects.length > 0 ? (
+        <div className="border-rust bg-rust/10 mt-10 rounded-sm border-2 px-4 py-3">
+          <div className="text-rust font-mono text-[10px] tracking-[0.2em] uppercase">
+            ⚠ Under construction, nothing pulled here
+          </div>
+          <p className="text-ink mt-1 text-[13px]">
+            {unflaggedProjects.length === 1
+              ? "This project is under construction but has no tasks checked off onto this page:"
+              : "These projects are under construction but have no tasks checked off onto this page:"}
+          </p>
+          <ul className="mt-2 space-y-1">
+            {unflaggedProjects.map((p) => (
+              <li key={p.id}>
+                <Link
+                  href={`/project-plans/project/${p.id}`}
+                  className="text-rust hover:text-brass paper-task-title underline underline-offset-2"
+                >
+                  {p.title}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
       ) : null}
     </div>
   );
