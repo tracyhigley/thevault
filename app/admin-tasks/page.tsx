@@ -121,10 +121,14 @@ export default async function CounterPage({
   const sp = await searchParams;
   const active = coerceFilter(firstQuery(sp.filter));
   const area = firstQuery(sp.area);
-  const [all, buildings] = await Promise.all([
+  const [counterItems, buildings] = await Promise.all([
     getItemsByBox("COUNTER"),
     getBuildings(),
   ]);
+  // Project Tasks pulled onto Today create a linked Item in this same
+  // COUNTER box (so they show on the Today docket) — but they belong to
+  // Project Tasks, not Admin Tasks, so they're excluded here entirely.
+  const all = counterItems.filter((it) => !it.sourceTaskId);
   const filtered = applyFilter(all, active, area);
   const areas = buildings
     .filter((b) => all.some((it) => it.area === b.key))

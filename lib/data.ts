@@ -24,6 +24,7 @@ function rowToItem(r: any): Item {
     should: !!r.should,
     todayOrder: r.today_order,
     atmOrder: r.atm_order,
+    sourceTaskId: r.source_task_id ?? null,
     energy: r.energy,
     category: r.category,
     potential: r.potential,

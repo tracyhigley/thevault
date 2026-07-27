@@ -58,8 +58,13 @@ export default async function BuildDayPage({
   };
 
   // Wizard review wants every counter item (for opt-in), not just the
-  // ones already on today's plan.
-  const classified = classify(counterItems, /* todayOnly */ false);
+  // ones already on today's plan — but it's the "Admin Tasks" step, so
+  // items linked to a Project Task pulled onto Today (see
+  // addProjectTaskToToday) are excluded, same as the standalone Admin
+  // Tasks page. `counterItems` itself stays unfiltered for the Time Left
+  // step, which needs every Today item regardless of source.
+  const adminReviewItems = counterItems.filter((it) => !it.sourceTaskId);
+  const classified = classify(adminReviewItems, /* todayOnly */ false);
 
   // Flatten Project Plans' onTaskList tasks the same way the standalone
   // Project Tasks page does: one list, building tag per row, sorted
