@@ -1,5 +1,5 @@
 "use client";
-import { useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
 import clsx from "clsx";
 import { updateItemPatch } from "@/lib/actions";
@@ -32,6 +32,17 @@ export function EditableText({
 }) {
   const [value, setValue] = useState(initial ?? "");
   const [pending, startTransition] = useTransition();
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Auto-grow the multiline textarea to fit its content instead of always
+  // reserving two rows — most titles are one line, so this keeps the
+  // Today card tight instead of leaving a blank second line under it.
+  useEffect(() => {
+    const el = textareaRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${el.scrollHeight}px`;
+  }, [value, multiline]);
 
   function commit() {
     if (String(value) === String(initial ?? "")) return;
@@ -57,6 +68,7 @@ export function EditableText({
   if (multiline) {
     return (
       <textarea
+        ref={textareaRef}
         value={value as any}
         onChange={(e) => setValue(e.target.value)}
         onBlur={commit}
@@ -64,8 +76,8 @@ export function EditableText({
           if (e.key === "Escape") setValue(initial ?? "");
         }}
         placeholder={placeholder}
-        rows={2}
-        className={clsx("resize-none", sharedClassName)}
+        rows={1}
+        className={clsx("resize-none overflow-hidden", sharedClassName)}
       />
     );
   }

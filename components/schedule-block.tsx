@@ -52,7 +52,7 @@ export function ScheduleBlock({
   return (
     <div
       className={clsx(
-        "group relative flex items-center gap-4 rounded-sm border-l-2 bg-paper-panel/60 px-4 py-3 transition",
+        "group relative flex items-center gap-3 rounded-sm border-l-2 bg-paper-panel/60 px-4 py-2 transition",
         BUCKET_COLOR[block.bucket] ?? "border-l-ink-mute",
         isDone && "opacity-50",
         state === "active" &&
@@ -61,7 +61,7 @@ export function ScheduleBlock({
         pending && "opacity-70",
       )}
     >
-      <div className="flex w-16 shrink-0 flex-col items-end font-mono text-[11px] tracking-wider text-ink-mute">
+      <div className="flex w-16 shrink-0 flex-col items-end font-mono text-[11px] tracking-wider whitespace-nowrap text-ink-mute">
         <span>{fmtTime(block.start)}</span>
         {block.overflow && (
           <span className="mt-0.5 text-[9px] tracking-wider text-rust/80">
