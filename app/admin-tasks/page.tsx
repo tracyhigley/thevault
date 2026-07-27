@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import Link from "next/link";
 import clsx from "clsx";
 import { getItemsByBox } from "@/lib/data";
@@ -29,7 +30,6 @@ const FILTERS: { key: Filter; label: string }[] = [
   { key: "stress", label: "Stress" },
   { key: "urgent", label: "Urgent" },
   { key: "must", label: "Must" },
-  { key: "should", label: "Should" },
   { key: "quick", label: "Quick (5–15)" },
 ];
 
@@ -137,6 +137,9 @@ export default async function CounterPage({
     should: sumMinutes(applyFilter(all, "should")),
     quick: sumMinutes(applyFilter(all, "quick")),
   };
+  const todayMinutes = sumMinutes(
+    all.filter((it) => (it.todayOrder ?? null) !== null),
+  );
 
   const boxOpts = buildings.map((b) => ({ key: b.key, label: b.label }));
   const { stress, urgent, must, should, plain } =
@@ -223,22 +226,31 @@ export default async function CounterPage({
         <div className="mt-3 space-y-2">
           <div className="flex flex-wrap gap-2">
             {FILTERS.map((f) => (
-              <Link
-                key={f.key}
-                href={
-                  f.key === "all"
-                    ? "/admin-tasks"
-                    : `/admin-tasks?filter=${f.key}`
-                }
-                className={clsx(
-                  "rounded-sm border px-4 py-1.5 font-mono text-[11px] tracking-wider transition",
-                  active === f.key
-                    ? "border-brass bg-brass/10 text-brass"
-                    : "border-paper-line text-ink-mute hover:border-brass/40 hover:text-brass",
-                )}
-              >
-                {`${f.label}: ${formatMinutesShort(filterTotals[f.key] ?? 0)}`}
-              </Link>
+              <Fragment key={f.key}>
+                <Link
+                  href={
+                    f.key === "all"
+                      ? "/admin-tasks"
+                      : `/admin-tasks?filter=${f.key}`
+                  }
+                  className={clsx(
+                    "rounded-sm border px-4 py-1.5 font-mono text-[11px] tracking-wider transition",
+                    active === f.key
+                      ? "border-brass bg-brass/10 text-brass"
+                      : "border-paper-line text-ink-mute hover:border-brass/40 hover:text-brass",
+                  )}
+                >
+                  {`${f.label}: ${formatMinutesShort(filterTotals[f.key] ?? 0)}`}
+                </Link>
+                {f.key === "all" ? (
+                  <span
+                    className="border-paper-line text-ink-mute rounded-sm border px-4 py-1.5 font-mono text-[11px] tracking-wider"
+                    title="Total minutes across everything marked Today"
+                  >
+                    {`Today: ${formatMinutesShort(todayMinutes)}`}
+                  </span>
+                ) : null}
+              </Fragment>
             ))}
           </div>
           {areas.length > 0 && (
