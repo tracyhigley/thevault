@@ -35,74 +35,6 @@ async function currentVaultId() {
   return data?.vault_id as string | undefined;
 }
 
-type DailyAnchorSpec = {
-  tag: string;
-  title: string;
-  minutes: number;
-  order: number;
-  /** When true, locks scheduled_start at `start`. When false, only today_order is set. */
-  pinned?: boolean;
-  start?: Date;
-};
-
-async function upsertDailyAnchor(
-  sb: Awaited<ReturnType<typeof supabaseServer>>,
-  opts: {
-    vaultId: string;
-    userId: string;
-    spec: DailyAnchorSpec;
-  },
-) {
-  const { vaultId, userId, spec } = opts;
-  const pinned = spec.pinned ?? true;
-  const scheduledStart =
-    pinned && spec.start ? spec.start.toISOString() : null;
-  const scheduledEnd =
-    pinned && spec.start
-      ? new Date(spec.start.getTime() + spec.minutes * 60_000).toISOString()
-      : null;
-
-  const patch = {
-    box: "COUNTER",
-    title: spec.title,
-    minutes: spec.minutes,
-    today_order: spec.order,
-    pinned,
-    scheduled_start: scheduledStart,
-    scheduled_end: scheduledEnd,
-    urgent: false,
-    must: false,
-    should: false,
-    area: null,
-    category: null,
-    state: "upcoming" as const,
-    actual_start: null,
-    actual_end: null,
-    notes: spec.tag,
-  };
-
-  const { data: existing } = await sb
-    .from("items")
-    .select("id")
-    .eq("vault_id", vaultId)
-    .eq("notes", spec.tag)
-    .is("deleted_at", null)
-    .order("modified_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-
-  if (existing?.id) {
-    await sb.from("items").update(patch).eq("id", existing.id);
-    return;
-  }
-
-  await sb.from("items").insert({
-    vault_id: vaultId,
-    user_id: userId,
-    ...patch,
-  });
-}
-
 // ─── Day inputs ────────────────────────────────────────────────────────────
 
 const DayInputsSchema = z.object({
@@ -139,7 +71,7 @@ const PartialDayInputs = z.object({
 export async function saveDayInputsPartial(
   patch: z.input<typeof PartialDayInputs>,
 ) {
-  const { sb, user } = await requireUser();
+  const { sb } = await requireUser();
   const vaultId = await currentVaultId();
   if (!vaultId) throw new Error("No vault");
   const parsed = PartialDayInputs.parse(patch);
@@ -214,25 +146,6 @@ export async function saveDayInputsPartial(
     ignoreDuplicates: false,
   });
 
-  // Daily Anchors: Morning Workout always on Today (unpinned). Run whenever
-  // step 1 is saved so rebuilding updates anchors.
-  if (parsed.end_of_day !== undefined || parsed.hours_available !== undefined) {
-    try {
-      await upsertDailyAnchor(sb, {
-        vaultId,
-        userId: user.id,
-        spec: {
-          tag: "__daily_anchor__:morning-workout",
-          title: "Morning Workout",
-          minutes: 45,
-          order: 1,
-          pinned: false,
-        },
-      });
-    } catch {
-      // Keep day build resilient if time parsing fails.
-    }
-  }
   revalidatePath("/", "layout");
 }
 
