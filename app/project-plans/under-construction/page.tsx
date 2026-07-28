@@ -41,6 +41,7 @@ export default async function UnderConstructionProjectsPage() {
         <div className="mt-8 space-y-2">
           {active.map((p) => {
             const lastLog = p.log.at(-1);
+            const currentTasks = p.tasks.filter((t) => t.onTaskList);
             return (
               <Link
                 key={p.id}
@@ -57,6 +58,20 @@ export default async function UnderConstructionProjectsPage() {
                 {p.doneLooksLike ? (
                   <div className="mt-1 text-[12px] text-ink-dim">
                     Done looks like: {p.doneLooksLike}
+                  </div>
+                ) : null}
+                {currentTasks.length > 0 ? (
+                  <div className="mt-2">
+                    <div className="font-mono text-[9px] tracking-[0.2em] text-brass">
+                      CURRENT TASKS:
+                    </div>
+                    <ul className="mt-1 space-y-0.5">
+                      {currentTasks.map((t) => (
+                        <li key={t.id} className="text-[12px] text-ink-dim">
+                          {t.text}
+                        </li>
+                      ))}
+                    </ul>
                   </div>
                 ) : null}
               </Link>
