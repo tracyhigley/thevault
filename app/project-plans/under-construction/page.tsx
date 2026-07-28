@@ -62,7 +62,7 @@ export default async function UnderConstructionProjectsPage() {
                 ) : null}
                 {currentTasks.length > 0 ? (
                   <div className="mt-2">
-                    <div className="font-mono text-[9px] tracking-[0.2em] text-brass">
+                    <div className="font-mono text-[9px] tracking-[0.2em] text-red-500">
                       CURRENT TASKS:
                     </div>
                     <ul className="mt-1 space-y-0.5">
