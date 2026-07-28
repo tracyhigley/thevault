@@ -382,6 +382,33 @@ export async function reorderProjectTasks(projectId: string, taskIds: string[]) 
   revalidatePath("/project-tasks");
 }
 
+// Drag order for the Under Construction page (all phase="building"
+// projects, across every building, one flat list). Same shape as
+// reorderItems/reorderAtmItems: stamp sequential ints across exactly the
+// ids the client has on screen.
+export async function reorderActiveProjects(projectIds: string[]) {
+  const { sb } = await requireUser();
+  await Promise.all(
+    projectIds.map((id, i) =>
+      sb.from("projects").update({ active_order: i + 1 }).eq("id", id),
+    ),
+  );
+  revalidatePath("/project-plans", "layout");
+}
+
+// Drag order for the Project Tasks page's grouped cards — a narrower list
+// (only active projects with at least one task checked onto that page),
+// so it gets its own order column rather than sharing active_order.
+export async function reorderProjectTaskGroups(projectIds: string[]) {
+  const { sb } = await requireUser();
+  await Promise.all(
+    projectIds.map((id, i) =>
+      sb.from("projects").update({ task_group_order: i + 1 }).eq("id", id),
+    ),
+  );
+  revalidatePath("/project-tasks");
+}
+
 // Soft delete — reversible from the DB, same as items.
 export async function deleteProject(id: string) {
   const { sb } = await requireUser();

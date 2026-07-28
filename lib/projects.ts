@@ -29,6 +29,11 @@ export type Project = {
   completedAt: string | null;
   createdAt: string;
   modifiedAt: string;
+  // Manual drag-order, null until someone actually drags a card. Separate
+  // fields because the two pages show different (overlapping) subsets of
+  // active projects — same reasoning as items.today_order vs atm_order.
+  activeOrder: number | null;
+  taskGroupOrder: number | null;
 };
 
 function envReady() {
@@ -82,6 +87,9 @@ function rowToProject(r: any): Project {
     completedAt: r.completed_at,
     createdAt: r.created_at,
     modifiedAt: r.modified_at,
+    activeOrder: typeof r.active_order === "number" ? r.active_order : null,
+    taskGroupOrder:
+      typeof r.task_group_order === "number" ? r.task_group_order : null,
   };
 }
 

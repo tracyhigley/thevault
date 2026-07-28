@@ -1,9 +1,14 @@
 // Under construction — everything actively being built across the whole
-// campus, in one place. Mirrors /project-plans/completed.
+// campus, in one place. Mirrors /project-plans/completed. Drag-orderable via
+// active_order — falls back to newest-note-first for anything never dragged.
 
 import Link from "next/link";
 import { getBuildings } from "@/lib/categories";
 import { getProjects } from "@/lib/projects";
+import {
+  ReorderableProjects,
+  type ReorderableProject,
+} from "@/components/reorderable-projects";
 
 export default async function UnderConstructionProjectsPage() {
   const [buildings, projects] = await Promise.all([
@@ -13,10 +18,28 @@ export default async function UnderConstructionProjectsPage() {
 
   const active = projects
     .filter((p) => p.phase === "building")
-    .sort((a, b) => (b.modifiedAt ?? "").localeCompare(a.modifiedAt ?? ""));
+    .sort((a, b) => {
+      if (a.activeOrder != null && b.activeOrder != null) {
+        return a.activeOrder - b.activeOrder;
+      }
+      if (a.activeOrder != null) return -1;
+      if (b.activeOrder != null) return 1;
+      return (b.modifiedAt ?? "").localeCompare(a.modifiedAt ?? "");
+    });
 
   const labelFor = (key: string) =>
     buildings.find((b) => b.key === key)?.label ?? "Uncategorized";
+
+  const reorderableProjects: ReorderableProject[] = active.map((p) => ({
+    id: p.id,
+    title: p.title,
+    buildingLabel: labelFor(p.building),
+    lastLogDate: p.log.at(-1)?.date ?? null,
+    doneLooksLike: p.doneLooksLike,
+    currentTasks: p.tasks
+      .filter((t) => t.onTaskList)
+      .map((t) => ({ id: t.id, text: t.text })),
+  }));
 
   return (
     <div className="mx-auto max-w-[900px] px-4 py-8 md:px-10">
@@ -38,45 +61,8 @@ export default async function UnderConstructionProjectsPage() {
           Nothing under construction — the campus is at rest.
         </p>
       ) : (
-        <div className="mt-8 space-y-2">
-          {active.map((p) => {
-            const lastLog = p.log.at(-1);
-            const currentTasks = p.tasks.filter((t) => t.onTaskList);
-            return (
-              <Link
-                key={p.id}
-                href={`/project-plans/project/${p.id}`}
-                className="block rounded-sm border border-paper-line border-l-[3px] border-l-brass bg-paper-panel px-4 py-3 transition hover:border-brass/60"
-              >
-                <div className="flex flex-wrap items-baseline justify-between gap-x-3">
-                  <span className="paper-task-title text-ink">{p.title}</span>
-                  <span className="font-mono text-[10px] text-ink-mute">
-                    {labelFor(p.building).toUpperCase()}
-                    {lastLog ? ` · last note ${lastLog.date}` : ""}
-                  </span>
-                </div>
-                {p.doneLooksLike ? (
-                  <div className="mt-1 text-[12px] text-ink-dim">
-                    Done looks like: {p.doneLooksLike}
-                  </div>
-                ) : null}
-                {currentTasks.length > 0 ? (
-                  <div className="mt-2">
-                    <div className="font-mono text-[9px] tracking-[0.2em] text-red-500">
-                      CURRENT TASKS:
-                    </div>
-                    <ul className="mt-1 space-y-0.5">
-                      {currentTasks.map((t) => (
-                        <li key={t.id} className="text-[12px] text-ink-dim">
-                          {t.text}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ) : null}
-              </Link>
-            );
-          })}
+        <div className="mt-8">
+          <ReorderableProjects projects={reorderableProjects} />
         </div>
       )}
     </div>

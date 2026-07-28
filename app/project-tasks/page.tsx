@@ -12,7 +12,7 @@ import Link from "next/link";
 import { getBuildings } from "@/lib/categories";
 import { getProjects } from "@/lib/projects";
 import { getProjectTaskTodayLinks } from "@/lib/plan-actions";
-import { ProjectTaskGroupCard } from "@/components/project-task-group-card";
+import { ReorderableProjectTaskGroups } from "@/components/reorderable-project-task-groups";
 
 type GroupTask = {
   taskId: string;
@@ -29,6 +29,7 @@ type Group = {
   buildingColor?: string;
   tasks: GroupTask[];
   earliestCreatedAt: string;
+  taskGroupOrder: number | null;
 };
 
 export default async function ProjectTasksPage() {
@@ -62,14 +63,20 @@ export default async function ProjectTasksPage() {
       buildingColor: building?.color,
       tasks,
       earliestCreatedAt: tasks[0].createdAt,
+      taskGroupOrder: p.taskGroupOrder,
     });
   }
 
-  // Oldest-pulled project first — same feel as the old flat, oldest-first
-  // sort, just applied at the group level.
-  groups.sort((a, b) =>
-    a.earliestCreatedAt.localeCompare(b.earliestCreatedAt),
-  );
+  // Drag order wins once set; otherwise oldest-pulled project first — same
+  // feel as the old flat, oldest-first sort, just applied at the group level.
+  groups.sort((a, b) => {
+    if (a.taskGroupOrder != null && b.taskGroupOrder != null) {
+      return a.taskGroupOrder - b.taskGroupOrder;
+    }
+    if (a.taskGroupOrder != null) return -1;
+    if (b.taskGroupOrder != null) return 1;
+    return a.earliestCreatedAt.localeCompare(b.earliestCreatedAt);
+  });
 
   const totalTasks = groups.reduce((n, g) => n + g.tasks.length, 0);
   const buildingLabelsWithTasks = new Set(groups.map((g) => g.buildingLabel));
@@ -109,17 +116,21 @@ export default async function ProjectTasksPage() {
           </Link>
         </div>
       ) : (
-        <div className="mt-8 space-y-3">
-          {groups.map((g) => (
-            <ProjectTaskGroupCard
-              key={g.projectId}
-              projectId={g.projectId}
-              projectTitle={g.projectTitle}
-              buildingLabel={g.buildingLabel}
-              buildingColor={g.buildingColor}
-              tasks={g.tasks}
-            />
-          ))}
+        <div className="mt-8">
+          <ReorderableProjectTaskGroups
+            groups={groups.map((g) => ({
+              projectId: g.projectId,
+              projectTitle: g.projectTitle,
+              buildingLabel: g.buildingLabel,
+              buildingColor: g.buildingColor,
+              tasks: g.tasks.map((t) => ({
+                taskId: t.taskId,
+                text: t.text,
+                minutes: t.minutes,
+                onToday: t.onToday,
+              })),
+            }))}
+          />
         </div>
       )}
 
