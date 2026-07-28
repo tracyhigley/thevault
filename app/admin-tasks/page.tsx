@@ -128,7 +128,11 @@ export default async function CounterPage({
   // Project Tasks pulled onto Today create a linked Item in this same
   // COUNTER box (so they show on the Today docket) — but they belong to
   // Project Tasks, not Admin Tasks, so they're excluded here entirely.
-  const all = counterItems.filter((it) => !it.sourceTaskId);
+  // Custom blocks added from the Docket work the same way: tagged
+  // CUSTOM_BLOCK so they show on Today but never land on Admin Tasks.
+  const all = counterItems.filter(
+    (it) => !it.sourceTaskId && it.tag !== "CUSTOM_BLOCK",
+  );
   const filtered = applyFilter(all, active, area);
   const areas = buildings
     .filter((b) => all.some((it) => it.area === b.key))

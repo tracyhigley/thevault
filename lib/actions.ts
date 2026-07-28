@@ -577,7 +577,11 @@ export async function applyAtmBoxBudgets(
   revalidatePath("/build");
 }
 
-// Custom block on the Docket — creates a pinned, scheduled COUNTER item.
+// Custom block on the Docket — creates a Today-only item. Lives in the
+// COUNTER box (that's what Today's schedule reads), but tagged CUSTOM_BLOCK
+// and excluded on Admin Tasks (see the `all` filter there) so it never shows
+// up as an Admin Tasks obligation — it's Today-only scratch, same idea as
+// how Project Task pulls are excluded there via sourceTaskId.
 export async function addCustomBlock(opts: {
   title: string;
   minutes: number;
@@ -590,10 +594,21 @@ export async function addCustomBlock(opts: {
   const end = start
     ? new Date(start.getTime() + opts.minutes * 60_000)
     : null;
+  // Land at the bottom of Today's current order, same convention as
+  // setTodayPlan: today_order = current max + 1.
+  const { data: max } = await sb
+    .from("items")
+    .select("today_order")
+    .not("today_order", "is", null)
+    .order("today_order", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const todayOrder = (max?.today_order ?? 0) + 1;
   await sb.from("items").insert({
     vault_id: vaultId,
     user_id: user.id,
     box: "COUNTER",
+    tag: "CUSTOM_BLOCK",
     title: opts.title.trim(),
     minutes: opts.minutes,
     urgent: false,
@@ -602,8 +617,10 @@ export async function addCustomBlock(opts: {
     pinned: !!start,
     scheduled_start: start?.toISOString() ?? null,
     scheduled_end: end?.toISOString() ?? null,
+    today_order: todayOrder,
   });
   revalidatePath("/");
+  revalidatePath("/admin-tasks");
 }
 
 // Documents: write markdown body for the single document row in a document box.
