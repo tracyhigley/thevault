@@ -5,8 +5,8 @@
 // initiate changes to items or the daily schedule on their own. The two
 // narrow bridges are the "Project Tasks × Today" section below (adds/removes
 // a linked Today item) and markProjectTaskDoneCore, which lib/actions.ts
-// calls into from hardDeleteDoneTodayItems so that finishing a project-linked
-// item from Today's side stays in sync with its Project Plan checklist.
+// calls into from completeTodayItem so that checking a project-linked item
+// done from Today's side stays in sync with its Project Plan checklist.
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
@@ -279,9 +279,9 @@ export async function setProjectTaskOnList(
 // checklist, off the Project Tasks page, and its linked Today item (if any)
 // cleared out. Takes a caller-supplied Supabase client so both the planning
 // layer (markProjectTaskDone, below) and the daily-engine layer
-// (hardDeleteDoneTodayItems in lib/actions.ts, reached when Today's "Clear
-// All Done" finalizes an item that started life as a project task) can
-// finish the same operation from whichever side the user acted on.
+// (completeTodayItem in lib/actions.ts, reached the moment Today's done
+// click finishes an item that started life as a project task) can finish
+// the same operation from whichever side the user acted on.
 export async function markProjectTaskDoneCore(
   sb: Awaited<ReturnType<typeof supabaseServer>>,
   projectId: string,

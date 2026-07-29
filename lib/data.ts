@@ -69,6 +69,28 @@ export async function getItemsByBox(box: BoxKey): Promise<Item[]> {
   return (data ?? []).map(rowToItem);
 }
 
+// Admin Tasks (and one-off custom blocks) finished from Today's docket —
+// see completeTodayItem in lib/actions.ts. Project Tasks never land here:
+// finishing one deletes its linked Today item and the Project Plan
+// checklist becomes the record instead. Newest first; the /done page
+// groups these by actual_end's calendar date.
+export async function getDoneItems(): Promise<Item[]> {
+  if (!envReady()) return [];
+  const sb = await supabaseServer();
+  const { data, error } = await sb
+    .from("items")
+    .select("*")
+    .eq("state", "done")
+    .is("deleted_at", null)
+    .is("source_task_id", null)
+    .order("actual_end", { ascending: false, nullsFirst: false });
+  if (error) {
+    console.warn("getDoneItems error", error.message);
+    return [];
+  }
+  return (data ?? []).map(rowToItem);
+}
+
 export async function getAllItems(): Promise<Item[]> {
   if (!envReady()) return [];
   const sb = await supabaseServer();

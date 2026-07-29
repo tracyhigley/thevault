@@ -3,7 +3,12 @@ import clsx from "clsx";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
-import { setItemState, softDeleteItem } from "@/lib/actions";
+import {
+  completeTodayItem,
+  setItemState,
+  softDeleteItem,
+  undoTodayItemDone,
+} from "@/lib/actions";
 import { EditableText } from "@/components/editable-text";
 import type { ScheduledBlock } from "@/lib/daily-plan";
 
@@ -73,7 +78,7 @@ export function ScheduleBlock({
         title={
           isDone
             ? "Mark not done"
-            : "Mark done — the item stays in your boxes"
+            : "Mark done — Admin Tasks move to your Done log, Project Tasks finish on their Project Plan"
         }
         onClick={() => {
           if (doneButtonDisabled) return;
@@ -81,21 +86,24 @@ export function ScheduleBlock({
           setCooldownUntil(Date.now() + 700);
           startTransition(async () => {
             try {
-              await setItemState(
-                block.itemId,
-                isDone ? "upcoming" : "done",
-              );
-              if (!isDone) {
-                toast.success("Done. Still safe in your boxes.", {
+              if (isDone) {
+                await undoTodayItemDone(block.itemId);
+                return;
+              }
+              const { archivedAs } = await completeTodayItem(block.itemId);
+              if (archivedAs === "admin") {
+                toast.success("Done — moved to your Done log.", {
                   action: {
                     label: "Undo",
                     onClick: () => {
                       startTransition(async () => {
-                        await setItemState(block.itemId, "upcoming");
+                        await undoTodayItemDone(block.itemId);
                       });
                     },
                   },
                 });
+              } else {
+                toast.success("Done — struck through on the Project Plan.");
               }
             } catch (e: any) {
               toast.error(e?.message ?? "Couldn't mark done.");

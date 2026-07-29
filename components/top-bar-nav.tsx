@@ -37,6 +37,13 @@ function buildItems(fiftyFdHref: string): NavItem[] {
       button: true,
     },
     {
+      href: "/done",
+      label: "DONE",
+      hint: "g o",
+      match: (p) => p.startsWith("/done"),
+      button: true,
+    },
+    {
       href: "/project-tasks",
       label: "PROJECT TASKS",
       hint: "g a",

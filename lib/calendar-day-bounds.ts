@@ -21,3 +21,8 @@ export function localDayBoundsUtc(ymd: string, tz: string): { start: Date; end: 
 export function todayYmdInTz(tz: string): string {
   return format(toZonedTime(new Date(), tz), "yyyy-MM-dd");
 }
+
+/** Any instant's calendar date (yyyy-MM-dd) in the given IANA timezone. */
+export function ymdInTz(date: Date, tz: string): string {
+  return format(toZonedTime(date, tz), "yyyy-MM-dd");
+}

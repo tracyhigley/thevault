@@ -226,62 +226,56 @@ export async function softDeleteItem(itemId: string) {
 }
 
 /**
- * Clears Today’s “Done today” bucket: on today’s plan + state done. Ignores
- * unrelated ids. Plain Admin/Counter items are hard-deleted outright. Items
- * that trace back to a Project Task (source_project_id/source_task_id, set
- * only via the Project Tasks page's "Add to Today") instead get finished
- * through markProjectTaskDoneCore, so the same click also strikes the task
- * through on its Project Plan checklist and drops it off the Project Tasks
- * page — not just off Today. See markProjectTaskDone in lib/plan-actions.ts
- * for the mirror-image version of this, triggered from that page's own DONE
- * button.
+ * Finishes a Today item the moment it's checked done — no more parking it
+ * at the bottom of Today under a "Clear All Done" step. Branches on what
+ * kind of item it is:
+ *
+ *   - Project Task (source_project_id/source_task_id, set only via the
+ *     Project Tasks page's "Add to Today"): finished through
+ *     markProjectTaskDoneCore, so the same click strikes the task through
+ *     on its Project Plan checklist and drops it off the Project Tasks
+ *     page. See markProjectTaskDone in lib/plan-actions.ts for the
+ *     mirror-image version of this, triggered from that page's own DONE
+ *     button.
+ *   - Admin Task (plain Counter/ATM item): taken off today's plan and
+ *     archived — state "done" + actual_end stamped, today_order cleared —
+ *     so it disappears from Today and from Admin Tasks (see the state
+ *     !== "done" filter there) and instead shows up on the /done page,
+ *     grouped under today's date. Not soft-deleted, so undoTodayItemDone
+ *     can restore it.
  */
-export async function hardDeleteDoneTodayItems(itemIds: string[]) {
+export async function completeTodayItem(
+  itemId: string,
+): Promise<{ archivedAs: "project" | "admin" }> {
   const { sb } = await requireUser();
-  if (!itemIds.length) return { ok: true as const, deleted: 0 };
-
-  const { data: rows, error: selErr } = await sb
+  const { data: item, error } = await sb
     .from("items")
     .select("id, source_project_id, source_task_id")
-    .in("id", itemIds)
-    .eq("state", "done")
-    .not("today_order", "is", null)
-    .is("deleted_at", null);
+    .eq("id", itemId)
+    .is("deleted_at", null)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  if (!item) throw new Error("Item not found");
 
-  if (selErr) throw new Error(selErr.message);
+  const archivedAs: "project" | "admin" =
+    item.source_project_id && item.source_task_id ? "project" : "admin";
 
-  const validRows = rows ?? [];
-  if (!validRows.length) return { ok: true as const, deleted: 0 };
-
-  const projectLinked = validRows.filter(
-    (r: { source_project_id: string | null; source_task_id: string | null }) =>
-      !!r.source_project_id && !!r.source_task_id,
-  );
-  const plainIds = validRows
-    .filter(
-      (r: { source_project_id: string | null; source_task_id: string | null }) =>
-        !r.source_project_id || !r.source_task_id,
-    )
-    .map((r: { id: string }) => r.id);
-
-  // Project-linked items: finish them at the source. This both marks the
-  // task done (struck through) on the Project Plan and deletes this linked
-  // Today item as a side effect, so it never needs a separate delete call.
-  for (const r of projectLinked) {
+  if (archivedAs === "project") {
     await markProjectTaskDoneCore(
       sb,
-      r.source_project_id as string,
-      r.source_task_id as string,
+      item.source_project_id as string,
+      item.source_task_id as string,
     );
-  }
-
-  // Everything else: no project task to update, so just remove the item.
-  if (plainIds.length) {
-    const { error: delErr } = await sb
+  } else {
+    const { error: updateError } = await sb
       .from("items")
-      .delete()
-      .in("id", plainIds);
-    if (delErr) throw new Error(delErr.message);
+      .update({
+        state: "done",
+        today_order: null,
+        actual_end: new Date().toISOString(),
+      })
+      .eq("id", itemId);
+    if (updateError) throw new Error(updateError.message);
   }
 
   revalidatePath("/");
@@ -291,7 +285,35 @@ export async function hardDeleteDoneTodayItems(itemIds: string[]) {
   revalidatePath("/field-notes");
   revalidatePath("/boxes");
   revalidatePath("/documents");
-  return { ok: true as const, deleted: validRows.length };
+  revalidatePath("/done");
+  return { archivedAs };
+}
+
+/**
+ * Reverses completeTodayItem's admin-task path — puts the item back on
+ * today's plan as upcoming. Only meaningful for Admin Tasks: once a Project
+ * Task is finished, its linked Today item is gone and the checklist itself
+ * is the record, so that side has no single-click undo (matches how
+ * finishing a task from the Project Tasks page has always worked).
+ */
+export async function undoTodayItemDone(itemId: string) {
+  const { sb } = await requireUser();
+  const { data: max } = await sb
+    .from("items")
+    .select("today_order")
+    .not("today_order", "is", null)
+    .order("today_order", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const nextOrder = Number(max?.today_order ?? 0) + 1;
+  const { error } = await sb
+    .from("items")
+    .update({ state: "upcoming", today_order: nextOrder, actual_end: null })
+    .eq("id", itemId);
+  if (error) throw new Error(error.message);
+  revalidatePath("/");
+  revalidatePath("/admin-tasks");
+  revalidatePath("/done");
 }
 
 /** Permanently removes the row (use sparingly; soft-delete is the default elsewhere). */

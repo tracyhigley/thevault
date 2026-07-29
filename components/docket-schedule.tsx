@@ -11,12 +11,7 @@ import {
 } from "@/lib/daily-plan";
 import type { DayInputs, Item } from "@/lib/types";
 import { ScheduleWithNowLine } from "@/components/now-line";
-import {
-  hardDeleteDoneTodayItems,
-  reorderItems,
-  setItemState,
-  setTodayPlan,
-} from "@/lib/actions";
+import { reorderItems, setTodayPlan } from "@/lib/actions";
 import {
   DndContext,
   PointerSensor,
@@ -165,18 +160,8 @@ export function DocketSchedule({
   }, []);
   const [orderedBlocks, setOrderedBlocks] = useState<ScheduledBlock[]>([]);
   const [, startTransition] = useTransition();
-  const [clearPending, startClearTransition] = useTransition();
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
-  );
-  const doneTodayItems = useMemo(
-    () =>
-      [...counterItems, ...atmItems]
-        .filter(
-          (i) => (i.todayOrder ?? null) !== null && (i.state ?? "upcoming") === "done",
-        )
-        .sort((a, b) => (a.todayOrder ?? 0) - (b.todayOrder ?? 0)),
-    [counterItems, atmItems],
   );
   const skippedTodayItems = useMemo(
     () =>
@@ -346,78 +331,6 @@ export function DocketSchedule({
           </SortableContext>
         </DndContext>
         {children}
-        {doneTodayItems.length > 0 && (
-          <div className="mt-6 space-y-2">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <p className="font-mono text-[10px] tracking-[0.18em] text-ink-mute">
-                DONE TODAY
-              </p>
-              <button
-                type="button"
-                disabled={clearPending}
-                title="Clear every completed task off Today. Ones pulled from a Project Plan are marked done and struck through there too; everything else is deleted for good."
-                className="shrink-0 rounded-sm border border-paper-line bg-paper-panel/40 px-3 py-1 font-mono text-[10px] tracking-[0.18em] text-ink-mute transition hover:border-rust/50 hover:text-rust disabled:opacity-40"
-                onClick={() => {
-                  const n = doneTodayItems.length;
-                  if (
-                    !confirm(
-                      `Clear all ${n} completed item${n === 1 ? "" : "s"} from Today? Any pulled from a Project Plan will be marked done (struck through) there and removed from Project Tasks. The rest are deleted for good. Cannot be undone.`,
-                    )
-                  )
-                    return;
-                  startClearTransition(async () => {
-                    try {
-                      const r = await hardDeleteDoneTodayItems(
-                        doneTodayItems.map((it) => it.id),
-                      );
-                      toast.success(
-                        `Cleared ${r.deleted} completed item${r.deleted === 1 ? "" : "s"}.`,
-                      );
-                      router.refresh();
-                    } catch (e: any) {
-                      toast.error(
-                        e?.message ??
-                          "Could not clear completed items. Try again.",
-                      );
-                    }
-                  });
-                }}
-              >
-                {clearPending ? "CLEARING…" : "CLEAR ALL DONE"}
-              </button>
-            </div>
-            {doneTodayItems.map((it) => (
-              <div
-                key={it.id}
-                className="rounded-sm border border-paper-line/40 bg-paper-panel/30 px-4 py-3 opacity-60"
-              >
-                <div className="paper-task-title line-through text-ink-mute">
-                  {it.title}
-                </div>
-                <div className="mt-0.5 flex items-center justify-between gap-3 text-[11px] text-ink-mute">
-                  <span>{it.minutes ?? "—"} min</span>
-                  <button
-                    type="button"
-                    className="rounded-sm border border-paper-line/70 px-2 py-0.5 font-mono text-[10px] tracking-[0.14em] text-ink-mute transition hover:border-brass/50 hover:text-brass"
-                    onClick={() => {
-                      startTransition(async () => {
-                        try {
-                          await setItemState(it.id, "upcoming");
-                          toast.success("Moved back to Today.");
-                          router.refresh();
-                        } catch (e: any) {
-                          toast.error(e?.message ?? "Couldn't undo done.");
-                        }
-                      });
-                    }}
-                  >
-                    MARK NOT DONE
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
         {skippedTodayItems.length > 0 && (
           <div className="mt-6 space-y-2">
             <p className="font-mono text-[10px] tracking-[0.18em] text-ink-mute">
