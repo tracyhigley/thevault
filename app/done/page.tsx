@@ -49,29 +49,19 @@ export default async function DonePage() {
           Nothing finished yet. The first one will land here.
         </p>
       ) : (
-        <div className="mt-8 space-y-8">
+        <div className="mt-6 space-y-5">
           {groups.map((g) => (
             <div key={g.ymd}>
               <p className="font-mono text-[10px] tracking-[0.18em] text-ink-mute">
                 {g.ymd === "Undated" ? "UNDATED" : dateHeading(g.ymd).toUpperCase()}
               </p>
-              <div className="mt-2 space-y-2">
+              <div className="divide-y divide-paper-line/60">
                 {g.items.map((it) => (
                   <div
                     key={it.id}
-                    className="flex items-center gap-3 rounded-sm border border-paper-line bg-paper-panel px-4 py-3"
+                    className="flex items-center gap-2 py-1 text-[13px] leading-tight"
                   >
-                    <span className="mr-1 text-teal">✓</span>
-                    <div className="min-w-0 flex-1">
-                      <div className="paper-task-title line-through text-ink-mute">
-                        {it.title}
-                      </div>
-                      {it.minutes != null && (
-                        <div className="mt-0.5 text-[11px] text-ink-mute">
-                          {it.minutes} min
-                        </div>
-                      )}
-                    </div>
+                    <div className="min-w-0 flex-1 truncate">{it.title}</div>
                     <UndoDoneButton itemId={it.id} />
                     <DeleteItemButton itemId={it.id} />
                   </div>

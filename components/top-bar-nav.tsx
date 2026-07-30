@@ -69,7 +69,7 @@ function buildItems(fiftyFdHref: string): NavItem[] {
     },
     {
       href: "/done",
-      label: "DONE",
+      label: "ADMIN DONE",
       hint: "g o",
       match: (p) => p.startsWith("/done"),
       button: true,
