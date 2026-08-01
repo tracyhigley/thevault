@@ -14,6 +14,7 @@ import { UnsealGlow } from "@/components/unseal-glow";
 import type { DayInputs } from "@/lib/types";
 import { SKIP_FIELD_NOTES_LANDING_COOKIE } from "@/lib/nav-cookies";
 import { BuildPromptGreeting } from "@/components/build-prompt-greeting";
+import { DayScratchpad } from "@/components/day-scratchpad";
 import { todayYmd, zonedDayOfMonth } from "@/lib/day-timezone";
 
 const DAY_GREETINGS = [
@@ -60,7 +61,7 @@ export default async function DocketPage() {
   return (
     <div className="mx-auto max-w-[820px] px-4 py-6 md:px-10 md:py-10">
       <UnsealGlow />
-      <div className="flex items-baseline justify-between">
+      <div className="flex items-start justify-between">
         <div>
           <div className="serif-h text-ink text-[28px] md:text-[32px]">
             {greeting}
@@ -71,13 +72,16 @@ export default async function DocketPage() {
             endOfDay={inputs.endOfDay}
           />
         </div>
-        <Link
-          href="/build?step=1"
-          title="Press g b"
-          className="text-ink-mute hover:text-brass font-mono text-[10px] tracking-[0.18em]"
-        >
-          ↻ REBUILD DAY
-        </Link>
+        <div className="flex flex-col items-end gap-2">
+          <Link
+            href="/build?step=1"
+            title="Press g b"
+            className="text-ink-mute hover:text-brass font-mono text-[10px] tracking-[0.18em]"
+          >
+            ↻ REBUILD DAY
+          </Link>
+          <DayScratchpad date={inputs.date} />
+        </div>
       </div>
 
       <DocketSchedule
