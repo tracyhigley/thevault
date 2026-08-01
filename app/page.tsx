@@ -71,15 +71,15 @@ export default async function DocketPage() {
             hoursAvailable={inputs.hoursAvailable}
             endOfDay={inputs.endOfDay}
           />
+          <Link
+            href="/build?step=1"
+            title="Press g b"
+            className="text-ink-mute hover:text-brass mt-2 block font-mono text-[10px] tracking-[0.18em]"
+          >
+            ↻ REBUILD DAY
+          </Link>
         </div>
         <DayScratchpad date={inputs.date} className="min-w-0 flex-1" />
-        <Link
-          href="/build?step=1"
-          title="Press g b"
-          className="text-ink-mute hover:text-brass shrink-0 self-start font-mono text-[10px] tracking-[0.18em]"
-        >
-          ↻ REBUILD DAY
-        </Link>
       </div>
 
       <DocketSchedule

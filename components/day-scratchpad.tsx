@@ -51,7 +51,7 @@ export function DayScratchpad({
         value={value}
         onChange={(e) => setValue(e.target.value)}
         placeholder="Jot a note…"
-        rows={2}
+        rows={3}
         className="mt-1 w-full resize-none bg-transparent text-[13px] leading-snug text-ink outline-none placeholder:text-ink-mute"
       />
     </div>
