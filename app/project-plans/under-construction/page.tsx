@@ -1,14 +1,17 @@
 // Under construction — everything actively being built across the whole
-// campus, in one place. Mirrors /project-plans/completed. Drag-orderable via
-// active_order — falls back to newest-note-first for anything never dragged.
+// campus, in one place. Styled like the Master Project Plans building grid,
+// except each card is a single project (heading = project title, building
+// shown smaller inside the card) — a building with multiple projects under
+// construction gets one card per project, not one grouped card. Drag-orderable
+// via active_order — falls back to newest-note-first for anything never dragged.
 
 import Link from "next/link";
 import { getBuildings } from "@/lib/categories";
 import { getProjects } from "@/lib/projects";
 import {
-  ReorderableProjects,
-  type ReorderableProject,
-} from "@/components/reorderable-projects";
+  ReorderableProjectCards,
+  type ReorderableProjectCard,
+} from "@/components/reorderable-project-cards";
 
 export default async function UnderConstructionProjectsPage() {
   const [buildings, projects] = await Promise.all([
@@ -27,13 +30,13 @@ export default async function UnderConstructionProjectsPage() {
       return (b.modifiedAt ?? "").localeCompare(a.modifiedAt ?? "");
     });
 
-  const labelFor = (key: string) =>
-    buildings.find((b) => b.key === key)?.label ?? "Uncategorized";
+  const buildingByKey = new Map(buildings.map((b) => [b.key, b]));
 
-  const reorderableProjects: ReorderableProject[] = active.map((p) => ({
+  const reorderableProjects: ReorderableProjectCard[] = active.map((p) => ({
     id: p.id,
     title: p.title,
-    buildingLabel: labelFor(p.building),
+    buildingLabel: buildingByKey.get(p.building)?.label ?? "Uncategorized",
+    buildingColor: buildingByKey.get(p.building)?.color,
     lastLogDate: p.log.at(-1)?.date ?? null,
     doneLooksLike: p.doneLooksLike,
     currentTasks: p.tasks
@@ -42,7 +45,7 @@ export default async function UnderConstructionProjectsPage() {
   }));
 
   return (
-    <div className="mx-auto max-w-[900px] px-4 py-8 md:px-10">
+    <div className="mx-auto max-w-[1400px] px-4 py-8 md:px-10">
       <Link
         href="/project-plans"
         className="font-mono text-[10px] tracking-[0.2em] text-ink-mute hover:text-brass"
@@ -62,7 +65,7 @@ export default async function UnderConstructionProjectsPage() {
         </p>
       ) : (
         <div className="mt-8">
-          <ReorderableProjects projects={reorderableProjects} />
+          <ReorderableProjectCards projects={reorderableProjects} />
         </div>
       )}
     </div>
