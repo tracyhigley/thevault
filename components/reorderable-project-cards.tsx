@@ -35,7 +35,6 @@ export type ReorderableProjectCard = {
   buildingColor?: string;
   lastLogDate: string | null;
   doneLooksLike: string | null;
-  currentTasks: { id: string; text: string }[];
 };
 
 export function ReorderableProjectCards({
@@ -137,20 +136,6 @@ function SortableProjectCard({
         {project.doneLooksLike ? (
           <div className="mt-2 text-[12px] text-ink-dim">
             Done looks like: {project.doneLooksLike}
-          </div>
-        ) : null}
-        {project.currentTasks.length > 0 ? (
-          <div className="mt-2">
-            <div className="font-mono text-[9px] tracking-[0.2em] text-red-500">
-              CURRENT TASKS:
-            </div>
-            <ul className="mt-1 space-y-0.5">
-              {project.currentTasks.map((t) => (
-                <li key={t.id} className="text-[12px] text-ink-dim">
-                  {t.text}
-                </li>
-              ))}
-            </ul>
           </div>
         ) : null}
       </Link>

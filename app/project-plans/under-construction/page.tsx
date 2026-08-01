@@ -39,9 +39,6 @@ export default async function UnderConstructionProjectsPage() {
     buildingColor: buildingByKey.get(p.building)?.color,
     lastLogDate: p.log.at(-1)?.date ?? null,
     doneLooksLike: p.doneLooksLike,
-    currentTasks: p.tasks
-      .filter((t) => t.onTaskList)
-      .map((t) => ({ id: t.id, text: t.text })),
   }));
 
   return (
