@@ -61,8 +61,8 @@ export default async function DocketPage() {
   return (
     <div className="mx-auto max-w-[820px] px-4 py-6 md:px-10 md:py-10">
       <UnsealGlow />
-      <div className="flex items-start justify-between">
-        <div>
+      <div className="flex items-start gap-4">
+        <div className="shrink-0">
           <div className="serif-h text-ink text-[28px] md:text-[32px]">
             {greeting}
           </div>
@@ -72,16 +72,14 @@ export default async function DocketPage() {
             endOfDay={inputs.endOfDay}
           />
         </div>
-        <div className="flex flex-col items-end gap-2">
-          <Link
-            href="/build?step=1"
-            title="Press g b"
-            className="text-ink-mute hover:text-brass font-mono text-[10px] tracking-[0.18em]"
-          >
-            ↻ REBUILD DAY
-          </Link>
-          <DayScratchpad date={inputs.date} />
-        </div>
+        <DayScratchpad date={inputs.date} className="min-w-0 flex-1" />
+        <Link
+          href="/build?step=1"
+          title="Press g b"
+          className="text-ink-mute hover:text-brass shrink-0 self-start font-mono text-[10px] tracking-[0.18em]"
+        >
+          ↻ REBUILD DAY
+        </Link>
       </div>
 
       <DocketSchedule

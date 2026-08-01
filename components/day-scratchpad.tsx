@@ -9,7 +9,13 @@ function storageKey(date: string) {
   return `blueprint:scratchpad:${date}`;
 }
 
-export function DayScratchpad({ date }: { date: string }) {
+export function DayScratchpad({
+  date,
+  className = "",
+}: {
+  date: string;
+  className?: string;
+}) {
   const [value, setValue] = useState("");
   const loaded = useRef(false);
 
@@ -37,13 +43,15 @@ export function DayScratchpad({ date }: { date: string }) {
   }, [value, date]);
 
   return (
-    <div className="w-full max-w-[220px] rounded-sm border border-paper-line bg-paper-panel/60 p-2">
+    <div
+      className={`rounded-sm border border-paper-line bg-paper-panel/60 p-2 ${className}`}
+    >
       <div className="eyebrow text-ink-mute">Scratchpad</div>
       <textarea
         value={value}
         onChange={(e) => setValue(e.target.value)}
         placeholder="Jot a note…"
-        rows={3}
+        rows={2}
         className="mt-1 w-full resize-none bg-transparent text-[13px] leading-snug text-ink outline-none placeholder:text-ink-mute"
       />
     </div>
