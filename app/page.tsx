@@ -171,18 +171,23 @@ export default async function DocketPage() {
           >
             ↻ REBUILD DAY
           </Link>
-          <p className="text-ink-dim mt-2 text-[13px]">
+          <p className="text-ink-dim mt-2 text-[16px]">
             {fmtHoursFromMinutes(totalTodayMinutes)} hours out of{" "}
             {fmtHoursNumber(inputs.hoursAvailable)} available hours.
           </p>
         </div>
-        <DayScratchpad date={inputs.date} className="min-w-0 flex-1" />
+        <DayScratchpad
+          date={inputs.date}
+          initial={dayRow.scratchpad ?? null}
+          className="min-w-0 flex-1"
+        />
       </div>
 
       <div className="mt-8 space-y-6">
         <TodayCard
           title="The Gymnasium"
           color={gymBuilding?.color}
+          tint={gymBuilding?.color ?? "#b5853a"}
           rows={gymRows}
           buildingMode="none"
           buildingOpts={buildingOpts}
@@ -190,6 +195,7 @@ export default async function DocketPage() {
         />
         <TodayCard
           title="Maint Tasks"
+          tint="#eab308"
           rows={maintRows}
           buildingMode="editable"
           buildingOpts={buildingOpts}
@@ -202,6 +208,7 @@ export default async function DocketPage() {
         />
         <TodayCard
           title="Project Tasks"
+          tint="#3b82f6"
           rows={projectRows}
           buildingMode="tag"
           buildingOpts={buildingOpts}
@@ -219,6 +226,7 @@ function sumMinutes(rows: TodayRow[]): number {
 function TodayCard({
   title,
   color,
+  tint,
   rows,
   buildingMode,
   buildingOpts,
@@ -227,6 +235,8 @@ function TodayCard({
 }: {
   title: string;
   color?: string;
+  /** Base hex color (no alpha) for a slight background tint on the card. */
+  tint?: string;
   rows: TodayRow[];
   buildingMode: "editable" | "tag" | "none";
   buildingOpts: { key: string; label: string }[];
@@ -245,7 +255,10 @@ function TodayCard({
   }));
 
   return (
-    <div className="border-paper-line/60 bg-paper-panel/20 rounded-sm border p-4">
+    <div
+      className="border-paper-line/60 rounded-sm border p-4"
+      style={{ backgroundColor: tint ? `${tint}1f` : undefined }}
+    >
       <div className="mb-3 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           {color && (
@@ -257,7 +270,7 @@ function TodayCard({
           )}
           <h2 className="serif-h text-ink text-[18px]">{title}</h2>
         </div>
-        <span className="text-ink-mute shrink-0 font-mono text-[11px] tracking-wider tabular-nums">
+        <span className="text-ink-mute shrink-0 font-mono text-[14px] tracking-wider tabular-nums">
           {fmtHoursFromMinutes(sumMinutes(rows))}h
         </span>
       </div>

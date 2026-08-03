@@ -55,6 +55,24 @@ export async function saveDayInputs(formData: FormData) {
   revalidatePath("/");
 }
 
+// The Today scratchpad — loose notes for the day. Used to be localStorage
+// only (device-local, never synced); now lives on the day_inputs row so it
+// shows up the same on mobile and desktop. The Docket only ever renders the
+// scratchpad once a day_inputs row exists for that date (see app/page.tsx),
+// so a plain update is safe — no upsert/insert path needed here.
+export async function saveDayScratchpad(date: string, text: string) {
+  const { sb } = await requireUser();
+  const vaultId = await currentVaultId();
+  if (!vaultId) throw new Error("No vault");
+  const { error } = await sb
+    .from("day_inputs")
+    .update({ scratchpad: text.trim() === "" ? null : text })
+    .eq("vault_id", vaultId)
+    .eq("date", date);
+  if (error) throw new Error(error.message);
+  revalidatePath("/");
+}
+
 // Wizard partial save — only the fields you've answered so far. Used by the
 // /build wizard so each step persists immediately.
 const PartialDayInputs = z.object({
