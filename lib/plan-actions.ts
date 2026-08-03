@@ -320,7 +320,7 @@ export async function markProjectTaskDone(projectId: string, taskId: string) {
   revalidatePath("/project-plans", "layout");
   revalidatePath("/project-tasks");
   revalidatePath("/");
-  revalidatePath("/admin-tasks");
+  revalidatePath("/maint-tasks");
 }
 
 export async function deleteProjectTask(projectId: string, taskId: string) {
@@ -348,7 +348,7 @@ export async function deleteProjectTask(projectId: string, taskId: string) {
   revalidatePath("/project-plans", "layout");
   revalidatePath("/project-tasks");
   revalidatePath("/");
-  revalidatePath("/admin-tasks");
+  revalidatePath("/maint-tasks");
 }
 
 // Reorders a project's task checklist to match the given id sequence.
@@ -424,7 +424,7 @@ export async function deleteProject(id: string) {
 // Everything above is intentionally decoupled from items/today_order (see
 // the file header). "Add to Today" on the Project Tasks page is the one
 // place that bridges the two systems: it creates a real Item (so the task
-// actually shows up on the Today docket, same mechanism as any Admin Tasks
+// actually shows up on the Today docket, same mechanism as any Maint Tasks
 // row) tagged with source_project_id/source_task_id so it can be toggled
 // back off cleanly and can never be duplicated (see migration
 // 0018_project_task_today_link).
@@ -509,7 +509,7 @@ export async function addProjectTaskToToday(
 
   revalidatePath("/");
   revalidatePath("/project-tasks");
-  revalidatePath("/admin-tasks");
+  revalidatePath("/maint-tasks");
   revalidatePath("/build");
 }
 
@@ -531,7 +531,7 @@ export async function removeProjectTaskFromToday(
   if (error) throw new Error(error.message);
   revalidatePath("/");
   revalidatePath("/project-tasks");
-  revalidatePath("/admin-tasks");
+  revalidatePath("/maint-tasks");
   revalidatePath("/build");
 }
 
@@ -571,7 +571,7 @@ export async function updateProjectTaskText(
   revalidatePath("/project-plans", "layout");
   revalidatePath("/project-tasks");
   revalidatePath("/");
-  revalidatePath("/admin-tasks");
+  revalidatePath("/maint-tasks");
 }
 
 // Edits a project task's minutes estimate from the Project Tasks page, and
@@ -606,5 +606,5 @@ export async function updateProjectTaskMinutes(
 
   revalidatePath("/project-tasks");
   revalidatePath("/");
-  revalidatePath("/admin-tasks");
+  revalidatePath("/maint-tasks");
 }

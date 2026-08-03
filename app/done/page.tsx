@@ -1,4 +1,4 @@
-// DONE — the archive of finished Admin Tasks (and one-off custom blocks)
+// DONE — the archive of finished Maint Tasks (and one-off custom blocks)
 // checked off from Today's docket. Grouped under a heading for the
 // calendar date each item was finished, newest date first. Project Tasks
 // never land here — finishing one strikes it through on its Project Plan
@@ -41,7 +41,7 @@ export default async function DonePage() {
         Done.
       </h1>
       <p className="mt-1 text-[13px] text-ink-dim">
-        Admin Tasks checked off from Today — proof it gets done.
+        Maint Tasks checked off from Today — proof it gets done.
       </p>
 
       {groups.length === 0 ? (

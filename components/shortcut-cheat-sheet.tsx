@@ -36,7 +36,7 @@ export function ShortcutCheatSheet() {
     groups.get(g)!.push(e);
   }
   // Stable group order
-  const order = ["Help", "Navigate", "Capture", "Field Notes", "Build day", "Admin Tasks", "Project Tasks", "Other"];
+  const order = ["Help", "Navigate", "Capture", "Field Notes", "Build day", "Maint Tasks", "Project Tasks", "Other"];
   const sortedKeys = Array.from(groups.keys()).sort(
     (a, b) => (order.indexOf(a) === -1 ? 99 : order.indexOf(a)) - (order.indexOf(b) === -1 ? 99 : order.indexOf(b)),
   );

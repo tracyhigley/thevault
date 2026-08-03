@@ -30,8 +30,8 @@ export type Item = {
   atmOrder?: number | null;
   // Set only on the linked Today item created when a Project Task is
   // pulled onto today's plan (see addProjectTaskToToday). Lets pages that
-  // list "Admin Tasks" specifically exclude these — they should surface
-  // only on the Today docket, not duplicate onto Admin Tasks.
+  // list "Maint Tasks" specifically exclude these — they should surface
+  // only on the Today docket, not duplicate onto Maint Tasks.
   sourceTaskId?: string | null;
   energy?: Energy | null;
   category?: string | null;

@@ -1,6 +1,6 @@
 "use client";
 // "On today's plan" toggle for a Project Tasks row. Mirrors TodayToggle
-// (Admin Tasks) visually and behaviorally, but goes through the
+// (Maint Tasks) visually and behaviorally, but goes through the
 // Project-Tasks-specific actions since there's no existing Item to flip a
 // flag on — the first click creates one (linked via source_project_id /
 // source_task_id), the second click removes it again.

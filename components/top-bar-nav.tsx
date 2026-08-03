@@ -30,10 +30,10 @@ function buildItems(fiftyFdHref: string): NavItem[] {
       button: true,
     },
     {
-      href: "/admin-tasks",
-      label: "ADMIN TASKS",
+      href: "/maint-tasks",
+      label: "MAINT TASKS",
       hint: "g c",
-      match: (p) => p.startsWith("/admin-tasks"),
+      match: (p) => p.startsWith("/maint-tasks"),
       button: true,
     },
     {
@@ -69,7 +69,7 @@ function buildItems(fiftyFdHref: string): NavItem[] {
     },
     {
       href: "/done",
-      label: "ADMIN DONE",
+      label: "MAINT DONE",
       hint: "g o",
       match: (p) => p.startsWith("/done"),
       button: true,

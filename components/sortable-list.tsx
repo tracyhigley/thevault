@@ -26,7 +26,7 @@ type SortableListProps = {
   items: SortableItem[];
   /**
    * When set, drag-end invokes this with the new row order for this list only
-   * instead of calling `reorderItems` (e.g. Admin Tasks merges several sections).
+   * instead of calling `reorderItems` (e.g. Maint Tasks merges several sections).
    */
   onReorder?: (orderedItems: SortableItem[]) => void | Promise<void>;
 };

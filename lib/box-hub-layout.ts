@@ -1,7 +1,7 @@
 import type { Box } from "@/lib/categories";
 
 // The Boxes hub itself is gone (Buildings replaced it as the categorization
-// system across Field Notes, Admin Tasks, and Calendar), but this matcher
+// system across Field Notes, Maint Tasks, and Calendar), but this matcher
 // is still shared infrastructure — calendarWorkLifeGroup uses it to match a
 // calendar project (building) against its work/life slot strings.
 

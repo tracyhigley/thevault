@@ -5,7 +5,7 @@ import { useTransition } from "react";
 import { toast } from "sonner";
 import { undoTodayItemDone } from "@/lib/actions";
 
-/** Puts a finished Admin Task back on today's plan as upcoming. */
+/** Puts a finished Maint Task back on today's plan as upcoming. */
 export function UndoDoneButton({ itemId }: { itemId: string }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();

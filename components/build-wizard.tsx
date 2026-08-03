@@ -20,7 +20,7 @@ import { Kbd } from "./kbd";
 const STEPS = [
   { n: 1, title: "End Time" },
   { n: 2, title: "Field Notes" },
-  { n: 3, title: "Admin Tasks" },
+  { n: 3, title: "Maint Tasks" },
   { n: 4, title: "Project Tasks" },
   { n: 5, title: "Time Left" },
 ] as const;
@@ -46,7 +46,7 @@ export function BuildWizard({
   stressors,
   timeSensitive,
   mustDo,
-  otherAdmin,
+  otherMaint,
   projectRows,
 }: {
   step: number;
@@ -58,7 +58,7 @@ export function BuildWizard({
   stressors: Item[];
   timeSensitive: Item[];
   mustDo: Item[];
-  otherAdmin: Item[];
+  otherMaint: Item[];
   projectRows: ProjectTaskRow[];
 }) {
   const router = useRouter();
@@ -131,7 +131,7 @@ export function BuildWizard({
             stressors={stressors}
             timeSensitive={timeSensitive}
             mustDo={mustDo}
-            otherAdmin={otherAdmin}
+            otherMaint={otherMaint}
             onNext={next}
           />
         )}
@@ -239,7 +239,7 @@ function DaySetupStep({
   return (
     <Step
       title="When does your day end?"
-      hint="Set your end-of-day time first. Next, you will clear Field Notes before choosing Admin Tasks and Project Tasks items for today."
+      hint="Set your end-of-day time first. Next, you will clear Field Notes before choosing Maint Tasks and Project Tasks items for today."
       pending={pending}
       onSubmit={submit}
       submitLabel="NEXT"
@@ -286,10 +286,10 @@ function DropStep({
       title="Clear Field Notes first"
       hint={
         hasDrop
-          ? "For each Field Notes item, choose Project Tasks or Admin Tasks, set minutes and building, then send it (or delete it)."
-          : "Field Notes is clear. Continue to choose what is already on your Admin Tasks."
+          ? "For each Field Notes item, choose Project Tasks or Maint Tasks, set minutes and building, then send it (or delete it)."
+          : "Field Notes is clear. Continue to choose what is already on your Maint Tasks."
       }
-      submitLabel="ON TO ADMIN TASKS →"
+      submitLabel="ON TO MAINT TASKS →"
       onSubmit={onNext}
       submitDisabled={hasDrop}
     >
@@ -316,30 +316,30 @@ function DropStep({
   );
 }
 
-// Step 3: Admin Tasks review.
+// Step 3: Maint Tasks review.
 function ReviewStep({
   buildings,
   stressors,
   timeSensitive,
   mustDo,
-  otherAdmin,
+  otherMaint,
   onNext,
 }: {
   buildings: Box[];
   stressors: Item[];
   timeSensitive: Item[];
   mustDo: Item[];
-  otherAdmin: Item[];
+  otherMaint: Item[];
   onNext: () => void;
 }) {
   const total =
-    stressors.length + timeSensitive.length + mustDo.length + otherAdmin.length;
+    stressors.length + timeSensitive.length + mustDo.length + otherMaint.length;
   return (
     <Step
-      title="What's already on Admin Tasks?"
+      title="What's already on Maint Tasks?"
       hint={
         total === 0
-          ? "Nothing on Admin Tasks yet — add items below, or continue with an empty plan."
+          ? "Nothing on Maint Tasks yet — add items below, or continue with an empty plan."
           : "Edit titles and minutes as needed. Tap + TODAY on what you want scheduled; add more items anytime before you continue."
       }
       submitLabel="ON TO PROJECT TASKS →"
@@ -370,10 +370,10 @@ function ReviewStep({
         )}
       </Group>
       <Group label="Everything else" tone="brass">
-        {otherAdmin.length === 0 ? (
+        {otherMaint.length === 0 ? (
           <Empty />
         ) : (
-          otherAdmin.map((it) => <Row key={it.id} item={it} />)
+          otherMaint.map((it) => <Row key={it.id} item={it} />)
         )}
       </Group>
     </Step>
@@ -543,10 +543,10 @@ function TimeLeftStep({
       </h1>
       <p className="text-ink-dim mt-2">
         {leftoverMinutes > 0
-          ? `${formatDurationFromMinutes(leftoverMinutes)} still open after Admin Tasks and Project Tasks on Today.`
+          ? `${formatDurationFromMinutes(leftoverMinutes)} still open after Maint Tasks and Project Tasks on Today.`
           : leftoverMinutes === 0
-            ? "Admin Tasks and Project Tasks on Today exactly fill your day window."
-            : `Admin Tasks and Project Tasks on Today run ${formatDurationFromMinutes(-leftoverMinutes)} past your day window.`}
+            ? "Maint Tasks and Project Tasks on Today exactly fill your day window."
+            : `Maint Tasks and Project Tasks on Today run ${formatDurationFromMinutes(-leftoverMinutes)} past your day window.`}
       </p>
 
       <div className="border-paper-line/60 bg-paper-panel/40 mt-10 rounded-sm border p-6 text-center">

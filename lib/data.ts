@@ -69,7 +69,7 @@ export async function getItemsByBox(box: BoxKey): Promise<Item[]> {
   return (data ?? []).map(rowToItem);
 }
 
-// Admin Tasks (and one-off custom blocks) finished from Today's docket —
+// Maint Tasks (and one-off custom blocks) finished from Today's docket —
 // see completeTodayItem in lib/actions.ts. Project Tasks never land here:
 // finishing one deletes its linked Today item and the Project Plan
 // checklist becomes the record instead. Newest first; the /done page

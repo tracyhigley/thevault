@@ -4,12 +4,12 @@
 // Two related but separate concerns:
 //   classify()         → bucket counter items by urgent/must combinations
 //   pickAtmCandidates → energy-matched filter for ATM items
-//   buildSchedule     → emit timed blocks, admin-first or ATM-first
+//   buildSchedule     → emit timed blocks, maint-first or ATM-first
 //                        based on the stressor anchor threshold
 
 import type { DayInputs, Item } from "./types";
 
-export type Bucket = "STRESSOR" | "TIME_SENSITIVE" | "MUST_DO" | "OTHER_ADMIN";
+export type Bucket = "STRESSOR" | "TIME_SENSITIVE" | "MUST_DO" | "OTHER_MAINT";
 
 export type ClassifiedItem = Item & { bucket: Bucket };
 
@@ -17,7 +17,7 @@ export type Classified = {
   stressors: ClassifiedItem[];
   timeSensitive: ClassifiedItem[];
   mustDo: ClassifiedItem[];
-  otherAdmin: ClassifiedItem[];
+  otherMaint: ClassifiedItem[];
   stressorsMinutes: number;
   timeSensitiveMinutes: number;
   mustDoMinutes: number;
@@ -31,7 +31,7 @@ export function classify(items: Item[], todayOnly = true): Classified {
   const stressors: ClassifiedItem[] = [];
   const timeSensitive: ClassifiedItem[] = [];
   const mustDo: ClassifiedItem[] = [];
-  const otherAdmin: ClassifiedItem[] = [];
+  const otherMaint: ClassifiedItem[] = [];
 
   for (const it of items) {
     if (it.deletedAt) continue;
@@ -44,7 +44,7 @@ export function classify(items: Item[], todayOnly = true): Classified {
     } else if (it.must) {
       mustDo.push({ ...it, bucket: "MUST_DO" });
     } else {
-      otherAdmin.push({ ...it, bucket: "OTHER_ADMIN" });
+      otherMaint.push({ ...it, bucket: "OTHER_MAINT" });
     }
     void m;
   }
@@ -56,7 +56,7 @@ export function classify(items: Item[], todayOnly = true): Classified {
     stressors,
     timeSensitive,
     mustDo,
-    otherAdmin,
+    otherMaint,
     stressorsMinutes: sum(stressors),
     timeSensitiveMinutes: sum(timeSensitive),
     mustDoMinutes: sum(mustDo),
@@ -183,9 +183,9 @@ export function dayScheduleWindow(
 //
 // Logic:
 //   1. Compute end-of-day Date from inputs.endOfDay ("HH:MM" 24-hr or "4:30 PM").
-//   2. If stressorsMinutes < threshold, the admin pile (stressors + time-sensitive
+//   2. If stressorsMinutes < threshold, the maint pile (stressors + time-sensitive
 //      + must-do) is anchored so it FINISHES at end-of-day. Till picks fill earlier.
-//   3. If stressorsMinutes >= threshold, admin runs FIRST starting at the
+//   3. If stressorsMinutes >= threshold, maint runs FIRST starting at the
 //      day-start (computed = endOfDay - hoursAvailable). Till picks come after.
 //   4. Pinned items keep their scheduledStart; everything else flows around them.
 export function buildSchedule({
@@ -198,39 +198,39 @@ export function buildSchedule({
   const { dayStart, endOfDay } = dayScheduleWindow(inputs, now);
   const nowOnDate = now ?? new Date();
 
-  // adminPile = every counter item on today's plan, in priority order.
-  // otherAdmin (neither urgent nor must) was being dropped from the
+  // maintPile = every counter item on today's plan, in priority order.
+  // otherMaint (neither urgent nor must) was being dropped from the
   // schedule — fixed: append at the tail so "neither" items also show up.
-  const adminPile = [
+  const maintPile = [
     ...classified.stressors,
     ...classified.timeSensitive,
     ...classified.mustDo,
-    ...classified.otherAdmin,
+    ...classified.otherMaint,
   ];
 
-  // Admin-first vs ATM-first ordering. Either way, the day starts at
-  // dayStart — the old "anchor admin to end-of-day" mode produced weird
+  // Maint-first vs ATM-first ordering. Either way, the day starts at
+  // dayStart — the old "anchor maint to end-of-day" mode produced weird
   // 5:45 PM start times when ATM picks were empty, since the morning
   // had nothing to fill it. Now both branches start at dayStart.
-  const adminFirst =
+  const maintFirst =
     classified.stressorsMinutes >= stressorAnchorMinutes;
 
   let cursor: Date = new Date(dayStart);
   const blocks: ScheduledBlock[] = [];
 
-  if (adminFirst) {
-    cursor = appendBlocks(blocks, adminPile, cursor);
+  if (maintFirst) {
+    cursor = appendBlocks(blocks, maintPile, cursor);
     cursor = appendBlocks(blocks, atmPicks, cursor, "ATM_PICK");
   } else {
     cursor = appendBlocks(blocks, atmPicks, cursor, "ATM_PICK");
-    cursor = appendBlocks(blocks, adminPile, cursor);
+    cursor = appendBlocks(blocks, maintPile, cursor);
   }
   void endOfDay;
   void nowOnDate;
 
   // Apply pins last — items with their own scheduledStart override.
   for (const block of blocks) {
-    const source = [...adminPile, ...atmPicks].find(
+    const source = [...maintPile, ...atmPicks].find(
       (i) => i.id === block.itemId,
     );
     if (source?.pinned && source.scheduledStart) {
@@ -276,7 +276,7 @@ function appendBlocks(
       bucket:
         forceBucket ??
         ((it as ClassifiedItem).bucket as Bucket) ??
-        "OTHER_ADMIN",
+        "OTHER_MAINT",
       minutes,
       start: start.toISOString(),
       end: end.toISOString(),
@@ -322,13 +322,13 @@ export function thresholdCallout(
   threshold = 91,
 ): string {
   if (classified.stressorsMinutes >= threshold) {
-    return "Today's Admin tasks should be done first";
+    return "Today's Maint tasks should be done first";
   }
   const endOfDay = parseTimeOnDate(inputs.endOfDay, inputs.date);
   const start = new Date(
     endOfDay.getTime() - classified.stressorsMinutes * 60_000,
   );
-  return `Today's Admin tasks should be started at ${formatHHMM12(start)}`;
+  return `Today's Maint tasks should be started at ${formatHHMM12(start)}`;
 }
 
 function formatHHMM12(d: Date): string {

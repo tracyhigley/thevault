@@ -12,8 +12,8 @@ import type { Item } from "@/lib/types";
 
 // Field Notes row, two compact lines:
 //
-//   [edge]  [PROJECT TASKS|ADMIN TASKS]  Title (editable)          [Building ▼]
-//           ⏱ 30m   urgent / must / should (Admin Tasks)     Delete · Send
+//   [edge]  [PROJECT TASKS|MAINT TASKS]  Title (editable)          [Building ▼]
+//           ⏱ 30m   urgent / must / should (Maint Tasks)     Delete · Send
 //
 // 4-px coloured left edge tracks the destination so a glance reads where
 // each row will land. The destination toggle is the only place the user
@@ -68,7 +68,7 @@ export function DropTriageRow({
     options: { enabled: focused },
   });
   useShortcut("2", () => setDest("COUNTER"), {
-    label: "Send to Admin Tasks",
+    label: "Send to Maint Tasks",
     group: "Field Notes",
     options: { enabled: focused },
   });
@@ -137,7 +137,7 @@ export function DropTriageRow({
         const label = boxes.find((b) => b.key === boxKey)?.label ?? boxKey;
         toast.success(
           dest === "COUNTER"
-            ? `Sent to Admin Tasks · ${label}.`
+            ? `Sent to Maint Tasks · ${label}.`
             : `Sent to Project Tasks · ${label}.`,
         );
         window.dispatchEvent(new CustomEvent("field-notes:advance"));
@@ -305,7 +305,7 @@ function DestSegment({
         accent="rust"
         hint="2"
       >
-        ADMIN TASKS
+        MAINT TASKS
       </SegmentButton>
     </div>
   );

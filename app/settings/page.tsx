@@ -60,7 +60,7 @@ export default async function SettingsPage() {
           </Row>
           <Row
             label="Stressor anchor threshold"
-            hint="When today's urgent+must minutes hit this, admin runs first thing in the morning. Below it, Project Tasks picks come first and admin lands after."
+            hint="When today's urgent+must minutes hit this, maint runs first thing in the morning. Below it, Project Tasks picks come first and maint lands after."
           >
             <NumberField
               name="stressor_anchor_minutes"

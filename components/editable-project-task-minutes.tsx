@@ -1,6 +1,6 @@
 "use client";
 // Inline-editable minutes estimate for a Project Tasks row. Same look and
-// feel as the numeric EditableText field on Admin Tasks, but writes through
+// feel as the numeric EditableText field on Maint Tasks, but writes through
 // updateProjectTaskMinutes (project.tasks jsonb) instead of items.
 
 import { useState, useTransition } from "react";

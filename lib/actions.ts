@@ -187,7 +187,7 @@ export async function setItemState(
   }
   await sb.from("items").update(patch).eq("id", itemId);
   revalidatePath("/");
-  revalidatePath("/admin-tasks");
+  revalidatePath("/maint-tasks");
   revalidatePath("/project-tasks");
   revalidatePath("/build");
 }
@@ -207,7 +207,7 @@ export async function moveItemToBox(itemId: string, box: string) {
   await sb.from("items").update({ box }).eq("id", itemId);
   revalidatePath("/");
   revalidatePath("/field-notes");
-  revalidatePath("/admin-tasks");
+  revalidatePath("/maint-tasks");
   revalidatePath("/project-tasks");
   revalidatePath("/boxes");
 }
@@ -220,7 +220,7 @@ export async function softDeleteItem(itemId: string) {
     .eq("id", itemId);
   revalidatePath("/");
   revalidatePath("/project-tasks");
-  revalidatePath("/admin-tasks");
+  revalidatePath("/maint-tasks");
   revalidatePath("/field-notes");
   revalidatePath("/boxes");
 }
@@ -237,16 +237,16 @@ export async function softDeleteItem(itemId: string) {
  *     page. See markProjectTaskDone in lib/plan-actions.ts for the
  *     mirror-image version of this, triggered from that page's own DONE
  *     button.
- *   - Admin Task (plain Counter/ATM item): taken off today's plan and
+ *   - Maint Task (plain Counter/ATM item): taken off today's plan and
  *     archived — state "done" + actual_end stamped, today_order cleared —
- *     so it disappears from Today and from Admin Tasks (see the state
+ *     so it disappears from Today and from Maint Tasks (see the state
  *     !== "done" filter there) and instead shows up on the /done page,
  *     grouped under today's date. Not soft-deleted, so undoTodayItemDone
  *     can restore it.
  */
 export async function completeTodayItem(
   itemId: string,
-): Promise<{ archivedAs: "project" | "admin" }> {
+): Promise<{ archivedAs: "project" | "maint" }> {
   const { sb } = await requireUser();
   const { data: item, error } = await sb
     .from("items")
@@ -257,8 +257,8 @@ export async function completeTodayItem(
   if (error) throw new Error(error.message);
   if (!item) throw new Error("Item not found");
 
-  const archivedAs: "project" | "admin" =
-    item.source_project_id && item.source_task_id ? "project" : "admin";
+  const archivedAs: "project" | "maint" =
+    item.source_project_id && item.source_task_id ? "project" : "maint";
 
   if (archivedAs === "project") {
     await markProjectTaskDoneCore(
@@ -281,7 +281,7 @@ export async function completeTodayItem(
   revalidatePath("/");
   revalidatePath("/project-plans", "layout");
   revalidatePath("/project-tasks");
-  revalidatePath("/admin-tasks");
+  revalidatePath("/maint-tasks");
   revalidatePath("/field-notes");
   revalidatePath("/boxes");
   revalidatePath("/documents");
@@ -290,8 +290,8 @@ export async function completeTodayItem(
 }
 
 /**
- * Reverses completeTodayItem's admin-task path — puts the item back on
- * today's plan as upcoming. Only meaningful for Admin Tasks: once a Project
+ * Reverses completeTodayItem's maint-task path — puts the item back on
+ * today's plan as upcoming. Only meaningful for Maint Tasks: once a Project
  * Task is finished, its linked Today item is gone and the checklist itself
  * is the record, so that side has no single-click undo (matches how
  * finishing a task from the Project Tasks page has always worked).
@@ -312,7 +312,7 @@ export async function undoTodayItemDone(itemId: string) {
     .eq("id", itemId);
   if (error) throw new Error(error.message);
   revalidatePath("/");
-  revalidatePath("/admin-tasks");
+  revalidatePath("/maint-tasks");
   revalidatePath("/done");
 }
 
@@ -322,7 +322,7 @@ export async function hardDeleteItem(itemId: string) {
   await sb.from("items").delete().eq("id", itemId);
   revalidatePath("/");
   revalidatePath("/project-tasks");
-  revalidatePath("/admin-tasks");
+  revalidatePath("/maint-tasks");
   revalidatePath("/field-notes");
   revalidatePath("/boxes");
   revalidatePath("/documents");
@@ -454,7 +454,7 @@ export async function createItem(box: string, title: string, extras: z.input<typ
     .single();
   revalidatePath("/", "layout");
   revalidatePath("/boxes");
-  revalidatePath("/admin-tasks");
+  revalidatePath("/maint-tasks");
   revalidatePath("/project-tasks");
   return data?.id;
 }
@@ -511,7 +511,7 @@ export async function setTodayPlan(itemId: string, on: boolean) {
   }
   revalidatePath("/");
   revalidatePath("/project-tasks");
-  revalidatePath("/admin-tasks");
+  revalidatePath("/maint-tasks");
   revalidatePath("/build");
 }
 
@@ -601,8 +601,8 @@ export async function applyAtmBoxBudgets(
 
 // Custom block on the Docket — creates a Today-only item. Lives in the
 // COUNTER box (that's what Today's schedule reads), but tagged CUSTOM_BLOCK
-// and excluded on Admin Tasks (see the `all` filter there) so it never shows
-// up as an Admin Tasks obligation — it's Today-only scratch, same idea as
+// and excluded on Maint Tasks (see the `all` filter there) so it never shows
+// up as an Maint Tasks obligation — it's Today-only scratch, same idea as
 // how Project Task pulls are excluded there via sourceTaskId.
 export async function addCustomBlock(opts: {
   title: string;
@@ -642,7 +642,7 @@ export async function addCustomBlock(opts: {
     today_order: todayOrder,
   });
   revalidatePath("/");
-  revalidatePath("/admin-tasks");
+  revalidatePath("/maint-tasks");
 }
 
 // Documents: write markdown body for the single document row in a document box.

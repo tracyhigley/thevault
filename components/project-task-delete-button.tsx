@@ -1,7 +1,7 @@
 "use client";
 // Small red ✕ on a Project Tasks row — permanently removes the task from
 // the project's checklist (and cleans up a linked Today item, if any).
-// Visually and behaviorally matches DeleteItemButton on Admin Tasks. Hides
+// Visually and behaviorally matches DeleteItemButton on Maint Tasks. Hides
 // optimistically and rolls back on failure.
 
 import { useTransition } from "react";

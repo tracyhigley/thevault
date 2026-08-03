@@ -41,7 +41,7 @@ export default async function DropPage() {
           </h3>
           <p className="text-ink-dim mt-1 text-[13px]">
             Triage needs at least one building (where things go) and one energy
-            (which decides Project Tasks vs Admin Tasks).
+            (which decides Project Tasks vs Maint Tasks).
           </p>
           <div className="mt-4 flex flex-wrap gap-3">
             {buildings.length === 0 && (
@@ -72,7 +72,7 @@ export default async function DropPage() {
           </span>
           <span className="flex items-center gap-1.5">
             <Kbd keys="1" size="xs" /> Project Tasks <Kbd keys="2" size="xs" />{" "}
-            Admin Tasks
+            Maint Tasks
           </span>
           <span className="flex items-center gap-1.5">
             <Kbd keys="b" size="xs" /> box <Kbd keys="t" size="xs" /> time{" "}

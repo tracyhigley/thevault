@@ -20,7 +20,7 @@ export default async function BuildingsSettingsPage() {
       <p className="text-ink-dim mt-6">
         Buildings are the big, ongoing areas of your life — each one holds
         building projects on the Master Project Plans, and tags what you file
-        from Field Notes, Admin Tasks, and Calendar.
+        from Field Notes, Maint Tasks, and Calendar.
       </p>
       <p className="text-ink-dim mt-1 text-[13px]">
         The <strong>label</strong> is the building&apos;s name. The{" "}

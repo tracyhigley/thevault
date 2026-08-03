@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { softDeleteItem } from "@/lib/actions";
 
-/** Removes the item from Admin Tasks — same data path as delete, different intent. */
+/** Removes the item from Maint Tasks — same data path as delete, different intent. */
 export function CounterDoneButton({ itemId }: { itemId: string }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -18,7 +18,7 @@ export function CounterDoneButton({ itemId }: { itemId: string }) {
       onClick={(e) => {
         e.preventDefault();
         e.stopPropagation();
-        if (!confirm("Mark this done? It will be removed from Admin Tasks."))
+        if (!confirm("Mark this done? It will be removed from Maint Tasks."))
           return;
         startTransition(async () => {
           await softDeleteItem(itemId);

@@ -16,7 +16,7 @@ import type { Item, DayInputs } from "./types";
 // override.
 const baseItem = (over: Partial<Item>): Item => ({
   id: crypto.randomUUID(),
-  box: "ADMIN",
+  box: "MAINT",
   title: "x",
   urgent: false,
   must: false,
@@ -49,7 +49,7 @@ describe("classify", () => {
     expect(r.stressors).toHaveLength(1);
     expect(r.timeSensitive).toHaveLength(1);
     expect(r.mustDo).toHaveLength(1);
-    expect(r.otherAdmin).toHaveLength(1);
+    expect(r.otherMaint).toHaveLength(1);
     expect(r.stressorsMinutes).toBe(60);
     expect(r.timeSensitiveMinutes).toBe(15);
     expect(r.mustDoMinutes).toBe(30);
@@ -153,10 +153,10 @@ describe("pickAtmCandidates", () => {
 });
 
 describe("buildSchedule", () => {
-  it("always starts at dayStart regardless of admin size", () => {
-    // Below threshold (small admin pile, no ATM picks). The old behavior
-    // anchored admin to end-of-day, producing a late "first block start"
-    // when nothing filled the morning. New behavior: admin starts at
+  it("always starts at dayStart regardless of maint size", () => {
+    // Below threshold (small maint pile, no ATM picks). The old behavior
+    // anchored maint to end-of-day, producing a late "first block start"
+    // when nothing filled the morning. New behavior: maint starts at
     // dayStart (= endOfDay − hoursAvailable = 9:30 AM).
     const classified = classify([
       baseItem({ urgent: true, must: true, minutes: 30, title: "S1" }),
@@ -168,7 +168,7 @@ describe("buildSchedule", () => {
     expect(new Date(first.start).getMinutes()).toBe(30);
   });
 
-  it("runs admin first when stressors >= threshold", () => {
+  it("runs maint first when stressors >= threshold", () => {
     const stressors = Array.from({ length: 5 }, () =>
       baseItem({ urgent: true, must: true, minutes: 25, title: "s" }),
     );
@@ -179,7 +179,7 @@ describe("buildSchedule", () => {
     expect(new Date(first.start).getMinutes()).toBe(30);
   });
 
-  it("schedules otherAdmin (neither urgent nor must) too", () => {
+  it("schedules otherMaint (neither urgent nor must) too", () => {
     const classified = classify([
       baseItem({ urgent: false, must: false, minutes: 20, title: "Q1" }),
     ]);
@@ -290,6 +290,6 @@ describe("thresholdCallout", () => {
     const c = classify([
       baseItem({ urgent: true, must: true, minutes: 30, title: "S" }),
     ]);
-    expect(thresholdCallout(c, inputs)).toMatch(/Today's Admin/);
+    expect(thresholdCallout(c, inputs)).toMatch(/Today's Maint/);
   });
 });

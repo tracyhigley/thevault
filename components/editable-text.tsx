@@ -98,7 +98,7 @@ export function EditableText({
   );
 }
 
-/** Same visuals as EditableFlag, for local state before insert (e.g. new Admin Tasks row). */
+/** Same visuals as EditableFlag, for local state before insert (e.g. new Maint Tasks row). */
 export function CounterFlagDraft({
   on,
   onChange,
@@ -129,7 +129,7 @@ export function CounterFlagDraft({
 }
 
 // Visual key:
-//   urgent (⚡ lightning) → time pressure, amber (see Admin Tasks / Field Notes)
+//   urgent (⚡ lightning) → time pressure, amber (see Maint Tasks / Field Notes)
 //   must   (★ star)       → required / anchor, brass color
 //   should (◎ target)     → recommended / strong nudge, emerald
 // Each renders an outline when OFF (still clearly that flag) and fills when ON.

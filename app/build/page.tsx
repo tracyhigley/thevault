@@ -1,4 +1,4 @@
-// Wizard: build today — set end time, clear Field Notes, review Admin Tasks,
+// Wizard: build today — set end time, clear Field Notes, review Maint Tasks,
 // pull Project Tasks, then see what's left in the day.
 
 import { redirect } from "next/navigation";
@@ -58,19 +58,19 @@ export default async function BuildDayPage({
   };
 
   // Wizard review wants every counter item (for opt-in), not just the
-  // ones already on today's plan — but it's the "Admin Tasks" step, so it
-  // mirrors the same exclusions as the standalone Admin Tasks page: items
+  // ones already on today's plan — but it's the "Maint Tasks" step, so it
+  // mirrors the same exclusions as the standalone Maint Tasks page: items
   // linked to a Project Task pulled onto Today (see addProjectTaskToToday),
   // custom blocks added from the Docket, and items already finished via
   // completeTodayItem (state "done" — archived to /done, not re-offered
   // here every time the wizard runs). `counterItems` itself stays
   // unfiltered for the Time Left step, which needs every Today item
   // regardless of source.
-  const adminReviewItems = counterItems.filter(
+  const maintReviewItems = counterItems.filter(
     (it) =>
       !it.sourceTaskId && it.tag !== "CUSTOM_BLOCK" && it.state !== "done",
   );
-  const classified = classify(adminReviewItems, /* todayOnly */ false);
+  const classified = classify(maintReviewItems, /* todayOnly */ false);
 
   // Flatten Project Plans' onTaskList tasks the same way the standalone
   // Project Tasks page does: one list, building tag per row, sorted
@@ -115,7 +115,7 @@ export default async function BuildDayPage({
       stressors={classified.stressors}
       timeSensitive={classified.timeSensitive}
       mustDo={classified.mustDo}
-      otherAdmin={classified.otherAdmin}
+      otherMaint={classified.otherMaint}
       projectRows={projectRows}
     />
   );

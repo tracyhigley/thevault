@@ -1,8 +1,8 @@
 "use client";
 // One task row on the Project Tasks page. Deliberately styled to match the
-// Admin Tasks row (CounterRow): bordered card, same title treatment, same
+// Maint Tasks row (CounterRow): bordered card, same title treatment, same
 // button language — just swapped in a building tag (since this page mixes
-// tasks from every building) in place of Admin's editable area pill, and
+// tasks from every building) in place of Maint's editable area pill, and
 // Project-Tasks-specific actions underneath. The source Project Plan's
 // title runs as the prominent line, with the task text underneath in a
 // smaller size (not truncated — this page never has too many rows at once,
@@ -14,7 +14,7 @@ import { ProjectTaskTodayToggle } from "./project-task-today-toggle";
 import { ProjectTaskDeleteButton } from "./project-task-delete-button";
 import { ProjectTaskDoneButton } from "./project-task-done-button";
 
-/** Static building tag — sizing matches Admin Tasks' AreaPill chip. */
+/** Static building tag — sizing matches Maint Tasks' AreaPill chip. */
 function BuildingTag({ label, color }: { label: string; color?: string }) {
   return (
     <span

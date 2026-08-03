@@ -19,7 +19,7 @@ export function GlobalShortcuts() {
     { label: "Today (Docket)", group: "Navigate" },
   );
   useShortcut("g r", go("/field-notes"), { label: "Field Notes", group: "Navigate" });
-  useShortcut("g c", go("/admin-tasks"), { label: "Admin Tasks", group: "Navigate" });
+  useShortcut("g c", go("/maint-tasks"), { label: "Maint Tasks", group: "Navigate" });
   useShortcut("g o", go("/done"), { label: "Done", group: "Navigate" });
   useShortcut("g a", go("/project-tasks"), { label: "Project Tasks", group: "Navigate" });
   useShortcut("g e", go("/documents"), { label: "NOTES", group: "Navigate" });

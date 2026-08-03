@@ -2,20 +2,24 @@
 import { useState, useTransition } from "react";
 import { addCustomBlock } from "@/lib/actions";
 
-export function CustomBlockForm({ date }: { date: string }) {
+// Quick-add for an ad-hoc Today task that isn't sourced from Maint Tasks
+// or Project Tasks. Lands in the Maint Tasks card (same box, same shape —
+// just tagged CUSTOM_BLOCK so it never lands on the Maint Tasks page
+// itself). No time-of-day pinning anymore — Today is three cards, not a
+// timed schedule.
+export function CustomBlockForm() {
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [minutes, setMinutes] = useState(30);
-  const [time, setTime] = useState("");
   const [pending, startTransition] = useTransition();
 
   if (!open) {
     return (
       <button
         onClick={() => setOpen(true)}
-        className="w-full rounded-sm border border-dashed border-brass/40 py-3 font-mono text-[10px] tracking-[0.24em] text-brass/70 hover:border-brass"
+        className="w-full rounded-sm border border-dashed border-brass/40 py-2 font-mono text-[10px] tracking-[0.24em] text-brass/70 hover:border-brass"
       >
-        + ADD A CUSTOM BLOCK
+        + ADD A CUSTOM TASK
       </button>
     );
   }
@@ -24,13 +28,9 @@ export function CustomBlockForm({ date }: { date: string }) {
     e.preventDefault();
     if (!title.trim()) return;
     startTransition(async () => {
-      const startISO = time
-        ? new Date(`${date}T${time.length === 5 ? time : "09:00"}:00`).toISOString()
-        : undefined;
-      await addCustomBlock({ title, minutes, startISO });
+      await addCustomBlock({ title, minutes });
       setTitle("");
       setMinutes(30);
-      setTime("");
       setOpen(false);
     });
   }
@@ -42,7 +42,7 @@ export function CustomBlockForm({ date }: { date: string }) {
     >
       <input
         autoFocus
-        placeholder="What is the block for?"
+        placeholder="What's the task?"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         className="paper-task-title w-full bg-transparent text-ink outline-none placeholder:text-ink-mute"
@@ -57,15 +57,6 @@ export function CustomBlockForm({ date }: { date: string }) {
             value={minutes}
             onChange={(e) => setMinutes(Number(e.target.value))}
             className="w-16 rounded-sm border border-paper-line bg-paper-bg/60 px-2 py-1 text-right text-brass outline-none focus:border-brass"
-          />
-        </label>
-        <label className="flex items-center gap-2">
-          <span className="eyebrow">Pin to</span>
-          <input
-            type="time"
-            value={time}
-            onChange={(e) => setTime(e.target.value)}
-            className="rounded-sm border border-paper-line bg-paper-bg/60 px-2 py-1 text-brass outline-none focus:border-brass"
           />
         </label>
         <span className="ml-auto flex items-center gap-2">

@@ -14,6 +14,7 @@ import type { SortableItem } from "@/components/sortable-list";
 import { TodayToggle } from "@/components/today-toggle";
 import { CounterDoneButton } from "@/components/counter-done-button";
 import { DeleteItemButton } from "@/components/delete-item-button";
+import { fmtHoursFromMinutes } from "@/lib/format-hours";
 import type { Item } from "@/lib/types";
 
 type Filter =
@@ -67,7 +68,7 @@ function coerceFilter(raw: string | undefined): Filter {
 }
 
 /**
- * Filter semantics match the row chrome on Admin Tasks:
+ * Filter semantics match the row chrome on Maint Tasks:
  *   Stress  → both flags (rust “stressor” strip)
  *   Urgent  → urgent only, not must (amber strip)
  *   Must    → must only, not urgent (sky strip)
@@ -127,9 +128,9 @@ export default async function CounterPage({
   ]);
   // Project Tasks pulled onto Today create a linked Item in this same
   // COUNTER box (so they show on the Today docket) — but they belong to
-  // Project Tasks, not Admin Tasks, so they're excluded here entirely.
+  // Project Tasks, not Maint Tasks, so they're excluded here entirely.
   // Custom blocks added from the Docket work the same way: tagged
-  // CUSTOM_BLOCK so they show on Today but never land on Admin Tasks.
+  // CUSTOM_BLOCK so they show on Today but never land on Maint Tasks.
   // Items finished from Today's docket (state "done") move to the /done
   // archive instead of lingering here — see completeTodayItem.
   const all = counterItems.filter(
@@ -221,10 +222,13 @@ export default async function CounterPage({
   return (
     <div className="mx-auto max-w-[1400px] px-4 py-8 md:px-10">
       <h1 className="serif-h text-[28px] leading-tight md:text-[36px]">
-        Admin Tasks
+        Maint Tasks
       </h1>
       <p className="text-ink-dim mt-1 text-[13px]">
         Obligations — what has to happen.
+      </p>
+      <p className="text-ink-mute mt-1 font-mono text-[11px] tracking-wider">
+        {fmtHoursFromMinutes(todayMinutes)} hours marked Today
       </p>
 
       <details className="group mt-6" open>
@@ -241,8 +245,8 @@ export default async function CounterPage({
                 <Link
                   href={
                     f.key === "all"
-                      ? "/admin-tasks"
-                      : `/admin-tasks?filter=${f.key}`
+                      ? "/maint-tasks"
+                      : `/maint-tasks?filter=${f.key}`
                   }
                   className={clsx(
                     "rounded-sm border px-4 py-1.5 font-mono text-[11px] tracking-wider transition",
@@ -269,7 +273,7 @@ export default async function CounterPage({
               {areas.map((a) => (
                 <Link
                   key={a.key}
-                  href={`/admin-tasks?filter=byarea&area=${encodeURIComponent(a.key)}`}
+                  href={`/maint-tasks?filter=byarea&area=${encodeURIComponent(a.key)}`}
                   className={clsx(
                     "rounded-sm border px-4 py-1.5 font-mono text-[11px] tracking-wider transition",
                     active === "byarea" && area === a.key
@@ -292,7 +296,7 @@ export default async function CounterPage({
         {filtered.length === 0 ? (
           <p className="text-ink-mute mt-4 text-[13px]">
             {active === "all"
-              ? "Nothing on Admin Tasks yet."
+              ? "Nothing on Maint Tasks yet."
               : "No items match this filter."}
           </p>
         ) : (

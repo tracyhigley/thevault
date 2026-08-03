@@ -15,7 +15,7 @@ export type DayChange =
 const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 // Boxes the user doesn't want offered as week/day projects on the calendar.
-// They still exist on Admin Tasks/Project Tasks/Boxes — this only hides them from the
+// They still exist on Maint Tasks/Project Tasks/Boxes — this only hides them from the
 // calendar's pickers. Matched on label, case-insensitive, whitespace-collapsed.
 const CALENDAR_HIDDEN_BOX_LABELS = new Set(["health", "read / watch"]);
 

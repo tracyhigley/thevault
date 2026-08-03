@@ -127,13 +127,13 @@ docs/
    - `DROP`, `ATM`, `COUNTER`, `DOCKET` are top-level pages, not categories. `RESERVED_BOX_KEYS` in `lib/categories.ts` filters them defensively at multiple gates.
 
 3. **Counter items opt IN to today.**
-   - `today_order` is the universal "on today's plan" flag. Default is `null` (not on today). The wizard's Step 5 review and the Counter page have a `+ TODAY` toggle. Don't reintroduce opt-out — at 35–40 admin items it's unworkable.
+   - `today_order` is the universal "on today's plan" flag. Default is `null` (not on today). The wizard's Step 5 review and the Counter page have a `+ TODAY` toggle. Don't reintroduce opt-out — at 35–40 maint items it's unworkable.
 
 4. **The schedule starts at `dayStart` and clamps to `now`.**
    - `dayStart = endOfDay − hoursAvailable`. If "now" is later than dayStart on the same day, schedule starts at "now" (no past blocks). Don't reintroduce the old end-of-day-anchor mode.
 
-5. **`otherAdmin` (counter items with neither urgent nor must) is included in the schedule.**
-   - Was being silently dropped in an earlier version. Make sure any change to `buildSchedule` keeps it in `adminPile`.
+5. **`otherMaint` (counter items with neither urgent nor must) is included in the schedule.**
+   - Was being silently dropped in an earlier version. Make sure any change to `buildSchedule` keeps it in `maintPile`.
 
 6. **Done doesn't delete.**
    - Marking a schedule block done sets `state: 'done'` and toasts "Still safe in your vault." Items stay in their box. Don't change this behavior.
@@ -197,8 +197,8 @@ Defined once in `lib/daily-plan.ts`:
 - Stressors = `urgent && must`
 - Time-sensitive = `urgent && !must`
 - Must-do = `must && !urgent`
-- Other admin = neither flag (long tail)
-- Stressor anchor threshold (default 91 min, configurable): when stressors hit this, admin runs first thing in the morning; otherwise ATM picks come first and admin lands after.
+- Other maint = neither flag (long tail)
+- Stressor anchor threshold (default 91 min, configurable): when stressors hit this, maint runs first thing in the morning; otherwise ATM picks come first and maint lands after.
 - Both branches start at `dayStart` (or `now` if later, same day).
 - ATM picks selected by `pickAtmCandidates` based on `creative` / `probSolv` / `tieBreak` from the wizard.
 

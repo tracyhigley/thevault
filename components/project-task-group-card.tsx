@@ -18,7 +18,7 @@ type GroupTask = {
   onToday: boolean;
 };
 
-/** Static building tag — sizing matches Admin Tasks' AreaPill chip. */
+/** Static building tag — sizing matches Maint Tasks' AreaPill chip. */
 function BuildingTag({ label, color }: { label: string; color?: string }) {
   return (
     <span

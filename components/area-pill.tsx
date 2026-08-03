@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { updateItemPatch } from "@/lib/actions";
 import { Select } from "./ui";
 
-// Compact box-key picker. Admin Tasks rows set `area`; Project Tasks rows set `category`.
+// Compact box-key picker. Maint Tasks rows set `area`; Project Tasks rows set `category`.
 
 export function AreaPill({
   itemId,

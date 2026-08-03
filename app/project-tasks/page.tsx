@@ -1,6 +1,6 @@
 // Project Tasks — a rollup of whatever you've checked off as active on
 // projects that are currently under construction. Deliberately styled like
-// Admin Tasks (same row chrome, minutes, Today/Done/delete) since this is
+// Maint Tasks (same row chrome, minutes, Today/Done/delete) since this is
 // meant to feel like the same system, just filtered down to "what to
 // actually pull from right now." Tasks are grouped under one card per
 // project (so a project with several tasks pulled shows one title header,
@@ -13,6 +13,7 @@ import { getBuildings } from "@/lib/categories";
 import { getProjects } from "@/lib/projects";
 import { getProjectTaskTodayLinks } from "@/lib/plan-actions";
 import { ReorderableProjectTaskGroups } from "@/components/reorderable-project-task-groups";
+import { fmtHoursFromMinutes } from "@/lib/format-hours";
 
 type GroupTask = {
   taskId: string;
@@ -78,6 +79,13 @@ export default async function ProjectTasksPage() {
     return a.earliestCreatedAt.localeCompare(b.earliestCreatedAt);
   });
 
+  const todayMinutes = groups.reduce(
+    (sum, g) =>
+      sum +
+      g.tasks.reduce((s, t) => s + (t.onToday ? (t.minutes ?? 0) : 0), 0),
+    0,
+  );
+
   const totalTasks = groups.reduce((n, g) => n + g.tasks.length, 0);
   const buildingLabelsWithTasks = new Set(groups.map((g) => g.buildingLabel));
   const buildingCount = buildingLabelsWithTasks.size;
@@ -98,6 +106,9 @@ export default async function ProjectTasksPage() {
         What you&apos;ve pulled off the drafting table.
       </h1>
       <p className="text-ink-dim mt-1 text-[13px]">Current Project Tasks</p>
+      <p className="text-ink-mute mt-1 font-mono text-[11px] tracking-wider">
+        {fmtHoursFromMinutes(todayMinutes)} hours marked Today
+      </p>
 
       {groups.length === 0 ? (
         <div className="border-paper-line bg-paper-panel/40 mt-10 rounded-sm border border-dashed p-8 text-center">

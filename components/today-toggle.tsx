@@ -1,6 +1,6 @@
 "use client";
 
-// "On today's plan" opt-in toggle. Used on Admin Tasks rows and in the
+// "On today's plan" opt-in toggle. Used on Maint Tasks rows and in the
 // wizard's "What's heavy" review.
 //
 // Default off. Click once → today_order set → row is included in

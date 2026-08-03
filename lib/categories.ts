@@ -1,5 +1,5 @@
 // Shared category shape used by Buildings, Documents, and (formerly) Boxes.
-// Buildings are the categorization axis across Field Notes, Admin Tasks,
+// Buildings are the categorization axis across Field Notes, Maint Tasks,
 // and Calendar — see getBuildings() below. Documents are a separate,
 // text-first storage category — see getDocuments().
 //

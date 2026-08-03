@@ -5,7 +5,7 @@ import { saveEnergyConfig } from "@/lib/actions";
 import type { EnergyType } from "@/lib/categories";
 
 // Energies don't carry a destination — Project Tasks items use them for daily
-// energy-matching, Admin Tasks items don't have an energy column at all.
+// energy-matching, Maint Tasks items don't have an energy column at all.
 
 function deriveKey(label: string): string {
   return label

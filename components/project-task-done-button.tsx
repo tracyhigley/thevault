@@ -2,7 +2,7 @@
 // "Done" button on a Project Tasks row. Marks the task done (shown struck
 // through back on the project's own checklist) and takes it off this page
 // — the task itself isn't deleted. Visually matches CounterDoneButton on
-// Admin Tasks. Hides optimistically and rolls back on failure.
+// Maint Tasks. Hides optimistically and rolls back on failure.
 
 import { useTransition } from "react";
 import { toast } from "sonner";

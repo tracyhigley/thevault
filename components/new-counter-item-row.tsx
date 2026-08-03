@@ -60,7 +60,7 @@ export function NewCounterItemRow({
             add();
           }
         }}
-        placeholder="+ New admin task"
+        placeholder="+ New maint task"
         className="paper-task-title min-w-[220px] flex-1 bg-transparent text-ink placeholder:text-ink-mute outline-none"
       />
       <Select
@@ -68,7 +68,7 @@ export function NewCounterItemRow({
         onChange={(e) => setArea(e.target.value)}
         tone="brass"
         className="w-[13rem] shrink-0 px-2 py-1 font-mono text-[10px]"
-        aria-label="Pick building for new admin task"
+        aria-label="Pick building for new maint task"
       >
         <option value="" className="bg-paper-bg">
           — pick building —
@@ -82,7 +82,7 @@ export function NewCounterItemRow({
       <MinutesInlineInput
         value={minutes}
         onChange={setMinutes}
-        aria-label="Minutes for new admin task"
+        aria-label="Minutes for new maint task"
       />
       <div className="flex shrink-0 items-center gap-1">
         <CounterFlagDraft
