@@ -24,10 +24,11 @@ import { BuildingTag } from "@/components/building-tag";
 import { EditableText } from "@/components/editable-text";
 import { EditableProjectTaskMinutes } from "@/components/editable-project-task-minutes";
 import type { DayInputs } from "@/lib/types";
-import { fmtHoursFromMinutes, fmtHoursNumber } from "@/lib/format-hours";
+import { fmtHoursFromMinutes } from "@/lib/format-hours";
 import { SKIP_FIELD_NOTES_LANDING_COOKIE } from "@/lib/nav-cookies";
 import { BuildPromptGreeting } from "@/components/build-prompt-greeting";
 import { DayScratchpad } from "@/components/day-scratchpad";
+import { TodayHoursSummary } from "@/components/today-hours-summary";
 import { todayYmd, zonedDayOfMonth } from "@/lib/day-timezone";
 
 const DAY_GREETINGS = [
@@ -171,10 +172,11 @@ export default async function DocketPage() {
           >
             ↻ REBUILD DAY
           </Link>
-          <p className="text-ink-dim mt-2 text-[16px]">
-            {fmtHoursFromMinutes(totalTodayMinutes)} hours out of{" "}
-            {fmtHoursNumber(inputs.hoursAvailable)} available hours.
-          </p>
+          <TodayHoursSummary
+            date={inputs.date}
+            endOfDay={inputs.endOfDay}
+            totalTodayMinutes={totalTodayMinutes}
+          />
         </div>
         <DayScratchpad
           date={inputs.date}
