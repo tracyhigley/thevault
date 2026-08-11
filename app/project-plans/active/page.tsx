@@ -14,11 +14,25 @@ export default async function ActiveProjectPlansPage() {
 
   const buildingByKey = new Map(buildings.map((b) => [b.key, b]));
   const labelFor = (key: string) => buildingByKey.get(key)?.label ?? "Uncategorized";
+  const buildingOrder = new Map(buildings.map((b, i) => [b.key, i]));
+  const orderFor = (key: string) =>
+    buildingOrder.get(key) ?? Number.MAX_SAFE_INTEGER;
+
+  // Always hidden from this view — not part of the campus's building projects.
+  const EXCLUDED_TITLES = new Set([
+    "Build Muscle",
+    "Build Endurance",
+    "Sculpt Leaner Body",
+  ]);
 
   const byPhase = (phase: Project["phase"]) =>
     projects
-      .filter((p) => p.phase === phase)
-      .sort((a, b) => (b.modifiedAt ?? "").localeCompare(a.modifiedAt ?? ""));
+      .filter((p) => p.phase === phase && !EXCLUDED_TITLES.has(p.title))
+      .sort((a, b) => {
+        const buildingDiff = orderFor(a.building) - orderFor(b.building);
+        if (buildingDiff !== 0) return buildingDiff;
+        return (b.modifiedAt ?? "").localeCompare(a.modifiedAt ?? "");
+      });
 
   const active = byPhase("building");
   const planning = byPhase("planning");
