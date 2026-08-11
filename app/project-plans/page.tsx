@@ -39,6 +39,13 @@ export default async function MasterPlanPage() {
         Walk into a building to see its projects.
       </p>
 
+      <Link
+        href="/project-plans/active"
+        className="mt-4 inline-block font-mono text-[10px] tracking-[0.2em] text-brass hover:text-brass-bright"
+      >
+        VIEW ALL ACTIVE PLANS →
+      </Link>
+
       {buildings.length === 0 ? (
         <div className="mt-10 rounded-sm border border-dashed border-paper-line bg-paper-panel/40 p-8 text-center">
           <p className="text-ink-dim">No buildings in your project plans yet.</p>
