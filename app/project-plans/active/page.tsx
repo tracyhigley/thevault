@@ -19,15 +19,19 @@ export default async function ActiveProjectPlansPage() {
     buildingOrder.get(key) ?? Number.MAX_SAFE_INTEGER;
 
   // Always hidden from this view — not part of the campus's building projects.
-  const EXCLUDED_TITLES = new Set([
+  // Matched by prefix since these recur as numbered instances, e.g.
+  // "Build Endurance Project #1", "Build Endurance Project #2", etc.
+  const EXCLUDED_TITLE_PREFIXES = [
     "Build Muscle",
     "Build Endurance",
     "Sculpt Leaner Body",
-  ]);
+  ];
+  const isExcluded = (title: string) =>
+    EXCLUDED_TITLE_PREFIXES.some((prefix) => title.startsWith(prefix));
 
   const byPhase = (phase: Project["phase"]) =>
     projects
-      .filter((p) => p.phase === phase && !EXCLUDED_TITLES.has(p.title))
+      .filter((p) => p.phase === phase && !isExcluded(p.title))
       .sort((a, b) => {
         const buildingDiff = orderFor(a.building) - orderFor(b.building);
         if (buildingDiff !== 0) return buildingDiff;
