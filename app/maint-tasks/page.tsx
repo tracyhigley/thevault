@@ -193,6 +193,7 @@ export default async function CounterPage({
       counterGroups.push({
         key: b.key,
         title: b.label,
+        color: b.color,
         items: toSortableItems(items),
       });
       usedAreaKeys.add(b.key);

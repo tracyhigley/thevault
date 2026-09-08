@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
+import clsx from "clsx";
 import { SortableList, type SortableItem } from "@/components/sortable-list";
 import { reorderItems } from "@/lib/actions";
 
@@ -8,6 +9,8 @@ export type CounterSectionGroup = {
   /** "urgent" (stressor) section, then one key per building area, in display order. */
   key: string;
   title: string;
+  /** Building's assigned color (hex), if any — tints the section heading. */
+  color?: string;
   items: SortableItem[];
 };
 
@@ -59,7 +62,11 @@ export function CounterSectionedLists({
         <section key={g.key} aria-labelledby={`counter-section-${g.key}`}>
           <h2
             id={`counter-section-${g.key}`}
-            className="eyebrow text-ink-mute"
+            className={clsx(
+              "font-mono text-[14px] font-semibold tracking-[0.16em] uppercase",
+              !g.color && "text-ink-mute",
+            )}
+            style={g.color ? { color: g.color } : undefined}
           >
             — {g.title} —
           </h2>
