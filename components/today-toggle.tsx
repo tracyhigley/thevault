@@ -15,10 +15,15 @@ export function TodayToggle({
   itemId,
   on: initial,
   size = "md",
+  onToggle,
 }: {
   itemId: string;
   on: boolean;
   size?: "sm" | "md";
+  /** Fired optimistically (before the server call resolves) — lets a
+   * parent keep a live tally (e.g. the Build wizard's minutes counter)
+   * without lifting the toggle's own pending/error state. */
+  onToggle?: (next: boolean) => void;
 }) {
   const [on, setOn] = useState(initial);
   const [pending, startTransition] = useTransition();
@@ -27,12 +32,14 @@ export function TodayToggle({
       onClick={() => {
         const next = !on;
         setOn(next);
+        onToggle?.(next);
         startTransition(async () => {
           try {
             await setTodayPlan(itemId, next);
             toast.success(next ? "Added to today." : "Removed from today.");
           } catch (e: any) {
             setOn(!next);
+            onToggle?.(!next);
             toast.error(e?.message ?? "Couldn't update.");
           }
         });

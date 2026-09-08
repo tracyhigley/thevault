@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import clsx from "clsx";
@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { formatEndOfDay12h, parseTimeOnDate } from "@/lib/daily-plan";
 import { saveDayInputsPartial } from "@/lib/actions";
 import { markPreferTodayOverDropLanding } from "@/lib/nav-client";
+import { buildCounterGroups } from "@/lib/counter-groups";
 import { DropTriageRow } from "@/components/drop-triage-row";
 import { EditableText } from "@/components/editable-text";
 import { NewCounterItemRow } from "@/components/new-counter-item-row";
@@ -43,10 +44,7 @@ export function BuildWizard({
   counterItems,
   buildings,
   energies,
-  stressors,
-  timeSensitive,
-  mustDo,
-  otherMaint,
+  maintItems,
   projectRows,
 }: {
   step: number;
@@ -55,10 +53,7 @@ export function BuildWizard({
   counterItems: Item[];
   buildings: Box[];
   energies: EnergyType[];
-  stressors: Item[];
-  timeSensitive: Item[];
-  mustDo: Item[];
-  otherMaint: Item[];
+  maintItems: Item[];
   projectRows: ProjectTaskRow[];
 }) {
   const router = useRouter();
@@ -126,14 +121,7 @@ export function BuildWizard({
           />
         )}
         {step === 3 && (
-          <ReviewStep
-            buildings={buildings}
-            stressors={stressors}
-            timeSensitive={timeSensitive}
-            mustDo={mustDo}
-            otherMaint={otherMaint}
-            onNext={next}
-          />
+          <ReviewStep buildings={buildings} items={maintItems} onNext={next} />
         )}
         {step === 4 && <ProjectTasksStep rows={projectRows} onNext={next} />}
         {step === 5 && (
@@ -316,24 +304,47 @@ function DropStep({
   );
 }
 
-// Step 3: Maint Tasks review.
+// Step 3: Maint Tasks review — mirrors the standalone Maint Tasks page:
+// an "Urgent" section up top, then everything else grouped by building.
 function ReviewStep({
   buildings,
-  stressors,
-  timeSensitive,
-  mustDo,
-  otherMaint,
+  items,
   onNext,
 }: {
   buildings: Box[];
-  stressors: Item[];
-  timeSensitive: Item[];
-  mustDo: Item[];
-  otherMaint: Item[];
+  items: Item[];
   onNext: () => void;
 }) {
-  const total =
-    stressors.length + timeSensitive.length + mustDo.length + otherMaint.length;
+  const total = items.length;
+  const groups = useMemo(
+    () => buildCounterGroups(items, buildings),
+    [items, buildings],
+  );
+
+  // Local "on today" tally, seeded from the server-provided items and kept
+  // live as the user taps + TODAY, so the minutes counter updates as they go.
+  const [onTodayIds, setOnTodayIds] = useState<Set<string>>(
+    () => new Set(items.filter((it) => (it.todayOrder ?? null) !== null).map((it) => it.id)),
+  );
+  const minutesById = useMemo(
+    () => new Map(items.map((it) => [it.id, it.minutes ?? 0])),
+    [items],
+  );
+  const chosenMinutes = useMemo(() => {
+    let sum = 0;
+    for (const id of onTodayIds) sum += minutesById.get(id) ?? 0;
+    return sum;
+  }, [onTodayIds, minutesById]);
+
+  function handleToggle(id: string, next: boolean) {
+    setOnTodayIds((prev) => {
+      const copy = new Set(prev);
+      if (next) copy.add(id);
+      else copy.delete(id);
+      return copy;
+    });
+  }
+
   return (
     <Step
       title="What's already on Maint Tasks?"
@@ -345,48 +356,48 @@ function ReviewStep({
       submitLabel="ON TO PROJECT TASKS →"
       onSubmit={onNext}
     >
-      <div className="mb-4">
+      <p className="text-ink-mute font-mono text-[11px] tracking-wider">
+        {formatDurationFromMinutes(chosenMinutes)} chosen for today
+      </p>
+      <div className="mt-4 mb-4">
         <NewCounterItemRow boxes={buildings} />
       </div>
-      <Group label="Stressors" tone="rust">
-        {stressors.length === 0 ? (
-          <Empty />
-        ) : (
-          stressors.map((it) => <Row key={it.id} item={it} />)
-        )}
-      </Group>
-      <Group label="Time-sensitive" tone="amber">
-        {timeSensitive.length === 0 ? (
-          <Empty />
-        ) : (
-          timeSensitive.map((it) => <Row key={it.id} item={it} />)
-        )}
-      </Group>
-      <Group label="Must-do" tone="sky">
-        {mustDo.length === 0 ? (
-          <Empty />
-        ) : (
-          mustDo.map((it) => <Row key={it.id} item={it} />)
-        )}
-      </Group>
-      <Group label="Everything else" tone="brass">
-        {otherMaint.length === 0 ? (
-          <Empty />
-        ) : (
-          otherMaint.map((it) => <Row key={it.id} item={it} />)
-        )}
-      </Group>
+      {groups.length === 0 ? (
+        <p className="border-paper-line/60 text-ink-mute rounded-sm border border-dashed px-4 py-6 text-center">
+          Nothing on Maint Tasks right now.
+        </p>
+      ) : (
+        groups.map((g) => (
+          <MaintGroup key={g.key} title={g.title} color={g.color}>
+            {g.items.map((it) => (
+              <Row
+                key={it.id}
+                item={it}
+                on={onTodayIds.has(it.id)}
+                onToggle={handleToggle}
+              />
+            ))}
+          </MaintGroup>
+        ))
+      )}
     </Step>
   );
 }
 
-function Row({ item }: { item: Item }) {
-  const onToday = (item.todayOrder ?? null) !== null;
+function Row({
+  item,
+  on,
+  onToggle,
+}: {
+  item: Item;
+  on: boolean;
+  onToggle: (id: string, next: boolean) => void;
+}) {
   return (
     <div
       className={clsx(
         "bg-paper-panel/40 flex items-center gap-3 rounded-sm border px-3 py-2 transition",
-        onToday ? "border-brass/40" : "border-paper-line/60",
+        on ? "border-brass/40" : "border-paper-line/60",
       )}
     >
       {item.area && (
@@ -400,7 +411,7 @@ function Row({ item }: { item: Item }) {
         initial={item.title}
         className={clsx(
           "paper-task-title min-w-0 flex-1",
-          onToday ? "text-ink" : "text-ink-mute",
+          on ? "text-ink" : "text-ink-mute",
         )}
         placeholder="(no title)"
       />
@@ -415,46 +426,41 @@ function Row({ item }: { item: Item }) {
         />
         <span>min</span>
       </span>
-      <TodayToggle itemId={item.id} on={onToday} size="sm" />
+      <TodayToggle
+        itemId={item.id}
+        on={on}
+        size="sm"
+        onToggle={(next) => onToggle(item.id, next)}
+      />
     </div>
   );
 }
 
-function Group({
-  label,
-  tone,
+// Larger, building-tinted section heading — matches the standalone Maint
+// Tasks page's section headings (see CounterSectionedLists).
+function MaintGroup({
+  title,
+  color,
   children,
 }: {
-  label: string;
-  tone: "rust" | "rust-soft" | "brass" | "sky" | "amber";
+  title: string;
+  color?: string;
   children: React.ReactNode;
 }) {
   return (
     <div className="mt-5">
-      <div className="flex items-center gap-2">
-        <span
-          className={clsx(
-            "h-2 w-2",
-            tone === "rust"
-              ? "bg-rust rounded-full"
-              : tone === "rust-soft"
-                ? "bg-rust/50 rounded-full"
-                : tone === "amber"
-                  ? "rounded-full bg-amber-500"
-                  : tone === "sky"
-                    ? "rounded-sm bg-sky-600"
-                    : "bg-brass rounded-sm",
-          )}
-        />
-        <h3 className="eyebrow">{label}</h3>
-      </div>
+      <h3
+        className={clsx(
+          "font-mono text-[14px] font-semibold tracking-[0.16em] uppercase",
+          !color && "text-ink-mute",
+        )}
+        style={color ? { color } : undefined}
+      >
+        — {title} —
+      </h3>
       <div className="mt-2 space-y-2">{children}</div>
     </div>
   );
-}
-
-function Empty() {
-  return <div className="text-ink-mute text-[12px] italic">(nothing here)</div>;
 }
 
 function roundHoursToMinutes(h: number): number {

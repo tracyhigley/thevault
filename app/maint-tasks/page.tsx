@@ -3,6 +3,7 @@ import Link from "next/link";
 import clsx from "clsx";
 import { getItemsByBox } from "@/lib/data";
 import { getBuildings } from "@/lib/categories";
+import { buildCounterGroups } from "@/lib/counter-groups";
 import { EditableText, EditableFlag } from "@/components/editable-text";
 import { AreaPill } from "@/components/area-pill";
 import { NewCounterItemRow } from "@/components/new-counter-item-row";
@@ -66,35 +67,6 @@ function applyFilter(items: Item[], f: Filter, area?: string): Item[] {
   }
 }
 
-/**
- * Split into the top "Urgent" bucket (anything flagged urgent) and
- * everything else, preserving `filtered` iteration order within each.
- * The rest gets grouped by building elsewhere.
- */
-function partitionCounterItemsPreservingOrder(items: Item[]) {
-  const urgent: Item[] = [];
-  const rest: Item[] = [];
-  for (const it of items) {
-    if (it.urgent) urgent.push(it);
-    else rest.push(it);
-  }
-  return { urgent, rest };
-}
-
-const UNASSIGNED_AREA_KEY = "__unassigned__";
-
-/** Group non-urgent items by building, preserving item order within each. */
-function groupByArea(items: Item[]): Map<string, Item[]> {
-  const byArea = new Map<string, Item[]>();
-  for (const it of items) {
-    const key = it.area ?? UNASSIGNED_AREA_KEY;
-    const bucket = byArea.get(key);
-    if (bucket) bucket.push(it);
-    else byArea.set(key, [it]);
-  }
-  return byArea;
-}
-
 export default async function CounterPage({
   searchParams,
 }: {
@@ -136,53 +108,20 @@ export default async function CounterPage({
   );
 
   const boxOpts = buildings.map((b) => ({ key: b.key, label: b.label }));
-  const { urgent, rest } = partitionCounterItemsPreservingOrder(filtered);
-  const restByArea = groupByArea(rest);
-
-  const toSortableItems = (items: Item[]): SortableItem[] =>
-    items.map((it) => ({
-      id: it.id,
-      content: <CounterRow item={it} boxes={boxOpts} />,
-    }));
-
-  const counterGroups: CounterSectionGroup[] = [];
-  if (urgent.length > 0) {
-    counterGroups.push({
-      key: "urgent",
-      title: "Urgent",
-      items: toSortableItems(urgent),
-    });
-  }
-  // One section per building, in the order buildings are configured;
-  // items keep their urgent flag chrome but aren't sorted by it.
-  const usedAreaKeys = new Set<string>();
-  for (const b of buildings) {
-    const items = restByArea.get(b.key);
-    if (items && items.length > 0) {
-      counterGroups.push({
-        key: b.key,
-        title: b.label,
-        color: b.color,
-        items: toSortableItems(items),
-      });
-      usedAreaKeys.add(b.key);
-    }
-  }
-  // Any area key present on items but no longer in settings.buildings.
-  for (const [key, items] of restByArea) {
-    if (key === UNASSIGNED_AREA_KEY || usedAreaKeys.has(key)) continue;
-    if (items.length > 0) {
-      counterGroups.push({ key, title: key, items: toSortableItems(items) });
-    }
-  }
-  const unassigned = restByArea.get(UNASSIGNED_AREA_KEY);
-  if (unassigned && unassigned.length > 0) {
-    counterGroups.push({
-      key: UNASSIGNED_AREA_KEY,
-      title: "Unassigned",
-      items: toSortableItems(unassigned),
-    });
-  }
+  const counterGroups: CounterSectionGroup[] = buildCounterGroups(
+    filtered,
+    buildings,
+  ).map((g) => ({
+    key: g.key,
+    title: g.title,
+    color: g.color,
+    items: g.items.map(
+      (it): SortableItem => ({
+        id: it.id,
+        content: <CounterRow item={it} boxes={boxOpts} />,
+      }),
+    ),
+  }));
 
   return (
     <div className="mx-auto max-w-[1400px] px-4 py-8 md:px-10">

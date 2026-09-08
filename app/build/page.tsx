@@ -4,7 +4,6 @@
 import { redirect } from "next/navigation";
 import { getDayInputs, getItemsByBox, getSettings } from "@/lib/data";
 import { defaultDayInputs } from "@/lib/data";
-import { classify } from "@/lib/daily-plan";
 import { getBuildings, getEnergies } from "@/lib/categories";
 import { getProjects } from "@/lib/projects";
 import { getProjectTaskTodayLinks } from "@/lib/plan-actions";
@@ -70,7 +69,6 @@ export default async function BuildDayPage({
     (it) =>
       !it.sourceTaskId && it.tag !== "CUSTOM_BLOCK" && it.state !== "done",
   );
-  const classified = classify(maintReviewItems, /* todayOnly */ false);
 
   // Flatten Project Plans' onTaskList tasks the same way the standalone
   // Project Tasks page does: one list, building tag per row, sorted
@@ -112,10 +110,7 @@ export default async function BuildDayPage({
       counterItems={counterItems}
       buildings={buildings}
       energies={energies}
-      stressors={classified.stressors}
-      timeSensitive={classified.timeSensitive}
-      mustDo={classified.mustDo}
-      otherMaint={classified.otherMaint}
+      maintItems={maintReviewItems}
       projectRows={projectRows}
     />
   );
