@@ -2,8 +2,10 @@
 // One project's worth of Project Tasks rows, grouped under a single title
 // header — replaces repeating the project title on every row when a
 // project has more than one task pulled onto this page. Header carries the
-// project title + building tag once; each task underneath is a slim row
-// with just its own controls (minutes, today toggle, done, delete).
+// project title once; each task underneath is a slim row with just its own
+// controls (minutes, today toggle, done, delete). The building itself is
+// shown once, on the section heading these cards sit under (see
+// ProjectTaskBuildingGroups) — not repeated per card.
 
 import { useState } from "react";
 import { EditableProjectTaskMinutes } from "./editable-project-task-minutes";
@@ -17,23 +19,6 @@ type GroupTask = {
   minutes: number | null;
   onToday: boolean;
 };
-
-/** Static building tag — sizing matches Maint Tasks' AreaPill chip. */
-function BuildingTag({ label, color }: { label: string; color?: string }) {
-  return (
-    <span
-      title={label}
-      className="border-brass/40 bg-paper-bg/20 text-ink-mute flex h-7 w-[9.25rem] shrink-0 items-center gap-1.5 rounded-sm border px-1.5 py-0.5 font-mono text-[9px] leading-tight tracking-wide uppercase"
-    >
-      <span
-        className="h-1.5 w-1.5 shrink-0 rounded-full"
-        style={{ background: color ?? "#b5853a" }}
-        aria-hidden
-      />
-      <span className="truncate">{label}</span>
-    </span>
-  );
-}
 
 function GroupTaskRow({
   projectId,
@@ -93,14 +78,10 @@ function GroupTaskRow({
 export function ProjectTaskGroupCard({
   projectId,
   projectTitle,
-  buildingLabel,
-  buildingColor,
   tasks,
 }: {
   projectId: string;
   projectTitle: string;
-  buildingLabel: string;
-  buildingColor?: string;
   tasks: GroupTask[];
 }) {
   const [remainingIds, setRemainingIds] = useState(
@@ -111,9 +92,8 @@ export function ProjectTaskGroupCard({
 
   return (
     <div className="border-paper-line/60 bg-paper-panel/40 overflow-hidden rounded-sm border">
-      <div className="border-paper-line/60 flex flex-wrap items-center justify-between gap-2 border-b px-4 py-2">
+      <div className="border-paper-line/60 border-b px-4 py-2">
         <span className="paper-task-title text-ink">{projectTitle}</span>
-        <BuildingTag label={buildingLabel} color={buildingColor} />
       </div>
       <div className="divide-paper-line/40 divide-y">
         {tasks.map((t) =>

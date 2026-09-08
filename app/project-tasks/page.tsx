@@ -1,18 +1,22 @@
 // Project Tasks — a rollup of whatever you've checked off as active on
 // projects that are currently under construction. Deliberately styled like
-// Maint Tasks (same row chrome, minutes, Today/Done/delete) since this is
-// meant to feel like the same system, just filtered down to "what to
-// actually pull from right now." Tasks are grouped under one card per
-// project (so a project with several tasks pulled shows one title header,
-// not a repeated one per row). Any project that's under construction but
-// has nothing checked off gets flagged at the bottom, so it doesn't quietly
-// fall off the radar.
+// Maint Tasks (same row chrome, minutes, Today/Done/delete, and now the
+// same building-grouped, color-coded section headings) since this is meant
+// to feel like the same system, just filtered down to "what to actually
+// pull from right now." Tasks are grouped under one card per project (so a
+// project with several tasks pulled shows one title header, not a repeated
+// one per row), and those cards are in turn grouped under their building's
+// heading. Any project that's under construction but has nothing checked
+// off gets flagged at the bottom, so it doesn't quietly fall off the radar.
 
 import Link from "next/link";
 import { getBuildings } from "@/lib/categories";
 import { getProjects } from "@/lib/projects";
 import { getProjectTaskTodayLinks } from "@/lib/plan-actions";
-import { ReorderableProjectTaskGroups } from "@/components/reorderable-project-task-groups";
+import {
+  ProjectTaskBuildingGroups,
+  type ProjectTaskBuildingSection,
+} from "@/components/project-task-building-groups";
 import { fmtHoursFromMinutes } from "@/lib/format-hours";
 
 type GroupTask = {
@@ -26,12 +30,67 @@ type GroupTask = {
 type Group = {
   projectId: string;
   projectTitle: string;
+  buildingKey: string;
   buildingLabel: string;
   buildingColor?: string;
   tasks: GroupTask[];
   earliestCreatedAt: string;
   taskGroupOrder: number | null;
 };
+
+const UNASSIGNED_BUILDING_KEY = "__unassigned__";
+
+/** Bucket project groups by building, in the order buildings are configured. */
+function groupsByBuilding(
+  groups: Group[],
+  buildings: { key: string; label: string; color?: string }[],
+): ProjectTaskBuildingSection[] {
+  const byBuilding = new Map<string, Group[]>();
+  for (const g of groups) {
+    const key = g.buildingKey || UNASSIGNED_BUILDING_KEY;
+    const bucket = byBuilding.get(key);
+    if (bucket) bucket.push(g);
+    else byBuilding.set(key, [g]);
+  }
+
+  const toCards = (gs: Group[]) =>
+    gs.map((g) => ({
+      projectId: g.projectId,
+      projectTitle: g.projectTitle,
+      tasks: g.tasks,
+    }));
+
+  const sections: ProjectTaskBuildingSection[] = [];
+  const usedKeys = new Set<string>();
+  for (const b of buildings) {
+    const bucket = byBuilding.get(b.key);
+    if (bucket && bucket.length > 0) {
+      sections.push({
+        key: b.key,
+        title: b.label,
+        color: b.color,
+        cards: toCards(bucket),
+      });
+      usedKeys.add(b.key);
+    }
+  }
+  // Any building key present on a project but no longer in settings.buildings.
+  for (const [key, bucket] of byBuilding) {
+    if (key === UNASSIGNED_BUILDING_KEY || usedKeys.has(key)) continue;
+    if (bucket.length > 0) {
+      sections.push({ key, title: key, cards: toCards(bucket) });
+    }
+  }
+  const unassigned = byBuilding.get(UNASSIGNED_BUILDING_KEY);
+  if (unassigned && unassigned.length > 0) {
+    sections.push({
+      key: UNASSIGNED_BUILDING_KEY,
+      title: "Unassigned",
+      cards: toCards(unassigned),
+    });
+  }
+  return sections;
+}
 
 export default async function ProjectTasksPage() {
   const [buildings, projects, todayLinks] = await Promise.all([
@@ -60,6 +119,7 @@ export default async function ProjectTasksPage() {
     groups.push({
       projectId: p.id,
       projectTitle: p.title,
+      buildingKey: p.building,
       buildingLabel: building?.label ?? p.building,
       buildingColor: building?.color,
       tasks,
@@ -92,6 +152,10 @@ export default async function ProjectTasksPage() {
   const emptyBuildings = buildings.filter(
     (b) => !buildingLabelsWithTasks.has(b.label),
   );
+
+  // Building order + card order within each building both come from
+  // `groups`, which is already sorted by drag order / oldest-pulled-first.
+  const sections = groupsByBuilding(groups, buildings);
 
   // Under-construction projects with nothing pulled onto this page — the
   // gap this page exists to catch.
@@ -128,20 +192,7 @@ export default async function ProjectTasksPage() {
         </div>
       ) : (
         <div className="mt-8">
-          <ReorderableProjectTaskGroups
-            groups={groups.map((g) => ({
-              projectId: g.projectId,
-              projectTitle: g.projectTitle,
-              buildingLabel: g.buildingLabel,
-              buildingColor: g.buildingColor,
-              tasks: g.tasks.map((t) => ({
-                taskId: t.taskId,
-                text: t.text,
-                minutes: t.minutes,
-                onToday: t.onToday,
-              })),
-            }))}
-          />
+          <ProjectTaskBuildingGroups sections={sections} />
         </div>
       )}
 
