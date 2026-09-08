@@ -5,24 +5,15 @@ import { SortableList, type SortableItem } from "@/components/sortable-list";
 import { reorderItems } from "@/lib/actions";
 
 export type CounterSectionGroup = {
-  key: "stress" | "urgent" | "must" | "should" | "plain";
+  /** "urgent" (stressor) section, then one key per building area, in display order. */
+  key: string;
   title: string;
   items: SortableItem[];
 };
 
-const MERGE_ORDER: CounterSectionGroup["key"][] = [
-  "stress",
-  "urgent",
-  "must",
-  "should",
-  "plain",
-];
-
+/** Groups are already in display order — just flatten their items in place. */
 function mergeIds(groups: CounterSectionGroup[]) {
-  return MERGE_ORDER.flatMap((k) => {
-    const g = groups.find((x) => x.key === k);
-    return g ? g.items.map((i) => i.id) : [];
-  });
+  return groups.flatMap((g) => g.items.map((i) => i.id));
 }
 
 export function CounterSectionedLists({

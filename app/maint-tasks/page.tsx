@@ -97,21 +97,34 @@ function applyFilter(items: Item[], f: Filter, area?: string): Item[] {
   }
 }
 
-/** Preserve `filtered` iteration order within each triage bucket. */
+/**
+ * Split into the top "Urgent" (stressor: both urgent + must) bucket and
+ * everything else, preserving `filtered` iteration order within each.
+ * The rest gets grouped by building elsewhere — flags are kept as row
+ * chrome (see CounterRow) but no longer determine section placement.
+ */
 function partitionCounterItemsPreservingOrder(items: Item[]) {
   const stress: Item[] = [];
-  const urgent: Item[] = [];
-  const must: Item[] = [];
-  const should: Item[] = [];
-  const plain: Item[] = [];
+  const rest: Item[] = [];
   for (const it of items) {
     if (it.urgent && it.must) stress.push(it);
-    else if (it.urgent && !it.must) urgent.push(it);
-    else if (it.must && !it.urgent) must.push(it);
-    else if (it.should) should.push(it);
-    else plain.push(it);
+    else rest.push(it);
   }
-  return { stress, urgent, must, should, plain };
+  return { stress, rest };
+}
+
+const UNASSIGNED_AREA_KEY = "__unassigned__";
+
+/** Group non-stressor items by building, preserving item order within each. */
+function groupByArea(items: Item[]): Map<string, Item[]> {
+  const byArea = new Map<string, Item[]>();
+  for (const it of items) {
+    const key = it.area ?? UNASSIGNED_AREA_KEY;
+    const bucket = byArea.get(key);
+    if (bucket) bucket.push(it);
+    else byArea.set(key, [it]);
+  }
+  return byArea;
 }
 
 export default async function CounterPage({
@@ -154,68 +167,50 @@ export default async function CounterPage({
   );
 
   const boxOpts = buildings.map((b) => ({ key: b.key, label: b.label }));
-  const { stress, urgent, must, should, plain } =
-    partitionCounterItemsPreservingOrder(filtered);
+  const { stress, rest } = partitionCounterItemsPreservingOrder(filtered);
+  const restByArea = groupByArea(rest);
+
+  const toSortableItems = (items: Item[]): SortableItem[] =>
+    items.map((it) => ({
+      id: it.id,
+      content: <CounterRow item={it} boxes={boxOpts} />,
+    }));
 
   const counterGroups: CounterSectionGroup[] = [];
   if (stress.length > 0) {
     counterGroups.push({
-      key: "stress",
-      title: "Stressors",
-      items: stress.map(
-        (it): SortableItem => ({
-          id: it.id,
-          content: <CounterRow item={it} boxes={boxOpts} />,
-        }),
-      ),
-    });
-  }
-  if (urgent.length > 0) {
-    counterGroups.push({
       key: "urgent",
-      title: "Other Urgent",
-      items: urgent.map(
-        (it): SortableItem => ({
-          id: it.id,
-          content: <CounterRow item={it} boxes={boxOpts} />,
-        }),
-      ),
+      title: "Urgent",
+      items: toSortableItems(stress),
     });
   }
-  if (must.length > 0) {
-    counterGroups.push({
-      key: "must",
-      title: "Other Must-Do",
-      items: must.map(
-        (it): SortableItem => ({
-          id: it.id,
-          content: <CounterRow item={it} boxes={boxOpts} />,
-        }),
-      ),
-    });
+  // One section per building, in the order buildings are configured;
+  // items keep their urgent/must/should flag chrome but aren't sorted by it.
+  const usedAreaKeys = new Set<string>();
+  for (const b of buildings) {
+    const items = restByArea.get(b.key);
+    if (items && items.length > 0) {
+      counterGroups.push({
+        key: b.key,
+        title: b.label,
+        items: toSortableItems(items),
+      });
+      usedAreaKeys.add(b.key);
+    }
   }
-  if (should.length > 0) {
-    counterGroups.push({
-      key: "should",
-      title: "Other Should",
-      items: should.map(
-        (it): SortableItem => ({
-          id: it.id,
-          content: <CounterRow item={it} boxes={boxOpts} />,
-        }),
-      ),
-    });
+  // Any area key present on items but no longer in settings.buildings.
+  for (const [key, items] of restByArea) {
+    if (key === UNASSIGNED_AREA_KEY || usedAreaKeys.has(key)) continue;
+    if (items.length > 0) {
+      counterGroups.push({ key, title: key, items: toSortableItems(items) });
+    }
   }
-  if (plain.length > 0) {
+  const unassigned = restByArea.get(UNASSIGNED_AREA_KEY);
+  if (unassigned && unassigned.length > 0) {
     counterGroups.push({
-      key: "plain",
-      title: "Other",
-      items: plain.map(
-        (it): SortableItem => ({
-          id: it.id,
-          content: <CounterRow item={it} boxes={boxOpts} />,
-        }),
-      ),
+      key: UNASSIGNED_AREA_KEY,
+      title: "Unassigned",
+      items: toSortableItems(unassigned),
     });
   }
 
