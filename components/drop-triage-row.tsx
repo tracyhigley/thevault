@@ -13,7 +13,7 @@ import type { Item } from "@/lib/types";
 // Field Notes row, two compact lines:
 //
 //   [edge]  [PROJECT TASKS|MAINT TASKS]  Title (editable)          [Building ▼]
-//           ⏱ 30m   urgent / must / should (Maint Tasks)     Delete · Send
+//           ⏱ 30m   urgent (Maint Tasks)     Delete · Send
 //
 // 4-px coloured left edge tracks the destination so a glance reads where
 // each row will land. The destination toggle is the only place the user
@@ -36,8 +36,6 @@ export function DropTriageRow({
     item.minutes != null ? String(item.minutes) : "",
   );
   const [urgent, setUrgent] = useState(item.urgent);
-  const [must, setMust] = useState(item.must);
-  const [should, setShould] = useState(item.should);
   const [pending, startTransition] = useTransition();
   const wrapperRef = useRef<HTMLDivElement>(null);
   const boxSelectRef = useRef<HTMLSelectElement>(null);
@@ -74,16 +72,6 @@ export function DropTriageRow({
   });
   useShortcut("u", () => dest === "COUNTER" && setUrgent((v) => !v), {
     label: "Toggle Urgent",
-    group: "Field Notes",
-    options: { enabled: focused && dest === "COUNTER" },
-  });
-  useShortcut("m", () => dest === "COUNTER" && setMust((v) => !v), {
-    label: "Toggle Must",
-    group: "Field Notes",
-    options: { enabled: focused && dest === "COUNTER" },
-  });
-  useShortcut("s", () => dest === "COUNTER" && setShould((v) => !v), {
-    label: "Toggle Should",
     group: "Field Notes",
     options: { enabled: focused && dest === "COUNTER" },
   });
@@ -131,8 +119,6 @@ export function DropTriageRow({
           minutes: minutes ? Number(minutes) : null,
           energy: null,
           urgent: dest === "COUNTER" ? urgent : false,
-          must: dest === "COUNTER" ? must : false,
-          should: dest === "COUNTER" ? should : false,
         });
         const label = boxes.find((b) => b.key === boxKey)?.label ?? boxKey;
         toast.success(
@@ -230,20 +216,6 @@ export function DropTriageRow({
               kind="urgent"
               label="Urgent (U)"
               color="text-amber-700"
-            />
-            <FlagToggle
-              on={must}
-              onChange={setMust}
-              kind="must"
-              label="Must (M)"
-              color="text-sky-600"
-            />
-            <FlagToggle
-              on={should}
-              onChange={setShould}
-              kind="should"
-              label="Should (S)"
-              color="text-green-500"
             />
           </div>
         )}

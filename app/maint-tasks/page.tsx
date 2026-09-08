@@ -17,32 +17,14 @@ import { DeleteItemButton } from "@/components/delete-item-button";
 import { fmtHoursFromMinutes } from "@/lib/format-hours";
 import type { Item } from "@/lib/types";
 
-type Filter =
-  | "all"
-  | "stress"
-  | "urgent"
-  | "must"
-  | "should"
-  | "quick"
-  | "byarea";
+type Filter = "all" | "quick" | "byarea";
 
 const FILTERS: { key: Filter; label: string }[] = [
   { key: "all", label: "All" },
-  { key: "stress", label: "Stress" },
-  { key: "urgent", label: "Urgent" },
-  { key: "must", label: "Must" },
   { key: "quick", label: "Quick (5–15)" },
 ];
 
-const VALID_FILTERS: readonly Filter[] = [
-  "all",
-  "stress",
-  "urgent",
-  "must",
-  "should",
-  "quick",
-  "byarea",
-];
+const VALID_FILTERS: readonly Filter[] = ["all", "quick", "byarea"];
 
 function sumMinutes(items: Item[]): number {
   return items.reduce((sum, item) => sum + (item.minutes ?? 0), 0);
@@ -67,24 +49,8 @@ function coerceFilter(raw: string | undefined): Filter {
   return VALID_FILTERS.includes(r as Filter) ? (r as Filter) : "all";
 }
 
-/**
- * Filter semantics match the row chrome on Maint Tasks:
- *   Stress  → both flags (rust “stressor” strip)
- *   Urgent  → urgent only, not must (amber strip)
- *   Must    → must only, not urgent (sky strip)
- *   Should  → any item marked should (emerald strip when should-only)
- * Items with both flags appear only under Stress (and All), not under Urgent or Must.
- */
 function applyFilter(items: Item[], f: Filter, area?: string): Item[] {
   switch (f) {
-    case "stress":
-      return items.filter((i) => i.urgent && i.must);
-    case "urgent":
-      return items.filter((i) => i.urgent && !i.must);
-    case "must":
-      return items.filter((i) => i.must && !i.urgent);
-    case "should":
-      return items.filter((i) => i.should);
     case "quick":
       return items.filter(
         (i) => (i.minutes ?? 0) >= 5 && (i.minutes ?? 0) <= 15,
@@ -98,24 +64,23 @@ function applyFilter(items: Item[], f: Filter, area?: string): Item[] {
 }
 
 /**
- * Split into the top "Urgent" (stressor: both urgent + must) bucket and
+ * Split into the top "Urgent" bucket (anything flagged urgent) and
  * everything else, preserving `filtered` iteration order within each.
- * The rest gets grouped by building elsewhere — flags are kept as row
- * chrome (see CounterRow) but no longer determine section placement.
+ * The rest gets grouped by building elsewhere.
  */
 function partitionCounterItemsPreservingOrder(items: Item[]) {
-  const stress: Item[] = [];
+  const urgent: Item[] = [];
   const rest: Item[] = [];
   for (const it of items) {
-    if (it.urgent && it.must) stress.push(it);
+    if (it.urgent) urgent.push(it);
     else rest.push(it);
   }
-  return { stress, rest };
+  return { urgent, rest };
 }
 
 const UNASSIGNED_AREA_KEY = "__unassigned__";
 
-/** Group non-stressor items by building, preserving item order within each. */
+/** Group non-urgent items by building, preserving item order within each. */
 function groupByArea(items: Item[]): Map<string, Item[]> {
   const byArea = new Map<string, Item[]>();
   for (const it of items) {
@@ -153,13 +118,13 @@ export default async function CounterPage({
   const filtered = applyFilter(all, active, area);
   const areas = buildings
     .filter((b) => all.some((it) => it.area === b.key))
-    .map((b) => ({ key: b.key, label: b.label }));
+    .map((b) => ({
+      key: b.key,
+      label: b.label,
+      minutes: sumMinutes(all.filter((it) => it.area === b.key)),
+    }));
   const filterTotals: Partial<Record<Filter, number>> = {
     all: sumMinutes(all),
-    stress: sumMinutes(applyFilter(all, "stress")),
-    urgent: sumMinutes(applyFilter(all, "urgent")),
-    must: sumMinutes(applyFilter(all, "must")),
-    should: sumMinutes(applyFilter(all, "should")),
     quick: sumMinutes(applyFilter(all, "quick")),
   };
   const todayMinutes = sumMinutes(
@@ -167,7 +132,7 @@ export default async function CounterPage({
   );
 
   const boxOpts = buildings.map((b) => ({ key: b.key, label: b.label }));
-  const { stress, rest } = partitionCounterItemsPreservingOrder(filtered);
+  const { urgent, rest } = partitionCounterItemsPreservingOrder(filtered);
   const restByArea = groupByArea(rest);
 
   const toSortableItems = (items: Item[]): SortableItem[] =>
@@ -177,15 +142,15 @@ export default async function CounterPage({
     }));
 
   const counterGroups: CounterSectionGroup[] = [];
-  if (stress.length > 0) {
+  if (urgent.length > 0) {
     counterGroups.push({
       key: "urgent",
       title: "Urgent",
-      items: toSortableItems(stress),
+      items: toSortableItems(urgent),
     });
   }
   // One section per building, in the order buildings are configured;
-  // items keep their urgent/must/should flag chrome but aren't sorted by it.
+  // items keep their urgent flag chrome but aren't sorted by it.
   const usedAreaKeys = new Set<string>();
   for (const b of buildings) {
     const items = restByArea.get(b.key);
@@ -277,7 +242,7 @@ export default async function CounterPage({
                       : "border-paper-line text-ink-mute hover:border-brass/40 hover:text-brass",
                   )}
                 >
-                  {a.label}
+                  {`${a.label}: ${formatMinutesShort(a.minutes)}`}
                 </Link>
               ))}
             </div>
@@ -321,10 +286,6 @@ function CounterRow({
   item: Item;
   boxes: { key: string; label: string }[];
 }) {
-  const stressor = item.urgent && item.must;
-  const mustOnly = item.must && !item.urgent;
-  const urgentOnly = item.urgent && !item.must;
-  const shouldOnly = item.should && !item.urgent && !item.must;
   const onToday = (item.todayOrder ?? null) !== null;
   return (
     <div
@@ -332,29 +293,14 @@ function CounterRow({
         "bg-paper-panel/40 flex min-w-0 items-start gap-3 rounded-sm border px-3 py-2 transition",
         onToday
           ? "border-brass/40"
-          : stressor
-            ? "border-rust/30"
-            : mustOnly
-              ? "border-sky-600/35"
-              : urgentOnly
-                ? "border-amber-500/45"
-                : shouldOnly
-                  ? "border-emerald-600/40"
-                  : "border-paper-line/60",
+          : item.urgent
+            ? "border-amber-500/45"
+            : "border-paper-line/60",
       )}
     >
-      {stressor || item.urgent || item.must || item.should ? (
+      {item.urgent ? (
         <div
-          className={clsx(
-            "w-1 shrink-0 self-stretch rounded-sm",
-            stressor
-              ? "bg-rust"
-              : mustOnly
-                ? "bg-sky-600"
-                : urgentOnly
-                  ? "bg-amber-500"
-                  : "bg-emerald-600",
-          )}
+          className="bg-amber-500 w-1 shrink-0 self-stretch rounded-sm"
           aria-hidden
         />
       ) : null}
@@ -394,20 +340,6 @@ function CounterRow({
               initial={item.urgent}
               kind="urgent"
               className="text-amber-700"
-            />
-            <EditableFlag
-              itemId={item.id}
-              field="must"
-              initial={item.must}
-              kind="must"
-              className="text-sky-600"
-            />
-            <EditableFlag
-              itemId={item.id}
-              field="should"
-              initial={item.should}
-              kind="should"
-              className="text-green-500"
             />
           </div>
           <TodayToggle itemId={item.id} on={onToday} size="sm" />

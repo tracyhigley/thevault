@@ -22,8 +22,6 @@ export function NewCounterItemRow({
   const [area, setArea] = useState(initialArea);
   const [minutes, setMinutes] = useState("");
   const [urgent, setUrgent] = useState(false);
-  const [must, setMust] = useState(false);
-  const [should, setShould] = useState(false);
   const [pending, startTransition] = useTransition();
 
   function add() {
@@ -35,15 +33,11 @@ export function NewCounterItemRow({
         area,
         category: null,
         urgent,
-        must,
-        should,
         ...(m !== undefined ? { minutes: m } : {}),
       });
       setTitle("");
       setMinutes("");
       setUrgent(false);
-      setMust(false);
-      setShould(false);
       router.refresh();
     });
   }
@@ -90,18 +84,6 @@ export function NewCounterItemRow({
           onChange={setUrgent}
           kind="urgent"
           activeClassName="text-amber-700"
-        />
-        <CounterFlagDraft
-          on={must}
-          onChange={setMust}
-          kind="must"
-          activeClassName="text-sky-600"
-        />
-        <CounterFlagDraft
-          on={should}
-          onChange={setShould}
-          kind="should"
-          activeClassName="text-green-500"
         />
       </div>
       <button
