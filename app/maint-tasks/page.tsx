@@ -17,14 +17,15 @@ import { DeleteItemButton } from "@/components/delete-item-button";
 import { fmtHoursFromMinutes } from "@/lib/format-hours";
 import type { Item } from "@/lib/types";
 
-type Filter = "all" | "quick" | "byarea";
+type Filter = "all" | "urgent" | "quick" | "byarea";
 
 const FILTERS: { key: Filter; label: string }[] = [
   { key: "all", label: "All" },
+  { key: "urgent", label: "Urgent" },
   { key: "quick", label: "Quick (5–15)" },
 ];
 
-const VALID_FILTERS: readonly Filter[] = ["all", "quick", "byarea"];
+const VALID_FILTERS: readonly Filter[] = ["all", "urgent", "quick", "byarea"];
 
 function sumMinutes(items: Item[]): number {
   return items.reduce((sum, item) => sum + (item.minutes ?? 0), 0);
@@ -51,6 +52,8 @@ function coerceFilter(raw: string | undefined): Filter {
 
 function applyFilter(items: Item[], f: Filter, area?: string): Item[] {
   switch (f) {
+    case "urgent":
+      return items.filter((i) => i.urgent);
     case "quick":
       return items.filter(
         (i) => (i.minutes ?? 0) >= 5 && (i.minutes ?? 0) <= 15,
@@ -125,6 +128,7 @@ export default async function CounterPage({
     }));
   const filterTotals: Partial<Record<Filter, number>> = {
     all: sumMinutes(all),
+    urgent: sumMinutes(applyFilter(all, "urgent")),
     quick: sumMinutes(applyFilter(all, "quick")),
   };
   const todayMinutes = sumMinutes(
