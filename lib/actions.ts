@@ -8,6 +8,8 @@ import { describeZodError } from "@/lib/zod-error";
 import { supabaseServer, supabaseAdmin } from "@/lib/supabase/server";
 import { normalizeDocumentFolderKey } from "@/lib/document-folders";
 import { markProjectTaskDoneCore } from "@/lib/plan-actions";
+import { ymdInTz } from "@/lib/calendar-day-bounds";
+import { DAY_TIMEZONE } from "@/lib/day-timezone";
 import {
   getDocuments,
   getBuildings,
@@ -33,6 +35,106 @@ async function currentVaultId() {
     .limit(1)
     .maybeSingle();
   return data?.vault_id as string | undefined;
+}
+
+// --- Daily Gymnasium defaults ---
+
+type DailyGymDefault = { tag: string; title: string; minutes: number };
+
+// Fixed daily habit tasks that belong on The Gymnasium card every day
+// without Tracy having to re-add them by hand. Identified by a dedicated
+// `tag` (not title) so renaming one later doesn't spawn a duplicate.
+const DAILY_GYM_DEFAULTS: DailyGymDefault[] = [
+  { tag: "DAILY_GYM:WATER", title: "Drink 64 oz water", minutes: 0 },
+  { tag: "DAILY_GYM:LIFT", title: "Lift weights", minutes: 20 },
+  { tag: "DAILY_GYM:STEPS", title: "Walk 10k steps", minutes: 60 },
+  { tag: "DAILY_GYM:SUPPLEMENTS", title: "Take supplements", minutes: 0 },
+  { tag: "DAILY_GYM:MACROS", title: "Eat 30p/10f three times", minutes: 0 },
+];
+
+// Hard-coded the same way app/page.tsx and lib/calendar-work-life.ts
+// already hard-code the Gymnasium building key.
+const GYMNASIUM_BUILDING_KEY = "THE_GYMNASIUM";
+
+/**
+ * Makes sure the five fixed Gymnasium habit tasks are on today's plan
+ * whenever the day gets (re)built. Called from inside
+ * saveDayInputsPartial's step-1 today_order wipe, which fires both on the
+ * first build of a day and on every rebuild ("REBUILD DAY").
+ *
+ * Matching is by `tag` + the calendar date (in the app's day timezone)
+ * the row was created on:
+ *   - no row yet for `date` -> create one, marked Today.
+ *   - a still-open row from earlier today -> its today_order was just
+ *     wiped by the caller, so re-mark it Today.
+ *   - a row already completed today (state "done") -> leave it alone, so
+ *     a same-day rebuild doesn't un-finish an already-checked-off task.
+ *   - a row from a *previous* day is ignored (a fresh one gets created for
+ *     `date`), so yesterday's completion stays intact as its own record
+ *     on /done.
+ */
+async function ensureDailyGymDefaults(
+  sb: Awaited<ReturnType<typeof supabaseServer>>,
+  vaultId: string,
+  userId: string,
+  date: string,
+) {
+  const tags = DAILY_GYM_DEFAULTS.map((d) => d.tag);
+  const { data: candidates } = await sb
+    .from("items")
+    .select("id, tag, state, created_at")
+    .eq("vault_id", vaultId)
+    .eq("box", "COUNTER")
+    .is("deleted_at", null)
+    .in("tag", tags);
+
+  const todaysByTag = new Map<string, { id: string; state: string | null }>();
+  for (const row of candidates ?? []) {
+    if (ymdInTz(new Date(row.created_at), DAY_TIMEZONE) !== date) continue;
+    const prev = todaysByTag.get(row.tag as string);
+    // If both an open and a done row somehow exist for today, prefer the open one.
+    if (!prev || (prev.state === "done" && row.state !== "done")) {
+      todaysByTag.set(row.tag as string, { id: row.id, state: row.state });
+    }
+  }
+
+  const { data: maxRow } = await sb
+    .from("items")
+    .select("today_order")
+    .eq("vault_id", vaultId)
+    .not("today_order", "is", null)
+    .order("today_order", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  let nextOrder = Number(maxRow?.today_order ?? 0);
+
+  for (const def of DAILY_GYM_DEFAULTS) {
+    const todays = todaysByTag.get(def.tag);
+    if (todays) {
+      if (todays.state === "done") continue;
+      nextOrder += 1;
+      await sb
+        .from("items")
+        .update({ today_order: nextOrder })
+        .eq("id", todays.id);
+    } else {
+      nextOrder += 1;
+      await sb.from("items").insert({
+        vault_id: vaultId,
+        user_id: userId,
+        box: "COUNTER",
+        title: def.title,
+        area: GYMNASIUM_BUILDING_KEY,
+        minutes: def.minutes,
+        tag: def.tag,
+        urgent: false,
+        must: false,
+        should: false,
+        pinned: false,
+        today_order: nextOrder,
+      });
+    }
+  }
 }
 
 // ─── Day inputs ────────────────────────────────────────────────────────────
@@ -89,7 +191,7 @@ const PartialDayInputs = z.object({
 export async function saveDayInputsPartial(
   patch: z.input<typeof PartialDayInputs>,
 ) {
-  const { sb } = await requireUser();
+  const { sb, user } = await requireUser();
   const vaultId = await currentVaultId();
   if (!vaultId) throw new Error("No vault");
   const parsed = PartialDayInputs.parse(patch);
@@ -110,6 +212,7 @@ export async function saveDayInputsPartial(
       .update({ today_order: null })
       .eq("vault_id", vaultId)
       .not("today_order", "is", null);
+    await ensureDailyGymDefaults(sb, vaultId, user.id, parsed.date);
   }
 
   const { data: settingsRow } = await sb
