@@ -62,16 +62,19 @@ const GYMNASIUM_BUILDING_KEY = "THE_GYMNASIUM";
  * saveDayInputsPartial's step-1 today_order wipe, which fires both on the
  * first build of a day and on every rebuild ("REBUILD DAY").
  *
- * Matching is by `tag` + the calendar date (in the app's day timezone)
- * the row was created on:
- *   - no row yet for `date` -> create one, marked Today.
- *   - a still-open row from earlier today -> its today_order was just
- *     wiped by the caller, so re-mark it Today.
- *   - a row already completed today (state "done") -> leave it alone, so
- *     a same-day rebuild doesn't un-finish an already-checked-off task.
- *   - a row from a *previous* day is ignored (a fresh one gets created for
- *     `date`), so yesterday's completion stays intact as its own record
- *     on /done.
+ * Per tag, only the single newest matching row decides what happens:
+ *   - none yet -> create one, marked Today.
+ *   - newest is still open (not done), no matter which day it was
+ *     created -> its today_order was just wiped by the caller, so
+ *     re-mark it Today. This is what stops an unfinished task from
+ *     duplicating on the next build: an unchecked "Drink 64 oz water"
+ *     just carries forward day after day until she checks it off.
+ *   - newest is done, *finished* (actual_end) on `date` -> already
+ *     finished for the day being built; leave it alone so a same-day
+ *     rebuild doesn't un-finish an already-checked-off task.
+ *   - newest is done but finished on an earlier day -> that habit cycle
+ *     is closed; create a fresh row for `date` so the earlier
+ *     completion stays intact as its own record on /done.
  */
 async function ensureDailyGymDefaults(
   sb: Awaited<ReturnType<typeof supabaseServer>>,
@@ -80,21 +83,34 @@ async function ensureDailyGymDefaults(
   date: string,
 ) {
   const tags = DAILY_GYM_DEFAULTS.map((d) => d.tag);
+  // Newest row per tag decides what happens — not "is there a row from
+  // `date`". An unfinished habit task has to carry forward across as many
+  // rebuilds/days as it takes until she actually checks it off; matching by
+  // creation date instead (the original approach) treated "not created
+  // today" as "doesn't exist" and spawned a fresh duplicate every day the
+  // task went unfinished. See [[project-blueprint-daily-gym-defaults]].
   const { data: candidates } = await sb
     .from("items")
-    .select("id, tag, state, created_at")
+    .select("id, tag, state, created_at, actual_end")
     .eq("vault_id", vaultId)
     .eq("box", "COUNTER")
     .is("deleted_at", null)
-    .in("tag", tags);
+    .in("tag", tags)
+    .order("created_at", { ascending: false });
 
-  const todaysByTag = new Map<string, { id: string; state: string | null }>();
+  const latestByTag = new Map<
+    string,
+    { id: string; state: string | null; actualEnd: string | null }
+  >();
   for (const row of candidates ?? []) {
-    if (ymdInTz(new Date(row.created_at), DAY_TIMEZONE) !== date) continue;
-    const prev = todaysByTag.get(row.tag as string);
-    // If both an open and a done row somehow exist for today, prefer the open one.
-    if (!prev || (prev.state === "done" && row.state !== "done")) {
-      todaysByTag.set(row.tag as string, { id: row.id, state: row.state });
+    const tag = row.tag as string;
+    // Rows arrive newest-first, so the first one seen per tag is the latest.
+    if (!latestByTag.has(tag)) {
+      latestByTag.set(tag, {
+        id: row.id,
+        state: row.state,
+        actualEnd: row.actual_end,
+      });
     }
   }
 
@@ -109,31 +125,49 @@ async function ensureDailyGymDefaults(
   let nextOrder = Number(maxRow?.today_order ?? 0);
 
   for (const def of DAILY_GYM_DEFAULTS) {
-    const todays = todaysByTag.get(def.tag);
-    if (todays) {
-      if (todays.state === "done") continue;
+    const latest = latestByTag.get(def.tag);
+    if (latest && latest.state !== "done") {
+      // Still open, whenever it was created — carry it forward onto
+      // today's plan instead of spawning a duplicate.
       nextOrder += 1;
       await sb
         .from("items")
         .update({ today_order: nextOrder })
-        .eq("id", todays.id);
-    } else {
-      nextOrder += 1;
-      await sb.from("items").insert({
-        vault_id: vaultId,
-        user_id: userId,
-        box: "COUNTER",
-        title: def.title,
-        area: GYMNASIUM_BUILDING_KEY,
-        minutes: def.minutes,
-        tag: def.tag,
-        urgent: false,
-        must: false,
-        should: false,
-        pinned: false,
-        today_order: nextOrder,
-      });
+        .eq("id", latest.id);
+      continue;
     }
+    if (latest && latest.state === "done") {
+      // Already finished — if that happened on the day being built, leave
+      // it archived (a same-day rebuild shouldn't un-finish it). If it was
+      // finished on an earlier day (or never got an actual_end stamped,
+      // which shouldn't happen but shouldn't loop forever either), that
+      // habit cycle is closed; fall through and start a fresh one for
+      // `date`. Checked against actual_end (when it was finished), not
+      // created_at (when the row/cycle started) — those two dates differ
+      // whenever a task carries over unfinished for a day or more before
+      // finally getting checked off.
+      const doneYmd = latest.actualEnd
+        ? ymdInTz(new Date(latest.actualEnd), DAY_TIMEZONE)
+        : null;
+      if (doneYmd === date) {
+        continue;
+      }
+    }
+    nextOrder += 1;
+    await sb.from("items").insert({
+      vault_id: vaultId,
+      user_id: userId,
+      box: "COUNTER",
+      title: def.title,
+      area: GYMNASIUM_BUILDING_KEY,
+      minutes: def.minutes,
+      tag: def.tag,
+      urgent: false,
+      must: false,
+      should: false,
+      pinned: false,
+      today_order: nextOrder,
+    });
   }
 }
 
