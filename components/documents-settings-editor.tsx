@@ -14,8 +14,8 @@ const META_MAX = 120;
 function deriveKey(label: string): string {
   return label
     .toUpperCase()
-    .replace(/\s+/g, "_")
-    .replace(/[^A-Z0-9_/-]/g, "")
+    .replace(/[\s/]+/g, "_")
+    .replace(/[^A-Z0-9_-]/g, "")
     .slice(0, 40);
 }
 
@@ -60,7 +60,16 @@ export function DocumentsSettingsEditor({
 
   function changeKey(i: number, key: string) {
     manualKeys.current.add(i);
-    update(i, { key: key.toUpperCase().replace(/\s+/g, "_") });
+    // Keys route through a lowercase/hyphen URL slug (see slugifyDocumentKey)
+    // that can't tell a hyphen from an original underscore or slash on the
+    // way back — so anything but A-Z/0-9/_/- has to be stripped here too,
+    // not just in deriveKey, or a manually-typed "/" 404s the note page.
+    update(i, {
+      key: key
+        .toUpperCase()
+        .replace(/[\s/]+/g, "_")
+        .replace(/[^A-Z0-9_-]/g, ""),
+    });
   }
 
   function add() {

@@ -870,6 +870,20 @@ export async function saveEnergyConfig(
 // not a fixed enum. normalizeDocumentFolderKey still translates any leftover
 // legacy folder values forward on save.
 const DocumentConfig = BoxConfig.extend({
+  // Overrides BoxConfig's bare `key` — document keys route through a
+  // lowercase/hyphen URL slug (slugifyDocumentKey in lib/document-folders.ts)
+  // that collapses "_" and "/" to the same "-", so a key containing "/"
+  // can never be reconstructed from its slug and 404s (see the
+  // "SCHEDULING/PLANNING" bug fixed 2026-09-09). Enforced here as a
+  // server-side backstop in case a future client path skips deriveKey.
+  key: z
+    .string()
+    .min(1)
+    .max(40)
+    .regex(
+      /^[A-Z0-9_-]+$/,
+      "Note key can only contain letters, numbers, _ and -.",
+    ),
   folder: z.string().optional(),
 });
 
@@ -952,8 +966,8 @@ export async function saveDocumentConfig(
 function deriveDocumentKeyFromLabel(label: string): string {
   return label
     .toUpperCase()
-    .replace(/\s+/g, "_")
-    .replace(/[^A-Z0-9_/-]/g, "")
+    .replace(/[\s/]+/g, "_")
+    .replace(/[^A-Z0-9_-]/g, "")
     .slice(0, 40);
 }
 

@@ -61,8 +61,8 @@ export function slugifyDocumentKey(key: string): string {
 export function deriveDocumentKey(label: string): string {
   return label
     .toUpperCase()
-    .replace(/\s+/g, "_")
-    .replace(/[^A-Z0-9_/-]/g, "")
+    .replace(/[\s/]+/g, "_")
+    .replace(/[^A-Z0-9_-]/g, "")
     .slice(0, 40);
 }
 
