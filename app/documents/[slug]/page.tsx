@@ -10,14 +10,11 @@
 import Link from "next/link";
 import { getItemsByBox } from "@/lib/data";
 import { getDocuments, getBuildings, buildingSlug } from "@/lib/categories";
+import { slugifyDocumentKey } from "@/lib/document-folders";
 import { DocumentsEditor } from "@/components/documents-editor";
 import { ConvertToProjectButton } from "@/components/convert-to-project-button";
 import { DeleteNoteButton } from "@/components/delete-note-button";
 import type { BoxKey } from "@/lib/types";
-
-function slugToKey(slug: string): string {
-  return slug.toUpperCase().replace(/-/g, "_");
-}
 
 export default async function DocumentPage({
   params,
@@ -26,8 +23,16 @@ export default async function DocumentPage({
 }) {
   const { slug } = await params;
   const documents = await getDocuments();
-  const key = slugToKey(slug);
-  const meta = documents.find((d) => d.key === key);
+  // Forward-search by re-slugifying each document's real key, rather than
+  // reversing the slug back into a key (matches the buildingSlug pattern in
+  // lib/categories.ts). A key can itself contain a literal "-" (e.g. a note
+  // titled "GLP-1 Thoughts" derives key "GLP-1_THOUGHTS"), and slugifying
+  // collapses both "-" and "_" to "-" in the URL ("glp-1-thoughts") — that
+  // collapse is lossy, so naively uppercasing the slug and turning every "-"
+  // back into "_" can reconstruct the wrong key ("GLP_1_THOUGHTS") and 404 on
+  // a note that really does exist. Searching forward sidesteps the need to
+  // invert a lossy transform at all.
+  const meta = documents.find((d) => slugifyDocumentKey(d.key) === slug);
 
   if (!meta) {
     return (
@@ -35,8 +40,8 @@ export default async function DocumentPage({
         <div className="eyebrow">— Note not found —</div>
         <h1 className="serif-h mt-2 text-[28px]">Nothing filed here.</h1>
         <p className="mt-2 text-[15px] text-ink-mute">
-          No note category called{" "}
-          <span className="font-mono text-brass">{key}</span>.
+          No note category matches{" "}
+          <span className="font-mono text-brass">{slug}</span>.
         </p>
         <div className="mt-6 flex justify-center gap-2">
           <Link
@@ -56,6 +61,7 @@ export default async function DocumentPage({
     );
   }
 
+  const key = meta.key;
   const [items, buildings] = await Promise.all([
     getItemsByBox(key as BoxKey),
     getBuildings(),
