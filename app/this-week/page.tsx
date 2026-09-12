@@ -2,12 +2,16 @@
 // calendar week. Two sections:
 //
 // 1. "This Week's Writing Project(s)" — multi-select over The Library's
-//    under-construction projects, shown as PROJECT/FIRST TASK cards.
+//    under-construction projects, shown as PROJECT/TASKS cards.
 // 2. The day grid — each day can have more than one building checked
 //    (multi-select). Within a checked building that has projects under
 //    construction, a dropdown picks ONE project to feature that day; its
-//    PROJECT/FIRST TASK card shows once picked. A building with nothing
-//    under construction shows its open Maint Tasks instead.
+//    PROJECT/TASKS card shows once picked (tasks = whatever's checked onto
+//    the Project Tasks page for that project — see lib/projects.ts). A
+//    building with nothing under construction shows its open Maint Tasks
+//    instead. Also, on the first day of the week a building is scheduled,
+//    its Maint Tasks show underneath the featured project too, so open
+//    chores don't get buried behind a whole week of "under construction."
 //
 // Everything is color-coded to each building's settings.buildings color.
 
@@ -19,7 +23,7 @@ import {
   getWeekWritingProjectIds,
 } from "@/lib/projects";
 import { getItemsByBox } from "@/lib/data";
-import { DAY_KEYS, DAY_LABELS } from "@/lib/week-days";
+import { DAY_HINTS, DAY_KEYS, DAY_LABELS } from "@/lib/week-days";
 import { WeekDayBuildingsPicker } from "@/components/week-day-buildings-picker";
 import { WeekDayBuildingBlock } from "@/components/week-day-building-block";
 import { WeekWritingProjectsSection } from "@/components/week-writing-projects-section";
@@ -46,9 +50,13 @@ export default async function ThisWeekPage() {
   // construction" definition as the Master Project Plans / Under
   // Construction pages (phase === "building"). Ordered the same way as the
   // Under Construction page: manual activeOrder first, else newest first.
+  // "tasks" here is every checklist item checked onto the Project Tasks
+  // page (t.onTaskList) — not just the first one, and never a done task:
+  // onTaskList and done are mutually exclusive (see lib/project-phases.ts),
+  // so finishing a task there already drops it from this list.
   const underConstructionByBuilding = new Map<
     string,
-    { id: string; title: string; firstTask: string | null }[]
+    { id: string; title: string; tasks: { id: string; text: string }[] }[]
   >();
   const activeSorted = projects
     .filter((p) => p.phase === "building")
@@ -65,14 +73,17 @@ export default async function ThisWeekPage() {
     list.push({
       id: p.id,
       title: p.title,
-      firstTask: p.tasks[0]?.text ?? null,
+      tasks: p.tasks
+        .filter((t) => t.onTaskList)
+        .map((t) => ({ id: t.id, text: t.text })),
     });
     underConstructionByBuilding.set(p.building, list);
   }
 
   // Open Maint Tasks, grouped by area — same filter Maint Tasks itself uses
   // (excludes Project-Task-linked items, Today custom blocks, and done
-  // items), for the "nothing under construction" fallback per building.
+  // items), for the "nothing under construction" fallback per building,
+  // and for the first-scheduled-day showcase below.
   const openMaintTasks = counterItems.filter(
     (it) => !it.sourceTaskId && it.tag !== "CUSTOM_BLOCK" && it.state !== "done",
   );
@@ -85,6 +96,15 @@ export default async function ThisWeekPage() {
     const list = maintTasksByBuilding.get(it.area) ?? [];
     list.push({ id: it.id, title: it.title, minutes: it.minutes ?? null });
     maintTasksByBuilding.set(it.area, list);
+  }
+
+  // First day of the week (Sun→Sat) each building is scheduled at all —
+  // that's the one day its Maint Tasks show alongside a featured project.
+  const firstDayForBuilding = new Map<string, (typeof DAY_KEYS)[number]>();
+  for (const day of DAY_KEYS) {
+    for (const key of weekBuildings[day] ?? []) {
+      if (!firstDayForBuilding.has(key)) firstDayForBuilding.set(key, day);
+    }
   }
 
   const libraryProjects =
@@ -128,7 +148,10 @@ export default async function ThisWeekPage() {
               }
             >
               <div className="serif-h text-[22px] text-ink">
-                {DAY_LABELS[day]}
+                {DAY_LABELS[day]}{" "}
+                <span className="text-[15px] font-sans font-normal text-ink-mute">
+                  ({DAY_HINTS[day]})
+                </span>
               </div>
 
               <WeekDayBuildingsPicker
@@ -153,6 +176,9 @@ export default async function ThisWeekPage() {
                         }
                         maintTasks={maintTasksByBuilding.get(b.key) ?? []}
                         initialProjectId={dayProjectPicks[b.key] ?? null}
+                        isFirstScheduledDay={
+                          firstDayForBuilding.get(b.key) === day
+                        }
                       />
                     ))}
                 </div>
