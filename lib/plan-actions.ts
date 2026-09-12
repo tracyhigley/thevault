@@ -12,6 +12,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { supabaseServer } from "@/lib/supabase/server";
 import { describeZodError } from "@/lib/zod-error";
+import { isDayKey, type DayKey, type WeekBuildings } from "@/lib/week-days";
 
 async function requireUser() {
   const sb = await supabaseServer();
@@ -60,6 +61,51 @@ export async function saveBuildingConfig(
   await sb.from("settings").upsert({ vault_id: vaultId, buildings: parsed });
   revalidatePath("/project-plans", "layout");
   revalidatePath("/settings/buildings");
+}
+
+// ─── This Week (settings.week_buildings) ────────────────────────────────────
+// A fixed Sun–Sat template (not tied to calendar dates, see lib/week-days.ts)
+// mapping each day to a chosen building. Read-modify-write on the single
+// settings row so picking one day's building never clobbers another day's
+// choice made moments earlier.
+
+export async function saveWeekBuilding(day: DayKey, building: string | null) {
+  if (!isDayKey(day)) throw new Error("Invalid day");
+  const { sb } = await requireUser();
+  const vaultId = await currentVaultId();
+  if (!vaultId) throw new Error("No vault");
+  const { data } = await sb
+    .from("settings")
+    .select("week_buildings")
+    .eq("vault_id", vaultId)
+    .maybeSingle();
+  const current = (data?.week_buildings as WeekBuildings | null) ?? {};
+  const next: WeekBuildings = { ...current, [day]: building };
+  const { error } = await sb
+    .from("settings")
+    .upsert({ vault_id: vaultId, week_buildings: next });
+  if (error) throw new Error(error.message);
+  revalidatePath("/this-week");
+}
+
+// This Week's Writing Project(s) — a straight full-replace of the picked
+// project ids (unlike saveWeekBuilding, there's only one field here, so no
+// read-modify-write merge needed). The client always sends its complete
+// current selection.
+export async function saveWeekWritingProjects(projectIds: string[]) {
+  const { sb } = await requireUser();
+  const vaultId = await currentVaultId();
+  if (!vaultId) throw new Error("No vault");
+  const clean = Array.from(
+    new Set(
+      projectIds.filter((id) => typeof id === "string" && id.trim().length > 0),
+    ),
+  );
+  const { error } = await sb
+    .from("settings")
+    .upsert({ vault_id: vaultId, week_writing_projects: clean });
+  if (error) throw new Error(error.message);
+  revalidatePath("/this-week");
 }
 
 // ─── Projects ────────────────────────────────────────────────────────────────

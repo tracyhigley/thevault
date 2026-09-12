@@ -2,6 +2,7 @@
 // projects" — separate from items, deliberately outside the daily engine.
 
 import { supabaseServer } from "./supabase/server";
+import type { WeekBuildings } from "./week-days";
 import type {
   ProjectPhase,
   ProjectLogEntry,
@@ -137,4 +138,31 @@ export async function getProject(id: string): Promise<Project | null> {
     .maybeSingle();
   if (error || !data) return null;
   return rowToProject(data);
+}
+
+// This Week's building picks (settings.week_buildings) — see lib/week-days.ts
+// for the day-key vocabulary and lib/plan-actions.ts's saveWeekBuilding for
+// the write side.
+export async function getWeekBuildings(): Promise<WeekBuildings> {
+  if (!envReady()) return {};
+  const sb = await supabaseServer();
+  const { data } = await sb
+    .from("settings")
+    .select("week_buildings")
+    .maybeSingle();
+  return (data?.week_buildings as WeekBuildings | null) ?? {};
+}
+
+// This Week's Writing Project(s) pick — settings.week_writing_projects, an
+// array of project ids. See lib/plan-actions.ts's saveWeekWritingProjects.
+export async function getWeekWritingProjectIds(): Promise<string[]> {
+  if (!envReady()) return [];
+  const sb = await supabaseServer();
+  const { data } = await sb
+    .from("settings")
+    .select("week_writing_projects")
+    .maybeSingle();
+  const raw = data?.week_writing_projects;
+  if (!Array.isArray(raw)) return [];
+  return raw.filter((id: unknown): id is string => typeof id === "string");
 }

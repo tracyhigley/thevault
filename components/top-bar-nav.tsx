@@ -30,6 +30,13 @@ function buildItems(fiftyFdHref: string): NavItem[] {
       button: true,
     },
     {
+      href: "/this-week",
+      label: "THIS WEEK",
+      hint: "g w",
+      match: (p) => p.startsWith("/this-week"),
+      button: true,
+    },
+    {
       href: "/maint-tasks",
       label: "MAINT TASKS",
       hint: "g c",
