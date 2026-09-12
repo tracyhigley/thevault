@@ -12,7 +12,12 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { supabaseServer } from "@/lib/supabase/server";
 import { describeZodError } from "@/lib/zod-error";
-import { isDayKey, type DayKey, type WeekBuildings } from "@/lib/week-days";
+import {
+  isDayKey,
+  type DayKey,
+  type WeekBuildings,
+  type WeekDayProjects,
+} from "@/lib/week-days";
 
 async function requireUser() {
   const sb = await supabaseServer();
@@ -63,35 +68,84 @@ export async function saveBuildingConfig(
   revalidatePath("/settings/buildings");
 }
 
-// ─── This Week (settings.week_buildings) ────────────────────────────────────
-// A fixed Sun–Sat template (not tied to calendar dates, see lib/week-days.ts)
-// mapping each day to a chosen building. Read-modify-write on the single
-// settings row so picking one day's building never clobbers another day's
-// choice made moments earlier.
+// ─── This Week (settings.week_buildings / settings.week_day_projects) ──────
+// A fixed Sun–Sat template (not tied to calendar dates, see lib/week-days.ts).
+// Each day can have more than one building chosen (multi-select); within a
+// building that has projects under construction, one project can be
+// "featured" for that day via a dropdown. Both read-modify-write on the
+// single settings row so a rapid edit never clobbers another day's/
+// building's choice made moments earlier.
 
-export async function saveWeekBuilding(day: DayKey, building: string | null) {
+export async function saveWeekBuildings(day: DayKey, buildingKeys: string[]) {
+  if (!isDayKey(day)) throw new Error("Invalid day");
+  const { sb } = await requireUser();
+  const vaultId = await currentVaultId();
+  if (!vaultId) throw new Error("No vault");
+  const clean = Array.from(
+    new Set(
+      buildingKeys.filter(
+        (k) => typeof k === "string" && k.trim().length > 0,
+      ),
+    ),
+  );
+  const { data } = await sb
+    .from("settings")
+    .select("week_buildings, week_day_projects")
+    .eq("vault_id", vaultId)
+    .maybeSingle();
+  const currentBuildings = (data?.week_buildings as WeekBuildings | null) ?? {};
+  const nextBuildings: WeekBuildings = { ...currentBuildings, [day]: clean };
+
+  // Drop any featured-project pick for a building that just got unchecked
+  // for this day, so a hidden pick doesn't silently reappear if it's
+  // re-checked later with stale state.
+  const currentProjects =
+    (data?.week_day_projects as WeekDayProjects | null) ?? {};
+  const dayProjects = { ...(currentProjects[day] ?? {}) };
+  for (const buildingKey of Object.keys(dayProjects)) {
+    if (!clean.includes(buildingKey)) delete dayProjects[buildingKey];
+  }
+  const nextProjects: WeekDayProjects = { ...currentProjects, [day]: dayProjects };
+
+  const { error } = await sb.from("settings").upsert({
+    vault_id: vaultId,
+    week_buildings: nextBuildings,
+    week_day_projects: nextProjects,
+  });
+  if (error) throw new Error(error.message);
+  revalidatePath("/this-week");
+}
+
+export async function saveWeekDayProject(
+  day: DayKey,
+  building: string,
+  projectId: string | null,
+) {
   if (!isDayKey(day)) throw new Error("Invalid day");
   const { sb } = await requireUser();
   const vaultId = await currentVaultId();
   if (!vaultId) throw new Error("No vault");
   const { data } = await sb
     .from("settings")
-    .select("week_buildings")
+    .select("week_day_projects")
     .eq("vault_id", vaultId)
     .maybeSingle();
-  const current = (data?.week_buildings as WeekBuildings | null) ?? {};
-  const next: WeekBuildings = { ...current, [day]: building };
+  const current = (data?.week_day_projects as WeekDayProjects | null) ?? {};
+  const dayProjects = { ...(current[day] ?? {}) };
+  if (projectId) dayProjects[building] = projectId;
+  else delete dayProjects[building];
+  const next: WeekDayProjects = { ...current, [day]: dayProjects };
   const { error } = await sb
     .from("settings")
-    .upsert({ vault_id: vaultId, week_buildings: next });
+    .upsert({ vault_id: vaultId, week_day_projects: next });
   if (error) throw new Error(error.message);
   revalidatePath("/this-week");
 }
 
 // This Week's Writing Project(s) — a straight full-replace of the picked
-// project ids (unlike saveWeekBuilding, there's only one field here, so no
-// read-modify-write merge needed). The client always sends its complete
-// current selection.
+// project ids (unlike saveWeekBuildings, this field doesn't interact with
+// any other column, so no cross-field merge needed). The client always
+// sends its complete current selection.
 export async function saveWeekWritingProjects(projectIds: string[]) {
   const { sb } = await requireUser();
   const vaultId = await currentVaultId();

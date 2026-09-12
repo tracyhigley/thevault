@@ -1,17 +1,27 @@
 // This Week — a fixed Sun–Sat planning table, not tied to any particular
-// calendar week. For each day, pick a building; once picked, the row shows
-// every project currently "under construction" in that building (phase ===
-// "building") along with the first task on that project's checklist, so a
-// glance down the table says what this week's building focus touches.
+// calendar week. Two sections:
+//
+// 1. "This Week's Writing Project(s)" — multi-select over The Library's
+//    under-construction projects, shown as PROJECT/FIRST TASK cards.
+// 2. The day grid — each day can have more than one building checked
+//    (multi-select). Within a checked building that has projects under
+//    construction, a dropdown picks ONE project to feature that day; its
+//    PROJECT/FIRST TASK card shows once picked. A building with nothing
+//    under construction shows its open Maint Tasks instead.
+//
+// Everything is color-coded to each building's settings.buildings color.
 
 import { getBuildings } from "@/lib/categories";
 import {
   getProjects,
   getWeekBuildings,
+  getWeekDayProjects,
   getWeekWritingProjectIds,
 } from "@/lib/projects";
+import { getItemsByBox } from "@/lib/data";
 import { DAY_KEYS, DAY_LABELS } from "@/lib/week-days";
-import { WeekBuildingPicker } from "@/components/week-building-picker";
+import { WeekDayBuildingsPicker } from "@/components/week-day-buildings-picker";
+import { WeekDayBuildingBlock } from "@/components/week-day-building-block";
 import { WeekWritingProjectsSection } from "@/components/week-writing-projects-section";
 
 // Matches settings.buildings' auto-derived key for "The Library" — same
@@ -20,12 +30,14 @@ import { WeekWritingProjectsSection } from "@/components/week-writing-projects-s
 const LIBRARY_BUILDING_KEY = "THE_LIBRARY";
 
 export default async function ThisWeekPage() {
-  const [buildings, projects, weekBuildings, weekWritingProjectIds] =
+  const [buildings, projects, weekBuildings, weekDayProjects, weekWritingProjectIds, counterItems] =
     await Promise.all([
       getBuildings(),
       getProjects(),
       getWeekBuildings(),
+      getWeekDayProjects(),
       getWeekWritingProjectIds(),
+      getItemsByBox("COUNTER"),
     ]);
 
   const buildingByKey = new Map(buildings.map((b) => [b.key, b]));
@@ -58,87 +70,93 @@ export default async function ThisWeekPage() {
     underConstructionByBuilding.set(p.building, list);
   }
 
+  // Open Maint Tasks, grouped by area — same filter Maint Tasks itself uses
+  // (excludes Project-Task-linked items, Today custom blocks, and done
+  // items), for the "nothing under construction" fallback per building.
+  const openMaintTasks = counterItems.filter(
+    (it) => !it.sourceTaskId && it.tag !== "CUSTOM_BLOCK" && it.state !== "done",
+  );
+  const maintTasksByBuilding = new Map<
+    string,
+    { id: string; title: string; minutes: number | null }[]
+  >();
+  for (const it of openMaintTasks) {
+    if (!it.area) continue;
+    const list = maintTasksByBuilding.get(it.area) ?? [];
+    list.push({ id: it.id, title: it.title, minutes: it.minutes ?? null });
+    maintTasksByBuilding.set(it.area, list);
+  }
+
   const libraryProjects =
     underConstructionByBuilding.get(LIBRARY_BUILDING_KEY) ?? [];
+  const libraryColor = buildingByKey.get(LIBRARY_BUILDING_KEY)?.color;
 
   return (
-    <div className="mx-auto max-w-[1000px] px-4 py-8 md:px-10">
+    <div className="mx-auto max-w-[1100px] px-4 py-8 md:px-10">
       <div className="eyebrow">— This Week —</div>
-      <h1 className="serif-h mt-2 text-[28px] leading-tight md:text-[36px]">
+      <h1 className="serif-h mt-2 text-[34px] leading-tight md:text-[44px]">
         A building a day.
       </h1>
-      <p className="mt-1 text-[13px] text-ink-dim">
-        Pick a building for each day. If it has projects under construction,
-        their first task shows up right here.
+      <p className="mt-2 text-[16px] leading-relaxed text-ink-dim">
+        Check off one or more buildings for each day. Pick a project under
+        construction there to feature it, or catch up on maint tasks if
+        nothing's building.
       </p>
 
-      <div className="mt-8 rounded-sm border border-paper-line bg-paper-panel/40 px-4 py-4 md:px-6">
+      <div className="mt-8 rounded-sm border border-paper-line bg-paper-panel/40 px-4 py-5 md:px-6">
         <div className="eyebrow">— This Week&apos;s Writing Project(s) —</div>
-        <div className="mt-3">
+        <div className="mt-4">
           <WeekWritingProjectsSection
             projects={libraryProjects}
             initialSelectedIds={weekWritingProjectIds}
+            color={libraryColor}
           />
         </div>
       </div>
 
       <div className="mt-6 overflow-hidden rounded-sm border border-paper-line">
         {DAY_KEYS.map((day, i) => {
-          const chosenKey = weekBuildings[day] ?? null;
-          const chosen = chosenKey ? buildingByKey.get(chosenKey) : undefined;
-          const projectsForDay = chosenKey
-            ? (underConstructionByBuilding.get(chosenKey) ?? [])
-            : [];
+          const selectedKeys = weekBuildings[day] ?? [];
+          const dayProjectPicks = weekDayProjects[day] ?? {};
 
           return (
             <div
               key={day}
               className={
-                "flex flex-col gap-3 border-paper-line bg-paper-panel/40 px-4 py-4 sm:flex-row sm:items-start sm:gap-6 md:px-6" +
+                "flex flex-col gap-4 border-paper-line bg-paper-panel/40 px-4 py-5 md:px-6" +
                 (i > 0 ? " border-t" : "")
               }
             >
-              <div className="serif-h shrink-0 pt-1.5 text-[16px] text-ink sm:w-[130px]">
+              <div className="serif-h text-[22px] text-ink">
                 {DAY_LABELS[day]}
               </div>
 
-              <div className="min-w-0 flex-1">
-                <div className="max-w-[280px]">
-                  <WeekBuildingPicker
-                    day={day}
-                    buildings={buildings}
-                    initial={chosenKey}
-                  />
-                </div>
+              <WeekDayBuildingsPicker
+                day={day}
+                buildings={buildings}
+                initialSelected={selectedKeys}
+              />
 
-                {chosenKey ? (
-                  projectsForDay.length > 0 ? (
-                    <div className="mt-3 space-y-2.5">
-                      {projectsForDay.map((p) => (
-                        <div
-                          key={p.id}
-                          className="rounded-sm border border-paper-line/60 bg-paper-bg/30 px-3 py-2"
-                        >
-                          <div className="font-mono text-[10px] tracking-[0.14em] text-brass">
-                            PROJECT: <span className="text-ink">{p.title}</span>
-                          </div>
-                          <div className="mt-1 font-mono text-[10px] tracking-[0.14em] text-ink-mute">
-                            FIRST TASK:{" "}
-                            <span className="text-ink-dim">
-                              {p.firstTask ?? "(no tasks yet)"}
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="mt-3 text-[12px] text-ink-mute">
-                      Nothing under construction in {chosen?.label ?? "this building"}{" "}
-                      right now.
-                    </p>
-                  )
-                ) : null}
-              </div>
+              {selectedKeys.length > 0 && (
+                <div className="mt-1 space-y-3">
+                  {buildings
+                    .filter((b) => selectedKeys.includes(b.key))
+                    .map((b) => (
+                      <WeekDayBuildingBlock
+                        key={b.key}
+                        day={day}
+                        buildingKey={b.key}
+                        buildingLabel={b.label}
+                        buildingColor={b.color}
+                        underConstruction={
+                          underConstructionByBuilding.get(b.key) ?? []
+                        }
+                        maintTasks={maintTasksByBuilding.get(b.key) ?? []}
+                        initialProjectId={dayProjectPicks[b.key] ?? null}
+                      />
+                    ))}
+                </div>
+              )}
             </div>
           );
         })}

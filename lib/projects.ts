@@ -2,7 +2,7 @@
 // projects" — separate from items, deliberately outside the daily engine.
 
 import { supabaseServer } from "./supabase/server";
-import type { WeekBuildings } from "./week-days";
+import type { WeekBuildings, WeekDayProjects } from "./week-days";
 import type {
   ProjectPhase,
   ProjectLogEntry,
@@ -141,8 +141,10 @@ export async function getProject(id: string): Promise<Project | null> {
 }
 
 // This Week's building picks (settings.week_buildings) — see lib/week-days.ts
-// for the day-key vocabulary and lib/plan-actions.ts's saveWeekBuilding for
-// the write side.
+// for the day-key vocabulary and lib/plan-actions.ts's saveWeekBuildings for
+// the write side. Normalizes old single-string-per-day rows (pre
+// multi-select) into one-element arrays, just in case anything slipped
+// through the one-off data migration.
 export async function getWeekBuildings(): Promise<WeekBuildings> {
   if (!envReady()) return {};
   const sb = await supabaseServer();
@@ -150,7 +152,31 @@ export async function getWeekBuildings(): Promise<WeekBuildings> {
     .from("settings")
     .select("week_buildings")
     .maybeSingle();
-  return (data?.week_buildings as WeekBuildings | null) ?? {};
+  const raw = (data?.week_buildings as Record<string, unknown> | null) ?? {};
+  const normalized: WeekBuildings = {};
+  for (const [day, value] of Object.entries(raw)) {
+    if (Array.isArray(value)) {
+      normalized[day as keyof WeekBuildings] = value.filter(
+        (v): v is string => typeof v === "string",
+      );
+    } else if (typeof value === "string") {
+      normalized[day as keyof WeekBuildings] = [value];
+    }
+  }
+  return normalized;
+}
+
+// This Week's per-(day, building) featured project pick
+// (settings.week_day_projects) — see lib/plan-actions.ts's
+// saveWeekDayProject for the write side.
+export async function getWeekDayProjects(): Promise<WeekDayProjects> {
+  if (!envReady()) return {};
+  const sb = await supabaseServer();
+  const { data } = await sb
+    .from("settings")
+    .select("week_day_projects")
+    .maybeSingle();
+  return (data?.week_day_projects as WeekDayProjects | null) ?? {};
 }
 
 // This Week's Writing Project(s) pick — settings.week_writing_projects, an

@@ -29,5 +29,11 @@ export function isDayKey(v: string): v is DayKey {
   return (DAY_KEYS as string[]).includes(v);
 }
 
-// settings.week_buildings shape: { [day]: buildingKey | null }
-export type WeekBuildings = Partial<Record<DayKey, string | null>>;
+// settings.week_buildings shape: { [day]: buildingKey[] } — a day can now
+// have more than one building chosen (multi-select).
+export type WeekBuildings = Partial<Record<DayKey, string[]>>;
+
+// settings.week_day_projects shape: { [day]: { [buildingKey]: projectId } }
+// — the one project "featured" for that day within that building, chosen
+// from a dropdown of the building's under-construction projects.
+export type WeekDayProjects = Partial<Record<DayKey, Record<string, string>>>;

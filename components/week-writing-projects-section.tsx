@@ -2,10 +2,10 @@
 // "This Week's Writing Project(s)" — sits above the day grid on the This
 // Week page. Multi-select checkboxes over The Library's under-construction
 // projects; whatever's checked is immediately shown below as a PROJECT /
-// FIRST TASK card (same format as the day grid's cards), and saved
-// (settings.week_writing_projects) so it survives a reload. Optimistic
-// like WeekBuildingPicker — local state updates first, server action
-// confirms in the background.
+// FIRST TASK card (same format as the day grid's cards), color-coded to
+// The Library's own settings.buildings color, and saved
+// (settings.week_writing_projects) so it survives a reload. Optimistic —
+// local state updates first, server action confirms in the background.
 
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
@@ -16,9 +16,12 @@ type LibraryProject = { id: string; title: string; firstTask: string | null };
 export function WeekWritingProjectsSection({
   projects,
   initialSelectedIds,
+  color = "#9a6b24",
 }: {
   projects: LibraryProject[];
   initialSelectedIds: string[];
+  /** The Library's settings.buildings color, for the checkboxes/cards. */
+  color?: string;
 }) {
   const [selected, setSelected] = useState<Set<string>>(
     () => new Set(initialSelectedIds),
@@ -43,7 +46,7 @@ export function WeekWritingProjectsSection({
 
   if (projects.length === 0) {
     return (
-      <p className="text-[12px] text-ink-mute">
+      <p className="text-[15px] text-ink-mute">
         No projects under construction in The Library right now.
       </p>
     );
@@ -53,15 +56,16 @@ export function WeekWritingProjectsSection({
 
   return (
     <div>
-      <div className="flex flex-wrap gap-x-5 gap-y-2">
+      <div className="flex flex-wrap gap-x-6 gap-y-3">
         {projects.map((p) => (
           <label
             key={p.id}
-            className="flex items-center gap-2 text-[13px] text-ink-dim"
+            className="flex cursor-pointer items-center gap-2.5 text-[16px] text-ink-dim"
           >
             <input
               type="checkbox"
-              className="accent-brass"
+              className="h-5 w-5 shrink-0"
+              style={{ accentColor: color }}
               checked={selected.has(p.id)}
               disabled={pending}
               onChange={(e) => toggle(p.id, e.target.checked)}
@@ -72,18 +76,22 @@ export function WeekWritingProjectsSection({
       </div>
 
       {selectedProjects.length > 0 && (
-        <div className="mt-3 space-y-2.5">
+        <div className="mt-4 space-y-3">
           {selectedProjects.map((p) => (
             <div
               key={p.id}
-              className="rounded-sm border border-brass/40 bg-paper-bg/30 px-3 py-2"
+              className="rounded-sm border px-4 py-3"
+              style={{ borderColor: color, background: `${color}14` }}
             >
-              <div className="font-mono text-[10px] tracking-[0.14em] text-brass">
-                PROJECT: <span className="text-ink">{p.title}</span>
+              <div
+                className="font-mono text-[13px] tracking-[0.14em]"
+                style={{ color }}
+              >
+                PROJECT: <span className="text-ink text-[15px]">{p.title}</span>
               </div>
-              <div className="mt-1 font-mono text-[10px] tracking-[0.14em] text-ink-mute">
+              <div className="mt-1.5 font-mono text-[13px] tracking-[0.14em] text-ink-mute">
                 FIRST TASK:{" "}
-                <span className="text-ink-dim">
+                <span className="text-ink-dim text-[15px]">
                   {p.firstTask ?? "(no tasks yet)"}
                 </span>
               </div>
