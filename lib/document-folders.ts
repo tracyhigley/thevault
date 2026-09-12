@@ -2,14 +2,14 @@ import type { DocumentType } from "@/lib/categories";
 
 // Notes used to live in a fixed set of ten folders (health, read-watch, …).
 // They now file into the same buildings as Project Plans and Project Tasks,
-// so a note's `folder` value is a building key (e.g. "THE_GYMNASIUM") —
+// so a note's `folder` value is a building key (e.g. "THE_RESERVOIR") —
 // looked up dynamically against settings.buildings, not a compile-time list.
 //
 // Older notes still carry the pre-rebuild lowercase folder keys. This map
 // translates them to a building key the first time they're read, so nothing
 // has to move in the database for the app to work correctly.
 const LEGACY_FOLDER_TO_BUILDING: Record<string, string> = {
-  health: "THE_GYMNASIUM",
+  health: "THE_RESERVOIR",
   "read-watch": "THE_LIBRARY",
   books: "THE_LIBRARY", // pre-rename alias, kept for safety
   "ecom-ecoship": "THE_MERCANTILE",
@@ -18,7 +18,7 @@ const LEGACY_FOLDER_TO_BUILDING: Record<string, string> = {
   "stonewater-books": "THE_PRESS",
   writing: "THE_PRESS",
   travel: "THE_PORT",
-  misc: "THE_GYMNASIUM", // only ever held one note (the 50 First Dates tape); Tracy's call
+  misc: "THE_RESERVOIR", // only ever held one note (the 50 First Dates tape); Tracy's call
 };
 
 /** Translate a legacy folder key to a building key. Anything else (already a

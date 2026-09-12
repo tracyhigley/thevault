@@ -25,7 +25,7 @@ import { WeekDayBuildingBlock } from "@/components/week-day-building-block";
 import { WeekWritingProjectsSection } from "@/components/week-writing-projects-section";
 
 // Matches settings.buildings' auto-derived key for "The Library" — same
-// hardcode-the-key convention as GYMNASIUM_BUILDING_KEY in lib/actions.ts.
+// hardcode-the-key convention as RESERVOIR_BUILDING_KEY in lib/actions.ts.
 // If Tracy ever renames/rekeys that building, update this to match.
 const LIBRARY_BUILDING_KEY = "THE_LIBRARY";
 

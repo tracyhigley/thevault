@@ -94,7 +94,7 @@ export type DocumentType = {
   label: string;
   color?: string;
   meta?: string;
-  // Building key from settings.buildings (e.g. "THE_GYMNASIUM") — same
+  // Building key from settings.buildings (e.g. "THE_RESERVOIR") — same
   // buildings Project Plans and Project Tasks use. Legacy pre-rebuild
   // folder values are translated forward on read; see document-folders.ts.
   folder?: string;

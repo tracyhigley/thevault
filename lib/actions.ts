@@ -37,27 +37,27 @@ async function currentVaultId() {
   return data?.vault_id as string | undefined;
 }
 
-// --- Daily Gymnasium defaults ---
+// --- Daily Reservoir defaults ---
 
-type DailyGymDefault = { tag: string; title: string; minutes: number };
+type DailyReservoirDefault = { tag: string; title: string; minutes: number };
 
-// Fixed daily habit tasks that belong on The Gymnasium card every day
+// Fixed daily habit tasks that belong on The Reservoir card every day
 // without Tracy having to re-add them by hand. Identified by a dedicated
 // `tag` (not title) so renaming one later doesn't spawn a duplicate.
-const DAILY_GYM_DEFAULTS: DailyGymDefault[] = [
-  { tag: "DAILY_GYM:WATER", title: "Drink 64 oz water", minutes: 0 },
-  { tag: "DAILY_GYM:LIFT", title: "Lift weights", minutes: 20 },
-  { tag: "DAILY_GYM:STEPS", title: "Walk 10k steps", minutes: 60 },
-  { tag: "DAILY_GYM:SUPPLEMENTS", title: "Take supplements", minutes: 0 },
-  { tag: "DAILY_GYM:MACROS", title: "Eat 30p/10f three times", minutes: 0 },
+const DAILY_RESERVOIR_DEFAULTS: DailyReservoirDefault[] = [
+  { tag: "DAILY_RESERVOIR:WATER", title: "Drink 64 oz water", minutes: 0 },
+  { tag: "DAILY_RESERVOIR:LIFT", title: "Lift weights", minutes: 20 },
+  { tag: "DAILY_RESERVOIR:STEPS", title: "Walk 10k steps", minutes: 60 },
+  { tag: "DAILY_RESERVOIR:SUPPLEMENTS", title: "Take supplements", minutes: 0 },
+  { tag: "DAILY_RESERVOIR:MACROS", title: "Eat 30p/10f three times", minutes: 0 },
 ];
 
 // Hard-coded the same way app/page.tsx and lib/calendar-work-life.ts
-// already hard-code the Gymnasium building key.
-const GYMNASIUM_BUILDING_KEY = "THE_GYMNASIUM";
+// already hard-code the Reservoir building key.
+const RESERVOIR_BUILDING_KEY = "THE_RESERVOIR";
 
 /**
- * Makes sure the five fixed Gymnasium habit tasks are on today's plan
+ * Makes sure the five fixed Reservoir habit tasks are on today's plan
  * whenever the day gets (re)built. Called from inside
  * saveDayInputsPartial's step-1 today_order wipe, which fires both on the
  * first build of a day and on every rebuild ("REBUILD DAY").
@@ -76,13 +76,13 @@ const GYMNASIUM_BUILDING_KEY = "THE_GYMNASIUM";
  *     is closed; create a fresh row for `date` so the earlier
  *     completion stays intact as its own record on /done.
  */
-async function ensureDailyGymDefaults(
+async function ensureDailyReservoirDefaults(
   sb: Awaited<ReturnType<typeof supabaseServer>>,
   vaultId: string,
   userId: string,
   date: string,
 ) {
-  const tags = DAILY_GYM_DEFAULTS.map((d) => d.tag);
+  const tags = DAILY_RESERVOIR_DEFAULTS.map((d) => d.tag);
   // Newest row per tag decides what happens — not "is there a row from
   // `date`". An unfinished habit task has to carry forward across as many
   // rebuilds/days as it takes until she actually checks it off; matching by
@@ -124,7 +124,7 @@ async function ensureDailyGymDefaults(
     .maybeSingle();
   let nextOrder = Number(maxRow?.today_order ?? 0);
 
-  for (const def of DAILY_GYM_DEFAULTS) {
+  for (const def of DAILY_RESERVOIR_DEFAULTS) {
     const latest = latestByTag.get(def.tag);
     if (latest && latest.state !== "done") {
       // Still open, whenever it was created — carry it forward onto
@@ -159,7 +159,7 @@ async function ensureDailyGymDefaults(
       user_id: userId,
       box: "COUNTER",
       title: def.title,
-      area: GYMNASIUM_BUILDING_KEY,
+      area: RESERVOIR_BUILDING_KEY,
       minutes: def.minutes,
       tag: def.tag,
       urgent: false,
@@ -246,7 +246,7 @@ export async function saveDayInputsPartial(
       .update({ today_order: null })
       .eq("vault_id", vaultId)
       .not("today_order", "is", null);
-    await ensureDailyGymDefaults(sb, vaultId, user.id, parsed.date);
+    await ensureDailyReservoirDefaults(sb, vaultId, user.id, parsed.date);
   }
 
   const { data: settingsRow } = await sb
@@ -899,7 +899,7 @@ export async function saveEnergyConfig(
   revalidatePath("/", "layout");
 }
 
-// Folder now holds a building key (e.g. "THE_GYMNASIUM") from
+// Folder now holds a building key (e.g. "THE_RESERVOIR") from
 // settings.buildings, which is user-configurable — so this is a free string,
 // not a fixed enum. normalizeDocumentFolderKey still translates any leftover
 // legacy folder values forward on save.

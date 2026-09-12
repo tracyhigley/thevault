@@ -13,7 +13,7 @@ export type WorkLifeGroup = "work" | "other";
 // building remap this replaced): Stonewater Books, Ecom & Ecoship, and
 // Writing were "work"; Travel, Leisure, Friends & Family, and Home & Garden
 // were "other". Leisure had no direct building equivalent and was folded
-// into The Gymnasium, so that building is grouped "other" here too.
+// into The Reservoir, so that building is grouped "other" here too.
 const WORK_SLOTS = [
   "THE_PRESS",
   "The Press",
@@ -30,8 +30,8 @@ const OTHER_SLOTS = [
   "The Family Lodge",
   "THE_GROUNDS",
   "The Grounds",
-  "THE_GYMNASIUM",
-  "The Gymnasium",
+  "THE_RESERVOIR",
+  "The Reservoir",
 ];
 
 function matchesAnySlot(box: Box, slots: readonly string[]): boolean {

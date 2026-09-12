@@ -1,4 +1,4 @@
-// The Docket — today's tasks, grouped into three cards (The Gymnasium,
+// The Docket — today's tasks, grouped into three cards (The Reservoir,
 // Maint Tasks, Project Tasks). App home.
 //
 // If today's day_inputs row hasn't been built yet, show a single calm
@@ -86,7 +86,7 @@ export default async function DocketPage() {
   const greeting = DAY_GREETINGS[zonedDayOfMonth() % DAY_GREETINGS.length];
 
   const buildingByKey = new Map(buildings.map((b) => [b.key, b]));
-  const gymBuilding = buildings.find((b) => b.key === "THE_GYMNASIUM");
+  const reservoirBuilding = buildings.find((b) => b.key === "THE_RESERVOIR");
 
   const projectByTaskId = new Map<string, { id: string; building: string }>();
   for (const p of projects) {
@@ -103,7 +103,7 @@ export default async function DocketPage() {
       it.state !== "skipped",
   );
 
-  const gymRows: TodayRow[] = [];
+  const reservoirRows: TodayRow[] = [];
   const maintRows: TodayRow[] = [];
   const projectRows: TodayRow[] = [];
 
@@ -121,8 +121,8 @@ export default async function DocketPage() {
         projectId: proj?.id,
         taskId: it.sourceTaskId,
       };
-      if (gymBuilding && proj?.building === gymBuilding.key) {
-        gymRows.push(row);
+      if (reservoirBuilding && proj?.building === reservoirBuilding.key) {
+        reservoirRows.push(row);
       } else {
         projectRows.push(row);
       }
@@ -137,8 +137,8 @@ export default async function DocketPage() {
         buildingLabel: building?.label ?? it.area ?? undefined,
         buildingColor: building?.color,
       };
-      if (gymBuilding && it.area === gymBuilding.key) {
-        gymRows.push(row);
+      if (reservoirBuilding && it.area === reservoirBuilding.key) {
+        reservoirRows.push(row);
       } else {
         maintRows.push(row);
       }
@@ -187,13 +187,13 @@ export default async function DocketPage() {
 
       <div className="mt-8 space-y-6">
         <TodayCard
-          title="The Gymnasium"
-          color={gymBuilding?.color}
-          tint={gymBuilding?.color ?? "#b5853a"}
-          rows={gymRows}
+          title="The Reservoir"
+          color={reservoirBuilding?.color}
+          tint={reservoirBuilding?.color ?? "#b5853a"}
+          rows={reservoirRows}
           buildingMode="none"
           buildingOpts={buildingOpts}
-          emptyLabel="Nothing marked Today for The Gymnasium."
+          emptyLabel="Nothing marked Today for The Reservoir."
         />
         <TodayCard
           title="Maint Tasks"
