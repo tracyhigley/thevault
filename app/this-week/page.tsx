@@ -83,9 +83,18 @@ export default async function ThisWeekPage() {
   // Open Maint Tasks, grouped by area — same filter Maint Tasks itself uses
   // (excludes Project-Task-linked items, Today custom blocks, and done
   // items), for the "nothing under construction" fallback per building,
-  // and for the first-scheduled-day showcase below.
+  // and for the first-scheduled-day showcase below. Also excludes the
+  // auto-populated Daily Reservoir habit defaults (Drink water, Lift
+  // weights, etc. — see ensureDailyReservoirDefaults in lib/actions.ts):
+  // those show up fresh every day regardless, so they don't belong in a
+  // weekly maint-tasks catch-up list. This exclusion is specific to This
+  // Week — the Maint Tasks page itself still shows them.
   const openMaintTasks = counterItems.filter(
-    (it) => !it.sourceTaskId && it.tag !== "CUSTOM_BLOCK" && it.state !== "done",
+    (it) =>
+      !it.sourceTaskId &&
+      it.tag !== "CUSTOM_BLOCK" &&
+      it.state !== "done" &&
+      !it.tag?.startsWith("DAILY_RESERVOIR:"),
   );
   const maintTasksByBuilding = new Map<
     string,
