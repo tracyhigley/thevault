@@ -56,15 +56,15 @@ function buildItems(fiftyFdHref: string): NavItem[] {
       hint: "g p",
       match: (p) =>
         p.startsWith("/project-plans") &&
-        !p.startsWith("/project-plans/under-construction") &&
+        !p.startsWith("/project-plans/active") &&
         !p.startsWith("/project-plans/completed"),
       button: true,
     },
     {
-      href: "/project-plans/under-construction",
-      label: "UNDER CONSTRUCTION",
+      href: "/project-plans/active",
+      label: "ACTIVE PLANS",
       hint: "g u",
-      match: (p) => p.startsWith("/project-plans/under-construction"),
+      match: (p) => p.startsWith("/project-plans/active"),
       button: true,
     },
     {

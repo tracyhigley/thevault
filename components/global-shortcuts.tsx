@@ -26,7 +26,7 @@ export function GlobalShortcuts() {
   useShortcut("g e", go("/documents"), { label: "NOTES", group: "Navigate" });
   useShortcut("g k", go("/calendar"), { label: "Calendar", group: "Navigate" });
   useShortcut("g p", go("/project-plans"), { label: "Master Project Plans", group: "Navigate" });
-  useShortcut("g u", go("/project-plans/under-construction"), { label: "Under Construction", group: "Navigate" });
+  useShortcut("g u", go("/project-plans/active"), { label: "Active Plans", group: "Navigate" });
   useShortcut("g f", go("/project-plans/completed"), { label: "Completed Projects", group: "Navigate" });
   useShortcut("g s", go("/settings"), { label: "Settings", group: "Navigate" });
   useShortcut("g b", go("/build?step=1"), { label: "Build day", group: "Navigate" });

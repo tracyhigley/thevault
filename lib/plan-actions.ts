@@ -482,10 +482,11 @@ export async function reorderProjectTasks(projectId: string, taskIds: string[]) 
   revalidatePath("/project-tasks");
 }
 
-// Drag order for the Under Construction page (all phase="building"
-// projects, across every building, one flat list). Same shape as
-// reorderItems/reorderAtmItems: stamp sequential ints across exactly the
-// ids the client has on screen.
+// Drag order for the Active Plans page's "Under construction" section
+// (phase="building" projects, across every building, one flat reorderable
+// list — formerly its own /project-plans/under-construction page, merged
+// in 2026-09-13). Same shape as reorderItems/reorderAtmItems: stamp
+// sequential ints across exactly the ids the client has on screen.
 export async function reorderActiveProjects(projectIds: string[]) {
   const { sb } = await requireUser();
   await Promise.all(

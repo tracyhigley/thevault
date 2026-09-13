@@ -1,8 +1,12 @@
 "use client";
-// Drag-orderable project cards for the Under Construction page, styled to
-// mirror the Master Project Plans building-card grid (color strip, serif
-// heading, small mono caption) — but one card per project, not per building,
-// and the heading is the project title rather than the building name.
+// Drag-orderable project cards for the Active Plans page's "Under
+// construction" section, styled to mirror the Master Project Plans
+// building-card grid (color strip, serif heading, small mono caption) —
+// but one card per project, not per building, and the heading is the
+// project title rather than the building name. Formerly its own
+// /project-plans/under-construction page; merged into Active Plans
+// 2026-09-13 so drag order, the Planning section, and this page's title
+// exclusions all live in one place instead of two views disagreeing.
 //
 // Reordering follows the same handle-based pattern as SortableList
 // (components/sortable-list.tsx), just laid out on a 2D grid via dnd-kit's

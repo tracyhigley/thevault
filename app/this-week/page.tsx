@@ -47,9 +47,10 @@ export default async function ThisWeekPage() {
   const buildingByKey = new Map(buildings.map((b) => [b.key, b]));
 
   // Under-construction projects, grouped by building — same "under
-  // construction" definition as the Master Project Plans / Under
-  // Construction pages (phase === "building"). Ordered the same way as the
-  // Under Construction page: manual activeOrder first, else newest first.
+  // construction" definition as the Master Project Plans page and the
+  // Active Plans page's "Under construction" section (phase === "building").
+  // Ordered the same way as that section: manual activeOrder first, else
+  // newest first.
   // "tasks" here is every checklist item checked onto the Project Tasks
   // page (t.onTaskList) — not just the first one, and never a done task:
   // onTaskList and done are mutually exclusive (see lib/project-phases.ts),
