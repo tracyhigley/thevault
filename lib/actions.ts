@@ -39,14 +39,28 @@ async function currentVaultId() {
 
 // --- Daily Reservoir defaults ---
 
-type DailyReservoirDefault = { tag: string; title: string; minutes: number };
+type DailyReservoirDefault = {
+  tag: string;
+  title: string;
+  minutes: number;
+  // Day-of-week values (0 = Sunday ... 6 = Saturday, matching Date#getDay())
+  // on which this default is skipped entirely -- not created if missing,
+  // and not carried forward if an unfinished row already exists. Omit for
+  // a default that runs every day.
+  skipDays?: number[];
+};
 
 // Fixed daily habit tasks that belong on The Reservoir card every day
 // without Tracy having to re-add them by hand. Identified by a dedicated
 // `tag` (not title) so renaming one later doesn't spawn a duplicate.
 const DAILY_RESERVOIR_DEFAULTS: DailyReservoirDefault[] = [
   { tag: "DAILY_RESERVOIR:WATER", title: "Drink 64 oz water", minutes: 0 },
-  { tag: "DAILY_RESERVOIR:LIFT", title: "Lift weights", minutes: 20 },
+  {
+    tag: "DAILY_RESERVOIR:LIFT",
+    title: "Weight Training (M-W-F) or Cardio Zone 2 for 60 min (T-Th-Sa)",
+    minutes: 20,
+    skipDays: [0], // Sunday is a rest day -- no task at all.
+  },
   { tag: "DAILY_RESERVOIR:STEPS", title: "Walk 10k steps", minutes: 60 },
   { tag: "DAILY_RESERVOIR:SUPPLEMENTS", title: "Take supplements", minutes: 0 },
   { tag: "DAILY_RESERVOIR:MACROS", title: "Eat 30p/10f three times", minutes: 0 },
@@ -125,6 +139,14 @@ async function ensureDailyReservoirDefaults(
   let nextOrder = Number(maxRow?.today_order ?? 0);
 
   for (const def of DAILY_RESERVOIR_DEFAULTS) {
+    if (def.skipDays?.length) {
+      // Parse date's day-of-week using local Y/M/D components, same
+      // convention as lib/calendar-planning.ts's fromYmd -- avoids the
+      // UTC-parse shift new Date("YYYY-MM-DD") is prone to.
+      const [y, m, d] = date.split("-").map((p) => parseInt(p, 10));
+      const dow = new Date(y, m - 1, d).getDay();
+      if (def.skipDays.includes(dow)) continue;
+    }
     const latest = latestByTag.get(def.tag);
     if (latest && latest.state !== "done") {
       // Still open, whenever it was created — carry it forward onto
