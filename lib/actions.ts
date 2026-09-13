@@ -58,7 +58,7 @@ const DAILY_RESERVOIR_DEFAULTS: DailyReservoirDefault[] = [
   {
     tag: "DAILY_RESERVOIR:LIFT",
     title: "Weight Training (M-W-F) or Cardio Zone 2 for 60 min (T-Th-Sa)",
-    minutes: 20,
+    minutes: 30,
     skipDays: [0], // Sunday is a rest day -- no task at all.
   },
   { tag: "DAILY_RESERVOIR:STEPS", title: "Walk 10k steps", minutes: 60 },
