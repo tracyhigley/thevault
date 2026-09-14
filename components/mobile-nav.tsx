@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
@@ -59,42 +60,50 @@ export function MobileNav({ fiftyFdHref }: { fiftyFdHref: string }) {
         </span>
       </button>
 
-      {open && (
-        <div
-          className="fixed inset-0 z-50 flex justify-end bg-paper-bg/80 backdrop-blur"
-          onMouseDown={(e) => {
-            if (e.target === e.currentTarget) setOpen(false);
-          }}
-        >
-          <nav
-            aria-label="Main"
-            className="flex h-full w-[78vw] max-w-[320px] flex-col gap-1 overflow-y-auto border-l border-brass/40 bg-paper-panel/95 p-5 shadow-2xl"
+      {open &&
+        createPortal(
+          // Portalled to <body> -- the header this button lives in has
+          // `backdrop-blur`, and like `transform`/`filter`, backdrop-filter
+          // on an ancestor creates a new containing block for `fixed`
+          // descendants. Left in place, this panel would size itself
+          // against the header's own small box instead of the viewport
+          // and get visually buried under the page content below it.
+          <div
+            className="fixed inset-0 z-50 flex justify-end bg-paper-bg/80 backdrop-blur"
+            onMouseDown={(e) => {
+              if (e.target === e.currentTarget) setOpen(false);
+            }}
           >
-            <div className="eyebrow mb-2">— Navigate —</div>
-            {items.map((item) => {
-              const active = item.match(path);
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => {
-                    if (item.href === "/") markPreferTodayOverDropLanding();
-                    setOpen(false);
-                  }}
-                  className={clsx(
-                    "rounded-sm border px-3 py-2.5 font-mono text-[11px] tracking-[0.14em] transition",
-                    active
-                      ? "border-brass bg-brass/10 text-brass"
-                      : "border-transparent text-ink-mute hover:border-paper-line hover:text-ink",
-                  )}
-                >
-                  {item.label}
-                </Link>
-              );
-            })}
-          </nav>
-        </div>
-      )}
+            <nav
+              aria-label="Main"
+              className="flex h-full w-[78vw] max-w-[320px] flex-col gap-1 overflow-y-auto border-l border-brass/40 bg-paper-panel/95 p-5 shadow-2xl"
+            >
+              <div className="eyebrow mb-2">— Navigate —</div>
+              {items.map((item) => {
+                const active = item.match(path);
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => {
+                      if (item.href === "/") markPreferTodayOverDropLanding();
+                      setOpen(false);
+                    }}
+                    className={clsx(
+                      "rounded-sm border px-3 py-2.5 font-mono text-[11px] tracking-[0.14em] transition",
+                      active
+                        ? "border-brass bg-brass/10 text-brass"
+                        : "border-transparent text-ink-mute hover:border-paper-line hover:text-ink",
+                    )}
+                  >
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </nav>
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }
