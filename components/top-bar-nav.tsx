@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import clsx from "clsx";
 import { markPreferTodayOverDropLanding } from "@/lib/nav-client";
 
-type NavItem = {
+export type NavItem = {
   href: string;
   label: string;
   hint: string;
@@ -14,7 +14,7 @@ type NavItem = {
   button?: boolean;
 };
 
-function buildItems(fiftyFdHref: string): NavItem[] {
+export function buildItems(fiftyFdHref: string): NavItem[] {
   return [
     {
       href: "/",
@@ -112,7 +112,7 @@ export function TopBarNav({ fiftyFdHref }: { fiftyFdHref: string }) {
   const items = buildItems(fiftyFdHref);
 
   return (
-    <nav className="flex min-w-0 flex-1 items-center justify-center gap-3 overflow-x-auto eyebrow md:gap-7">
+    <nav className="hidden min-w-0 flex-1 items-center justify-center gap-3 overflow-x-auto eyebrow md:gap-7 lg:flex">
       {items.map((item) => {
         const active = item.match(path);
         const title =

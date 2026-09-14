@@ -6,6 +6,7 @@ import { getSettings } from "@/lib/data";
 import { HomeLink } from "@/components/home-link";
 import { supabaseServer } from "@/lib/supabase/server";
 import { TopBarNav } from "./top-bar-nav";
+import { MobileNav } from "./mobile-nav";
 import { SealToggle } from "./seal-toggle";
 
 // Top bar is a Server Component so we can read settings (sealed flag).
@@ -51,6 +52,7 @@ export async function TopBar() {
       </HomeLink>
 
       <TopBarNav fiftyFdHref={fiftyFdHref} />
+      <MobileNav fiftyFdHref={fiftyFdHref} />
 
       <div className="flex shrink-0 items-center gap-2">
         <Link
