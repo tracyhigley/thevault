@@ -32,9 +32,9 @@ describe("calendarWorkLifeGroup", () => {
       "other",
     );
     // Leisure had no direct building equivalent and was folded into The
-    // Reservoir, so it's grouped "other" here too.
-    expect(calendarWorkLifeGroup(box("The Reservoir"))).toBe("other");
-    expect(calendarWorkLifeGroup(box("The Reservoir", "THE_RESERVOIR"))).toBe(
+    // Wellness Center, so it's grouped "other" here too.
+    expect(calendarWorkLifeGroup(box("The Wellness Center"))).toBe("other");
+    expect(calendarWorkLifeGroup(box("The Wellness Center", "THE_WELLNESS_CENTER"))).toBe(
       "other",
     );
   });

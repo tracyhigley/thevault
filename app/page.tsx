@@ -1,4 +1,4 @@
-// The Docket — today's tasks, grouped into three cards (The Reservoir,
+// The Docket — today's tasks, grouped into three cards (The Wellness Center,
 // Maint Tasks, Project Tasks). App home.
 //
 // If today's day_inputs row hasn't been built yet, show a single calm
@@ -86,7 +86,7 @@ export default async function DocketPage() {
   const greeting = DAY_GREETINGS[zonedDayOfMonth() % DAY_GREETINGS.length];
 
   const buildingByKey = new Map(buildings.map((b) => [b.key, b]));
-  const reservoirBuilding = buildings.find((b) => b.key === "THE_RESERVOIR");
+  const wellnessCenterBuilding = buildings.find((b) => b.key === "THE_WELLNESS_CENTER");
 
   const projectByTaskId = new Map<string, { id: string; building: string }>();
   for (const p of projects) {
@@ -103,7 +103,7 @@ export default async function DocketPage() {
       it.state !== "skipped",
   );
 
-  const reservoirRows: TodayRow[] = [];
+  const wellnessCenterRows: TodayRow[] = [];
   const maintRows: TodayRow[] = [];
   const projectRows: TodayRow[] = [];
 
@@ -121,8 +121,8 @@ export default async function DocketPage() {
         projectId: proj?.id,
         taskId: it.sourceTaskId,
       };
-      if (reservoirBuilding && proj?.building === reservoirBuilding.key) {
-        reservoirRows.push(row);
+      if (wellnessCenterBuilding && proj?.building === wellnessCenterBuilding.key) {
+        wellnessCenterRows.push(row);
       } else {
         projectRows.push(row);
       }
@@ -137,8 +137,8 @@ export default async function DocketPage() {
         buildingLabel: building?.label ?? it.area ?? undefined,
         buildingColor: building?.color,
       };
-      if (reservoirBuilding && it.area === reservoirBuilding.key) {
-        reservoirRows.push(row);
+      if (wellnessCenterBuilding && it.area === wellnessCenterBuilding.key) {
+        wellnessCenterRows.push(row);
       } else {
         maintRows.push(row);
       }
@@ -187,13 +187,13 @@ export default async function DocketPage() {
 
       <div className="mt-8 space-y-6">
         <TodayCard
-          title="The Reservoir"
-          color={reservoirBuilding?.color}
-          tint={reservoirBuilding?.color ?? "#b5853a"}
-          rows={reservoirRows}
+          title="The Wellness Center"
+          color={wellnessCenterBuilding?.color}
+          tint={wellnessCenterBuilding?.color ?? "#b5853a"}
+          rows={wellnessCenterRows}
           buildingMode="none"
           buildingOpts={buildingOpts}
-          emptyLabel="Nothing marked Today for The Reservoir."
+          emptyLabel="Nothing marked Today for The Wellness Center."
         />
         <TodayCard
           title="Maint Tasks"

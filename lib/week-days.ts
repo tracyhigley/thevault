@@ -29,13 +29,13 @@ export const DAY_LABELS: Record<DayKey, string> = {
 // This Week page — Tracy's usual building rhythm. Cosmetic only: it doesn't
 // drive which buildings can be picked that day, just hints at the pattern.
 export const DAY_HINTS: Record<DayKey, string> = {
-  sun: "usually Reservoir",
+  sun: "usually Wellness Center",
   mon: "usually Mercantile",
   tue: "choose from Support Center/Family Lodge or Press",
   wed: "choose from Support Center/Family Lodge or Press",
   thu: "choose from Support Center/Family Lodge or Press",
   fri: "choose from Support Center/Family Lodge or Press",
-  sat: "usually Grounds, Reservoir, and Port",
+  sat: "usually Grounds, Wellness Center, and Port",
 };
 
 export function isDayKey(v: string): v is DayKey {

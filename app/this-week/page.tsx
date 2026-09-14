@@ -29,7 +29,7 @@ import { WeekDayBuildingBlock } from "@/components/week-day-building-block";
 import { WeekWritingProjectsSection } from "@/components/week-writing-projects-section";
 
 // Matches settings.buildings' auto-derived key for "The Library" — same
-// hardcode-the-key convention as RESERVOIR_BUILDING_KEY in lib/actions.ts.
+// hardcode-the-key convention as WELLNESS_CENTER_BUILDING_KEY in lib/actions.ts.
 // If Tracy ever renames/rekeys that building, update this to match.
 const LIBRARY_BUILDING_KEY = "THE_LIBRARY";
 
@@ -85,8 +85,8 @@ export default async function ThisWeekPage() {
   // (excludes Project-Task-linked items, Today custom blocks, and done
   // items), for the "nothing under construction" fallback per building,
   // and for the first-scheduled-day showcase below. Also excludes the
-  // auto-populated Daily Reservoir habit defaults (Drink water, Lift
-  // weights, etc. — see ensureDailyReservoirDefaults in lib/actions.ts):
+  // auto-populated Daily Wellness Center habit defaults (Drink water, Lift
+  // weights, etc. — see ensureDailyWellnessCenterDefaults in lib/actions.ts):
   // those show up fresh every day regardless, so they don't belong in a
   // weekly maint-tasks catch-up list. This exclusion is specific to This
   // Week — the Maint Tasks page itself still shows them.
@@ -95,7 +95,7 @@ export default async function ThisWeekPage() {
       !it.sourceTaskId &&
       it.tag !== "CUSTOM_BLOCK" &&
       it.state !== "done" &&
-      !it.tag?.startsWith("DAILY_RESERVOIR:"),
+      !it.tag?.startsWith("DAILY_WELLNESS_CENTER:"),
   );
   const maintTasksByBuilding = new Map<
     string,

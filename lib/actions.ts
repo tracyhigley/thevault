@@ -37,9 +37,9 @@ async function currentVaultId() {
   return data?.vault_id as string | undefined;
 }
 
-// --- Daily Reservoir defaults ---
+// --- Daily Wellness Center defaults ---
 
-type DailyReservoirDefault = {
+type DailyWellnessCenterDefault = {
   tag: string;
   title: string;
   minutes: number;
@@ -50,28 +50,28 @@ type DailyReservoirDefault = {
   skipDays?: number[];
 };
 
-// Fixed daily habit tasks that belong on The Reservoir card every day
+// Fixed daily habit tasks that belong on The Wellness Center card every day
 // without Tracy having to re-add them by hand. Identified by a dedicated
 // `tag` (not title) so renaming one later doesn't spawn a duplicate.
-const DAILY_RESERVOIR_DEFAULTS: DailyReservoirDefault[] = [
-  { tag: "DAILY_RESERVOIR:WATER", title: "Drink 64 oz water", minutes: 0 },
+const DAILY_WELLNESS_CENTER_DEFAULTS: DailyWellnessCenterDefault[] = [
+  { tag: "DAILY_WELLNESS_CENTER:WATER", title: "Drink 64 oz water", minutes: 0 },
   {
-    tag: "DAILY_RESERVOIR:LIFT",
+    tag: "DAILY_WELLNESS_CENTER:LIFT",
     title: "Weight Training (M-W-F) or Cardio Zone 2 for 60 min (T-Th-Sa)",
     minutes: 30,
     skipDays: [0], // Sunday is a rest day -- no task at all.
   },
-  { tag: "DAILY_RESERVOIR:STEPS", title: "Walk 10k steps", minutes: 60 },
-  { tag: "DAILY_RESERVOIR:SUPPLEMENTS", title: "Take supplements", minutes: 0 },
-  { tag: "DAILY_RESERVOIR:MACROS", title: "Eat 30p/10f three times", minutes: 0 },
+  { tag: "DAILY_WELLNESS_CENTER:STEPS", title: "Walk 10k steps", minutes: 60 },
+  { tag: "DAILY_WELLNESS_CENTER:SUPPLEMENTS", title: "Take supplements", minutes: 0 },
+  { tag: "DAILY_WELLNESS_CENTER:MACROS", title: "Eat 30p/10f three times", minutes: 0 },
 ];
 
 // Hard-coded the same way app/page.tsx and lib/calendar-work-life.ts
-// already hard-code the Reservoir building key.
-const RESERVOIR_BUILDING_KEY = "THE_RESERVOIR";
+// already hard-code the Wellness Center building key.
+const WELLNESS_CENTER_BUILDING_KEY = "THE_WELLNESS_CENTER";
 
 /**
- * Makes sure the five fixed Reservoir habit tasks are on today's plan
+ * Makes sure the five fixed Wellness Center habit tasks are on today's plan
  * whenever the day gets (re)built. Called from inside
  * saveDayInputsPartial's step-1 today_order wipe, which fires both on the
  * first build of a day and on every rebuild ("REBUILD DAY").
@@ -90,13 +90,13 @@ const RESERVOIR_BUILDING_KEY = "THE_RESERVOIR";
  *     is closed; create a fresh row for `date` so the earlier
  *     completion stays intact as its own record on /done.
  */
-async function ensureDailyReservoirDefaults(
+async function ensureDailyWellnessCenterDefaults(
   sb: Awaited<ReturnType<typeof supabaseServer>>,
   vaultId: string,
   userId: string,
   date: string,
 ) {
-  const tags = DAILY_RESERVOIR_DEFAULTS.map((d) => d.tag);
+  const tags = DAILY_WELLNESS_CENTER_DEFAULTS.map((d) => d.tag);
   // Newest row per tag decides what happens — not "is there a row from
   // `date`". An unfinished habit task has to carry forward across as many
   // rebuilds/days as it takes until she actually checks it off; matching by
@@ -138,7 +138,7 @@ async function ensureDailyReservoirDefaults(
     .maybeSingle();
   let nextOrder = Number(maxRow?.today_order ?? 0);
 
-  for (const def of DAILY_RESERVOIR_DEFAULTS) {
+  for (const def of DAILY_WELLNESS_CENTER_DEFAULTS) {
     if (def.skipDays?.length) {
       // Parse date's day-of-week using local Y/M/D components, same
       // convention as lib/calendar-planning.ts's fromYmd -- avoids the
@@ -181,7 +181,7 @@ async function ensureDailyReservoirDefaults(
       user_id: userId,
       box: "COUNTER",
       title: def.title,
-      area: RESERVOIR_BUILDING_KEY,
+      area: WELLNESS_CENTER_BUILDING_KEY,
       minutes: def.minutes,
       tag: def.tag,
       urgent: false,
@@ -268,7 +268,7 @@ export async function saveDayInputsPartial(
       .update({ today_order: null })
       .eq("vault_id", vaultId)
       .not("today_order", "is", null);
-    await ensureDailyReservoirDefaults(sb, vaultId, user.id, parsed.date);
+    await ensureDailyWellnessCenterDefaults(sb, vaultId, user.id, parsed.date);
   }
 
   const { data: settingsRow } = await sb
@@ -921,7 +921,7 @@ export async function saveEnergyConfig(
   revalidatePath("/", "layout");
 }
 
-// Folder now holds a building key (e.g. "THE_RESERVOIR") from
+// Folder now holds a building key (e.g. "THE_WELLNESS_CENTER") from
 // settings.buildings, which is user-configurable — so this is a free string,
 // not a fixed enum. normalizeDocumentFolderKey still translates any leftover
 // legacy folder values forward on save.
