@@ -177,6 +177,10 @@ export default async function DocketPage() {
             endOfDay={inputs.endOfDay}
             totalTodayMinutes={totalTodayMinutes}
           />
+          <p className="text-ink-dim mt-1 w-0 min-w-full text-[14px] leading-snug">
+            Subtract Maint Task time from End of Day. Stop working on Projects
+            at that time and switch to Maint Tasks.
+          </p>
         </div>
         <DayScratchpad
           date={inputs.date}
