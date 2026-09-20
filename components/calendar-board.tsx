@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
 import type { Box } from "@/lib/categories";
 import type { CalendarWeek } from "@/lib/calendar-planning";
@@ -29,36 +29,11 @@ export function CalendarBoard({
 }) {
   const [weeks, setWeeks] = useState<CalendarWeek[]>(initialWeeks);
   const [, startTransition] = useTransition();
-  const todayCellRef = useRef<HTMLElement | null>(null);
-  const [scrolled, setScrolled] = useState(false);
-  const [showPast, setShowPast] = useState(false);
-
   // Keep local state in sync with fresh server data (e.g. after a route
   // refresh that pulls a new initialWeeks).
   useEffect(() => {
     setWeeks(initialWeeks);
   }, [initialWeeks]);
-
-  // Scroll today into view on first paint, and any time past weeks are
-  // toggled (so the current week stays roughly anchored under the toggle).
-  useEffect(() => {
-    if (scrolled && !showPast) return;
-    if (todayCellRef.current) {
-      todayCellRef.current.scrollIntoView({
-        block: showPast ? "center" : "start",
-        behavior: scrolled ? "smooth" : "auto",
-      });
-      setScrolled(true);
-    }
-  }, [scrolled, showPast]);
-
-  // Split into past vs current+future. If today's week isn't found (defensive,
-  // e.g. fixture mode), treat everything as future.
-  const currentIdx = weeks.findIndex((w) => w.isCurrentWeek);
-  const pastWeeks = currentIdx > 0 ? weeks.slice(0, currentIdx) : [];
-  const futureWeeks = currentIdx >= 0 ? weeks.slice(currentIdx) : weeks;
-  const visibleWeeks =
-    currentIdx >= 0 ? (showPast ? weeks : futureWeeks) : weeks;
 
   function updateDayLocal(date: string, plan: DayPlan) {
     const next = normalizeDayPlan(plan);
@@ -133,42 +108,16 @@ export function CalendarBoard({
   return (
     <div className="mt-6 space-y-3">
       <CalendarCounts
-        weeks={futureWeeks}
+        weeks={weeks}
         boxes={boxes}
-        heading={`FROM THIS WEEK FORWARD (${futureWeeks.length} weeks shown)`}
+        heading={`FROM THIS WEEK FORWARD (${weeks.length} weeks shown)`}
       />
-      {pastWeeks.length > 0 && (
-        <button
-          type="button"
-          onClick={() => setShowPast((v) => !v)}
-          className="border-paper-line bg-paper-panel/20 text-ink-mute hover:border-brass/40 hover:text-brass block w-full rounded-sm border border-dashed px-3 py-2 font-mono text-[10px] tracking-[0.18em]"
-        >
-          {showPast
-            ? `▴  HIDE EARLIER WEEKS (${pastWeeks.length})`
-            : `◂  SHOW EARLIER WEEKS (${pastWeeks.length})`}
-        </button>
-      )}
-      {showPast && pastWeeks.length > 0 && (
-        <CalendarCounts
-          weeks={pastWeeks}
-          boxes={boxes}
-          assignedOnly
-          heading={`EARLIER WEEKS (${pastWeeks.length} weeks shown)`}
-        />
-      )}
-      {visibleWeeks.map((w) => (
+      {weeks.map((w) => (
         <CalendarWeekRow
           key={w.weekStart}
           week={w}
           boxes={boxes}
           projects={projects}
-          todayRef={
-            w.isCurrentWeek
-              ? (el) => {
-                  todayCellRef.current = el;
-                }
-              : undefined
-          }
           onSetDay={onSetDay}
           onSetNote={(note) => onSetNote(w.weekStart, note)}
         />

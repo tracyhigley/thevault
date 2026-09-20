@@ -10,7 +10,7 @@ import { CalendarBoard } from "@/components/calendar-board";
 export default async function CalendarPage() {
   const [boxes, weeks, allProjects] = await Promise.all([
     getBuildings(),
-    getCalendarRange({ weeksBefore: 13, weeksAfter: 16 }),
+    getCalendarRange({ weeksBefore: 0, weeksAfter: 12 }),
     getProjects(),
   ]);
   const projects = allProjects.map((p) => ({
