@@ -7,9 +7,9 @@ import { calendarWorkLifeGroup } from "@/lib/calendar-work-life";
 const UNASSIGNED = "__unassigned__";
 
 function formatDayStat(count: number, totalDays: number): string {
-  if (totalDays <= 0) return `${count}d - 0%`;
+  if (totalDays <= 0) return `${count} days - 0%`;
   const pct = Math.round((count / totalDays) * 100);
-  return `${count}d - ${pct}%`;
+  return `${count} days - ${pct}%`;
 }
 
 function hexToRgba(hex: string | undefined, alpha: number): string | undefined {
@@ -49,9 +49,18 @@ export function CalendarCounts({
   }
 
   const boxesByKey = new Map(boxes.map((b) => [b.key, b]));
+
+  // Priority buildings appear first in this order; others follow sorted by count.
+  const priorityLabels = ["Press", "Library", "Mercantile"];
+  const priorityOrder = (label: string) => {
+    const idx = priorityLabels.findIndex(
+      (p) => p.toLowerCase() === label.toLowerCase(),
+    );
+    return idx >= 0 ? idx : priorityLabels.length;
+  };
+
   const projectChips = Array.from(counts.entries())
     .filter(([k]) => k !== UNASSIGNED)
-    .sort((a, b) => b[1] - a[1])
     .map(([key, count]) => {
       const box = boxesByKey.get(key);
       return {
@@ -60,6 +69,12 @@ export function CalendarCounts({
         color: box?.color,
         count,
       };
+    })
+    .sort((a, b) => {
+      const aPriority = priorityOrder(a.label);
+      const bPriority = priorityOrder(b.label);
+      if (aPriority !== bPriority) return aPriority - bPriority;
+      return b.count - a.count;
     });
   const unassignedCount = assignedOnly ? 0 : (counts.get(UNASSIGNED) ?? 0);
   const assignedTotal = projectChips.reduce((sum, c) => sum + c.count, 0);
@@ -88,7 +103,7 @@ export function CalendarCounts({
       <div className="mb-2 font-mono text-[10px] tracking-[0.18em] text-ink-mute">
         {heading}
       </div>
-      <div className="flex flex-wrap gap-1.5">
+      <div className="grid grid-cols-2 gap-1.5">
         {projectChips.map((chip) => (
           <span
             key={chip.key}
