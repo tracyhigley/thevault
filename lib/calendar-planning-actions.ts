@@ -4,6 +4,11 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { supabaseServer } from "@/lib/supabase/server";
 import { sundayOfYmd } from "@/lib/calendar-planning";
+import {
+  DAY_NOTE_MAX,
+  isEmptyDayPlan,
+  normalizeDayPlan,
+} from "@/lib/calendar-day-plan";
 
 async function requireUserAndVault() {
   const sb = await supabaseServer();
@@ -22,28 +27,30 @@ async function requireUserAndVault() {
 }
 
 const YmdSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
-const BoxKeySchema = z.string().min(1).max(64).nullable();
 const NoteSchema = z.string().max(2000).nullable();
+const DayPlanSchema = z.object({
+  boxKey: z.string().max(64).nullable(),
+  projectId: z.string().uuid().nullable(),
+  note: z.string().max(DAY_NOTE_MAX).nullable(),
+});
 
-type SupabaseClient = Awaited<ReturnType<typeof supabaseServer>>;
-
-// Drop an entirely-empty week row (no project AND no note) so we don't
-// accumulate ghost rows after the user clears everything.
+// Drop a week row that has nothing left on it (no note) so we don't
+// accumulate ghost rows. Weeks only carry a note now; the old week-level
+// building (box_key) is no longer read.
 async function cleanupEmptyWeek(
-  sb: SupabaseClient,
+  sb: Awaited<ReturnType<typeof supabaseServer>>,
   vaultId: string,
   weekStart: string,
 ) {
   const { data: row } = await sb
     .from("calendar_week_assignments")
-    .select("box_key, note")
+    .select("note")
     .eq("vault_id", vaultId)
     .eq("week_start", weekStart)
     .maybeSingle();
   if (!row) return;
-  const hasBox = !!row.box_key;
   const hasNote = typeof row.note === "string" && row.note.length > 0;
-  if (!hasBox && !hasNote) {
+  if (!hasNote) {
     await sb
       .from("calendar_week_assignments")
       .delete()
@@ -52,36 +59,7 @@ async function cleanupEmptyWeek(
   }
 }
 
-// Set (or clear) the project for an entire week. Pass boxKey = null to
-// unassign the week — the row is kept if the week has a note. Day
-// overrides for that week are preserved either way.
-export async function setWeekProject(
-  weekStart: string,
-  boxKey: string | null,
-) {
-  const ws = YmdSchema.parse(weekStart);
-  const bk = BoxKeySchema.parse(boxKey);
-  const normalized = sundayOfYmd(ws);
-  const { sb, vaultId } = await requireUserAndVault();
-
-  const { error } = await sb.from("calendar_week_assignments").upsert(
-    {
-      vault_id: vaultId,
-      week_start: normalized,
-      box_key: bk && bk !== "" ? bk : null,
-      modified_at: new Date().toISOString(),
-    },
-    { onConflict: "vault_id,week_start", ignoreDuplicates: false },
-  );
-  if (error) throw new Error(error.message);
-
-  if (!bk || bk === "") await cleanupEmptyWeek(sb, vaultId, normalized);
-
-  revalidatePath("/calendar");
-}
-
 // Set (or clear) the note for a week. Pass note = null or "" to clear.
-// Project (if any) is preserved.
 export async function setWeekNote(weekStart: string, note: string | null) {
   const ws = YmdSchema.parse(weekStart);
   const n = NoteSchema.parse(note);
@@ -105,53 +83,49 @@ export async function setWeekNote(weekStart: string, note: string | null) {
   revalidatePath("/calendar");
 }
 
-// Override a single day to a specific box. Use this when you want this
-// one day to differ from the week's project.
-export async function setDayProject(date: string, boxKey: string) {
+// Save everything about one day in a single write: its building, an optional
+// project inside that building, and an optional typed note that replaces the
+// project. A day with nothing left on it has its row removed.
+export async function setDayPlan(
+  date: string,
+  plan: { boxKey: string | null; projectId: string | null; note: string | null },
+) {
   const d = YmdSchema.parse(date);
-  const bk = z.string().min(1).max(64).parse(boxKey);
+  const parsed = DayPlanSchema.parse(plan);
+  const next = normalizeDayPlan(parsed);
   const { sb, vaultId } = await requireUserAndVault();
+
+  if (isEmptyDayPlan(next)) {
+    const { error } = await sb
+      .from("calendar_day_overrides")
+      .delete()
+      .eq("vault_id", vaultId)
+      .eq("date", d);
+    if (error) throw new Error(error.message);
+    revalidatePath("/calendar");
+    return;
+  }
+
+  // A project has to actually live in the building it's filed under.
+  if (next.projectId) {
+    const { data: proj } = await sb
+      .from("projects")
+      .select("id, building")
+      .eq("id", next.projectId)
+      .is("deleted_at", null)
+      .maybeSingle();
+    if (!proj || proj.building !== next.boxKey) {
+      throw new Error("That project isn't in this building.");
+    }
+  }
 
   const { error } = await sb.from("calendar_day_overrides").upsert(
     {
       vault_id: vaultId,
       date: d,
-      box_key: bk,
-      modified_at: new Date().toISOString(),
-    },
-    { onConflict: "vault_id,date", ignoreDuplicates: false },
-  );
-  if (error) throw new Error(error.message);
-
-  revalidatePath("/calendar");
-}
-
-// Drop any per-day override so the day inherits from its week again.
-export async function clearDayOverride(date: string) {
-  const d = YmdSchema.parse(date);
-  const { sb, vaultId } = await requireUserAndVault();
-
-  const { error } = await sb
-    .from("calendar_day_overrides")
-    .delete()
-    .eq("vault_id", vaultId)
-    .eq("date", d);
-  if (error) throw new Error(error.message);
-
-  revalidatePath("/calendar");
-}
-
-// Mark a single day as explicitly "no project" — distinct from inheriting,
-// so it stays unassigned even when the surrounding week has a project.
-export async function setDayUnassigned(date: string) {
-  const d = YmdSchema.parse(date);
-  const { sb, vaultId } = await requireUserAndVault();
-
-  const { error } = await sb.from("calendar_day_overrides").upsert(
-    {
-      vault_id: vaultId,
-      date: d,
-      box_key: null,
+      box_key: next.boxKey,
+      project_id: next.projectId,
+      note: next.note,
       modified_at: new Date().toISOString(),
     },
     { onConflict: "vault_id,date", ignoreDuplicates: false },

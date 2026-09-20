@@ -1,5 +1,6 @@
-// Calendar planning surface — week-level "this whole week is QCOM" assignments
-// plus per-day overrides. Pure planning data; reading is `override ?? week`.
+// Calendar planning surface — each day carries its own building, an optional
+// project inside that building, and an optional free-text note that stands in
+// for the project. Weeks only carry a note. Pure planning data.
 //
 // Week starts on Sunday. Dates are stored as plain YYYY-MM-DD strings (no
 // timezone in the table — these are calendar dates, not instants).
@@ -12,15 +13,15 @@ export type CalendarDay = {
   dayOfMonth: number;
   dayOfWeek: number;
   isToday: boolean;
-  boxKey: string | null;
-  overridden: boolean;
+  boxKey: string | null; // building key
+  projectId: string | null; // optional, inside that building
+  note: string | null; // typed text that replaces the project ("Dr B 3 pm")
 };
 
 export type CalendarWeek = {
   weekStart: string;
   weekLabel: string;
   isCurrentWeek: boolean;
-  boxKey: string | null;
   note: string | null;
   days: CalendarDay[];
 };
@@ -108,12 +109,11 @@ export async function getCalendarRange(opts: {
   const lastDayInclusive = new Date(lastSunday);
   lastDayInclusive.setDate(lastDayInclusive.getDate() + 6);
 
-  const weekBoxByStart = new Map<string, string>();
   const weekNoteByStart = new Map<string, string>();
-  const overrideByDate = new Map<string, string>();
-  // Days with an override row whose box_key is NULL — i.e. "off, just this
-  // day" even when the surrounding week has a project.
-  const unassignedOverrideDates = new Set<string>();
+  const planByDate = new Map<
+    string,
+    { boxKey: string | null; projectId: string | null; note: string | null }
+  >();
 
   if (envReady()) {
     const sb = await supabaseServer();
@@ -121,30 +121,32 @@ export async function getCalendarRange(opts: {
     const lastWeekYmd = ymd(lastSunday);
     const lastDayYmd = ymd(lastDayInclusive);
 
-    const [{ data: weeks }, { data: overrides }] = await Promise.all([
+    const [{ data: weeks }, { data: days }] = await Promise.all([
       sb
         .from("calendar_week_assignments")
-        .select("week_start, box_key, note")
+        .select("week_start, note")
         .gte("week_start", firstYmd)
         .lte("week_start", lastWeekYmd),
       sb
         .from("calendar_day_overrides")
-        .select("date, box_key")
+        .select("date, box_key, project_id, note")
         .gte("date", firstYmd)
         .lte("date", lastDayYmd),
     ]);
 
     for (const w of weeks ?? []) {
       if (!w?.week_start) continue;
-      if (w.box_key) weekBoxByStart.set(w.week_start, w.box_key);
       if (typeof w.note === "string" && w.note.length > 0) {
         weekNoteByStart.set(w.week_start, w.note);
       }
     }
-    for (const o of overrides ?? []) {
-      if (!o?.date) continue;
-      if (o.box_key) overrideByDate.set(o.date, o.box_key);
-      else unassignedOverrideDates.add(o.date);
+    for (const d of days ?? []) {
+      if (!d?.date) continue;
+      planByDate.set(d.date, {
+        boxKey: d.box_key ? d.box_key : null,
+        projectId: d.project_id ? d.project_id : null,
+        note: typeof d.note === "string" && d.note.length > 0 ? d.note : null,
+      });
     }
   }
 
@@ -153,7 +155,6 @@ export async function getCalendarRange(opts: {
     const ws = new Date(firstSunday);
     ws.setDate(ws.getDate() + 7 * i);
     const wsYmd = ymd(ws);
-    const weekBox = weekBoxByStart.get(wsYmd) ?? null;
     const weekNote = weekNoteByStart.get(wsYmd) ?? null;
 
     const days: CalendarDay[] = [];
@@ -161,17 +162,15 @@ export async function getCalendarRange(opts: {
       const day = new Date(ws);
       day.setDate(day.getDate() + d);
       const dYmd = ymd(day);
-      const boxOverride = overrideByDate.get(dYmd) ?? null;
-      const explicitlyUnassigned = unassignedOverrideDates.has(dYmd);
-      const overridden = explicitlyUnassigned || boxOverride !== null;
-      const boxKey = explicitlyUnassigned ? null : (boxOverride ?? weekBox);
+      const plan = planByDate.get(dYmd);
       days.push({
         date: dYmd,
         dayOfMonth: day.getDate(),
         dayOfWeek: day.getDay(),
         isToday: dYmd === today,
-        boxKey,
-        overridden,
+        boxKey: plan?.boxKey ?? null,
+        projectId: plan?.projectId ?? null,
+        note: plan?.note ?? null,
       });
     }
 
@@ -179,7 +178,6 @@ export async function getCalendarRange(opts: {
       weekStart: wsYmd,
       weekLabel: formatWeekLabel(ws),
       isCurrentWeek: wsYmd === ymd(currentSunday),
-      boxKey: weekBox,
       note: weekNote,
       days,
     });

@@ -4,17 +4,13 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
 import type { Box } from "@/lib/categories";
 import type { CalendarWeek } from "@/lib/calendar-planning";
+import { setDayPlan, setWeekNote } from "@/lib/calendar-planning-actions";
 import {
-  setWeekProject,
-  setDayProject,
-  clearDayOverride,
-  setDayUnassigned,
-  setWeekNote,
-} from "@/lib/calendar-planning-actions";
-import {
-  CalendarWeekRow,
-  type DayChange,
-} from "@/components/calendar-week-row";
+  normalizeDayPlan,
+  type CalendarProjectOption,
+  type DayPlan,
+} from "@/lib/calendar-day-plan";
+import { CalendarWeekRow } from "@/components/calendar-week-row";
 import { CalendarCounts } from "@/components/calendar-counts";
 
 // We pre-compute weeks server-side and pass them in. Locally we apply
@@ -25,9 +21,11 @@ import { CalendarCounts } from "@/components/calendar-counts";
 export function CalendarBoard({
   initialWeeks,
   boxes,
+  projects,
 }: {
   initialWeeks: CalendarWeek[];
   boxes: Box[];
+  projects: CalendarProjectOption[];
 }) {
   const [weeks, setWeeks] = useState<CalendarWeek[]>(initialWeeks);
   const [, startTransition] = useTransition();
@@ -62,63 +60,25 @@ export function CalendarBoard({
   const visibleWeeks =
     currentIdx >= 0 ? (showPast ? weeks : futureWeeks) : weeks;
 
-  function updateWeekLocal(weekStart: string, boxKey: string | null) {
-    setWeeks((prev) =>
-      prev.map((w) => {
-        if (w.weekStart !== weekStart) return w;
-        const newDays = w.days.map((d) => ({
-          ...d,
-          boxKey: d.overridden ? d.boxKey : boxKey,
-        }));
-        return { ...w, boxKey, days: newDays };
-      }),
-    );
-  }
-
-  function updateDayLocal(date: string, action: DayChange) {
+  function updateDayLocal(date: string, plan: DayPlan) {
+    const next = normalizeDayPlan(plan);
     setWeeks((prev) =>
       prev.map((w) => {
         if (!w.days.some((d) => d.date === date)) return w;
-        const newDays = w.days.map((d) => {
-          if (d.date !== date) return d;
-          if (action.kind === "inherit") {
-            return { ...d, overridden: false, boxKey: w.boxKey };
-          }
-          if (action.kind === "unassigned") {
-            return { ...d, overridden: true, boxKey: null };
-          }
-          return { ...d, overridden: true, boxKey: action.boxKey };
-        });
-        return { ...w, days: newDays };
+        return {
+          ...w,
+          days: w.days.map((d) => (d.date === date ? { ...d, ...next } : d)),
+        };
       }),
     );
   }
 
-  function onSetWeek(weekStart: string, boxKey: string | null) {
+  function onSetDay(date: string, plan: DayPlan) {
     const snapshot = weeks;
-    updateWeekLocal(weekStart, boxKey);
+    updateDayLocal(date, plan);
     startTransition(async () => {
       try {
-        await setWeekProject(weekStart, boxKey);
-      } catch (e: unknown) {
-        setWeeks(snapshot);
-        toast.error(
-          e instanceof Error && e.message
-            ? `Couldn't save: ${e.message}`
-            : "Couldn't save week.",
-        );
-      }
-    });
-  }
-
-  function onSetDay(date: string, action: DayChange) {
-    const snapshot = weeks;
-    updateDayLocal(date, action);
-    startTransition(async () => {
-      try {
-        if (action.kind === "inherit") await clearDayOverride(date);
-        else if (action.kind === "unassigned") await setDayUnassigned(date);
-        else await setDayProject(date, action.boxKey);
+        await setDayPlan(date, plan);
       } catch (e: unknown) {
         setWeeks(snapshot);
         toast.error(
@@ -157,8 +117,8 @@ export function CalendarBoard({
     return (
       <div className="border-paper-line bg-paper-panel/40 mt-8 rounded-sm border border-dashed p-6 text-center">
         <p className="text-ink-dim">
-          You haven&apos;t set up any buildings yet — those are the projects you
-          can block out weeks for.
+          You haven&apos;t set up any buildings yet — those are what you plan
+          each day around.
         </p>
         <a
           href="/settings/buildings"
@@ -201,6 +161,7 @@ export function CalendarBoard({
           key={w.weekStart}
           week={w}
           boxes={boxes}
+          projects={projects}
           todayRef={
             w.isCurrentWeek
               ? (el) => {
@@ -208,7 +169,6 @@ export function CalendarBoard({
                 }
               : undefined
           }
-          onSetWeek={(boxKey) => onSetWeek(w.weekStart, boxKey)}
           onSetDay={onSetDay}
           onSetNote={(note) => onSetNote(w.weekStart, note)}
         />

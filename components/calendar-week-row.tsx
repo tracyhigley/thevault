@@ -1,20 +1,27 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import {
+  useEffect,
+  useState,
+  type CSSProperties,
+  type ReactNode,
+} from "react";
 import clsx from "clsx";
 import type { Box } from "@/lib/categories";
 import type { CalendarDay, CalendarWeek } from "@/lib/calendar-planning";
-
-// Three intents the day picker can express. The board fans these out to
-// different server actions.
-export type DayChange =
-  | { kind: "inherit" }
-  | { kind: "unassigned" }
-  | { kind: "box"; boxKey: string };
+import {
+  DAY_NOTE_MAX,
+  projectsForBuilding,
+  type CalendarProjectOption,
+  type DayPlan,
+} from "@/lib/calendar-day-plan";
 
 const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-// Boxes the user doesn't want offered as week/day projects on the calendar.
+// Sentinel <option> value for "type my own text instead of a project".
+const CUSTOM = "__custom__";
+
+// Boxes the user doesn't want offered as buildings on the calendar.
 // They still exist on Maint Tasks/Project Tasks/Boxes — this only hides them from the
 // calendar's pickers. Matched on label, case-insensitive, whitespace-collapsed.
 const CALENDAR_HIDDEN_BOX_LABELS = new Set(["health", "read / watch"]);
@@ -46,22 +53,18 @@ function hexToRgba(hex: string | undefined, alpha: number): string | undefined {
 export function CalendarWeekRow({
   week,
   boxes,
+  projects,
   todayRef,
-  onSetWeek,
   onSetDay,
   onSetNote,
 }: {
   week: CalendarWeek;
   boxes: Box[];
+  projects: CalendarProjectOption[];
   todayRef?: (el: HTMLElement | null) => void;
-  onSetWeek: (boxKey: string | null) => void;
-  onSetDay: (date: string, action: DayChange) => void;
+  onSetDay: (date: string, plan: DayPlan) => void;
   onSetNote: (note: string | null) => void;
 }) {
-  const boxesByKey = new Map(boxes.map((b) => [b.key, b]));
-  const weekBox = week.boxKey ? boxesByKey.get(week.boxKey) ?? null : null;
-  const weekPickableBoxes = pickableBoxesFor(boxes, week.boxKey);
-
   // Local draft so typing feels instant; we flush to the server on blur.
   const [noteDraft, setNoteDraft] = useState<string>(week.note ?? "");
   useEffect(() => {
@@ -106,37 +109,17 @@ export function CalendarWeekRow({
           aria-label={`Notes for ${week.weekLabel}`}
           className="min-w-[140px] flex-1 rounded-sm border border-paper-line bg-paper-bg/60 px-2 py-1 text-[13px] italic text-ink-dim outline-none placeholder:text-ink-mute/50 focus:border-brass focus:not-italic focus:text-ink"
         />
-
-        <label className="flex items-center gap-2 text-[11px] text-ink-mute">
-          <span className="font-mono tracking-[0.18em]">PROJECT</span>
-          <select
-            value={week.boxKey ?? ""}
-            onChange={(e) => onSetWeek(e.target.value || null)}
-            className="rounded-sm border border-paper-line bg-paper-bg/60 px-2 py-1 text-[12px] text-ink outline-none focus:border-brass"
-            style={{
-              backgroundColor: hexToRgba(weekBox?.color, 0.12),
-              borderColor: hexToRgba(weekBox?.color, 0.5),
-            }}
-          >
-            <option value="">— no project —</option>
-            {weekPickableBoxes.map((b) => (
-              <option key={b.key} value={b.key}>
-                {b.label}
-              </option>
-            ))}
-          </select>
-        </label>
       </header>
 
-      <div className="mt-3 grid grid-cols-7 gap-1.5">
+      <div className="mt-3 grid grid-cols-1 gap-1.5 sm:grid-cols-2 md:grid-cols-4 xl:grid-cols-7">
         {week.days.map((day) => (
           <DayCell
             key={day.date}
             day={day}
-            weekBox={weekBox}
             boxes={boxes}
+            projects={projects}
             todayRef={day.isToday ? todayRef : undefined}
-            onChange={(action) => onSetDay(day.date, action)}
+            onChange={(plan) => onSetDay(day.date, plan)}
           />
         ))}
       </div>
@@ -144,49 +127,149 @@ export function CalendarWeekRow({
   );
 }
 
+// A dropdown that shows wrapped label text with a chevron, with the native
+// <select> laid invisibly over it — tapping anywhere opens the picker, and
+// phones get the native wheel for free.
+function OverlaySelect({
+  display,
+  placeholder,
+  ariaLabel,
+  value,
+  onChange,
+  className,
+  style,
+  children,
+}: {
+  display: string | null;
+  placeholder: string;
+  ariaLabel: string;
+  value: string;
+  onChange: (value: string) => void;
+  className?: string;
+  style?: CSSProperties;
+  children: ReactNode;
+}) {
+  return (
+    <div
+      className={clsx(
+        "relative rounded-sm border px-1.5 py-1 text-[11px] leading-tight transition hover:border-brass/60",
+        className,
+      )}
+      style={style}
+    >
+      <div className="flex items-start justify-between gap-1">
+        <span className={display ? "break-words" : "text-ink-mute/60"}>
+          {display ?? placeholder}
+        </span>
+        <span aria-hidden className="mt-px shrink-0 text-[9px] text-ink-mute">
+          ▾
+        </span>
+      </div>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        aria-label={ariaLabel}
+        className="absolute inset-0 h-full w-full cursor-pointer appearance-none bg-transparent text-transparent opacity-0"
+      >
+        {children}
+      </select>
+    </div>
+  );
+}
+
 function DayCell({
   day,
-  weekBox,
   boxes,
+  projects,
   todayRef,
   onChange,
 }: {
   day: CalendarDay;
-  weekBox: Box | null;
   boxes: Box[];
+  projects: CalendarProjectOption[];
   todayRef?: (el: HTMLElement | null) => void;
-  onChange: (action: DayChange) => void;
+  onChange: (plan: DayPlan) => void;
 }) {
   const boxesByKey = new Map(boxes.map((b) => [b.key, b]));
-  const activeBox = day.boxKey ? boxesByKey.get(day.boxKey) ?? null : null;
+  const activeBox = day.boxKey ? (boxesByKey.get(day.boxKey) ?? null) : null;
   const color = activeBox?.color;
   const isWeekend = day.dayOfWeek === 0 || day.dayOfWeek === 6;
-  const explicitlyUnassigned = day.overridden && day.boxKey === null;
-  const dayPickableBoxes = pickableBoxesFor(
-    boxes,
-    day.overridden ? day.boxKey : null,
+  const buildingOptions = pickableBoxesFor(boxes, day.boxKey);
+
+  const projectOptions = projectsForBuilding(
+    projects,
+    day.boxKey,
+    day.projectId,
   );
+  const chosenProject = day.projectId
+    ? (projects.find((p) => p.id === day.projectId) ?? null)
+    : null;
+
+  // "Type my own" mode: on whenever the day has typed text, or right after
+  // the user picks the option (before they've typed anything).
+  const [typing, setTyping] = useState<boolean>(day.note !== null);
+  const [draft, setDraft] = useState<string>(day.note ?? "");
+  useEffect(() => {
+    setDraft(day.note ?? "");
+    if (day.note !== null) setTyping(true);
+  }, [day.note]);
+
+  function onBuildingChange(v: string) {
+    if (!v) {
+      // No building means nothing else on the day makes sense either.
+      setTyping(false);
+      setDraft("");
+      onChange({ boxKey: null, projectId: null, note: null });
+      return;
+    }
+    // The project belonged to the old building, so it goes; typed text stays.
+    onChange({ boxKey: v, projectId: null, note: day.note });
+  }
+
+  function onProjectChange(v: string) {
+    if (v === CUSTOM) {
+      setTyping(true);
+      // Typed text replaces the project.
+      if (day.projectId) {
+        onChange({ boxKey: day.boxKey, projectId: null, note: day.note });
+      }
+      return;
+    }
+    setTyping(false);
+    setDraft("");
+    onChange({ boxKey: day.boxKey, projectId: v || null, note: null });
+  }
+
+  function commitDraft() {
+    const next = draft.trim();
+    if (next === (day.note ?? "")) {
+      if (next === "") setTyping(false);
+      return;
+    }
+    if (next === "") setTyping(false);
+    onChange({ boxKey: day.boxKey, projectId: null, note: next || null });
+  }
+
+  const projectValue = typing ? CUSTOM : (day.projectId ?? "");
+  const projectDisplay = typing
+    ? "✎ Custom text"
+    : day.projectId
+      ? (chosenProject?.title ?? "(removed project)")
+      : null;
 
   return (
     <div
       ref={todayRef ?? undefined}
       className={clsx(
-        "relative flex min-h-[78px] flex-col gap-1 overflow-hidden rounded-sm border px-2 py-1.5 transition",
-        "hover:border-brass/60",
-        day.isToday
-          ? "border-brass"
-          : explicitlyUnassigned
-            ? "border-dashed border-paper-line-2"
-            : "border-paper-line",
+        "relative flex min-h-[78px] flex-col gap-1.5 rounded-sm border px-2 py-1.5 transition",
+        day.isToday ? "border-brass" : "border-paper-line",
         !activeBox && isWeekend && "bg-paper-bg/40",
       )}
       style={
         activeBox
           ? {
               backgroundColor: hexToRgba(color, 0.18),
-              borderColor: day.isToday
-                ? undefined
-                : hexToRgba(color, 0.5),
+              borderColor: day.isToday ? undefined : hexToRgba(color, 0.5),
             }
           : undefined
       }
@@ -205,65 +288,76 @@ function DayCell({
         </span>
       </div>
 
-      <div className="mt-auto min-h-[14px] text-[10px] leading-tight">
-        {activeBox ? (
-          <span
-            className={clsx(
-              "font-mono tracking-[0.06em]",
-              day.overridden ? "text-ink" : "text-ink-dim",
-            )}
-            style={{ color: hexToRgba(color, 0.95) }}
-          >
-            {activeBox.label}
-            {day.overridden && weekBox && (
-              <span className="ml-1 text-ink-mute" title={`Overrides week (${weekBox.label})`}>
-                ✱
-              </span>
-            )}
-          </span>
-        ) : explicitlyUnassigned && weekBox ? (
-          <span
-            className="font-mono tracking-[0.06em] text-ink-mute"
-            title={`Off — overrides week (${weekBox.label})`}
-          >
-            — <span className="ml-0.5">✱</span>
-          </span>
-        ) : (
-          <span className="text-ink-mute/60">—</span>
+      <OverlaySelect
+        display={activeBox?.label ?? null}
+        placeholder="Building"
+        ariaLabel={`Building for ${day.date}`}
+        value={day.boxKey ?? ""}
+        onChange={onBuildingChange}
+        className={clsx(
+          "font-mono tracking-[0.06em]",
+          activeBox ? "" : "border-dashed border-paper-line",
         )}
-      </div>
-
-      {/* Native select overlays the cell — tapping anywhere opens the
-          picker. Mobile gets a native wheel for free. */}
-      <select
-        value={
-          !day.overridden
-            ? "__inherit__"
-            : explicitlyUnassigned
-              ? "__unassigned__"
-              : (day.boxKey ?? "__inherit__")
+        style={
+          activeBox
+            ? {
+                color: hexToRgba(color, 0.95),
+                borderColor: hexToRgba(color, 0.5),
+                backgroundColor: hexToRgba(color, 0.12),
+              }
+            : undefined
         }
-        onChange={(e) => {
-          const v = e.target.value;
-          if (v === "__inherit__") onChange({ kind: "inherit" });
-          else if (v === "__unassigned__") onChange({ kind: "unassigned" });
-          else onChange({ kind: "box", boxKey: v });
-        }}
-        aria-label={`Project for ${day.date}`}
-        className="absolute inset-0 cursor-pointer appearance-none bg-transparent text-transparent opacity-0"
       >
-        <option value="__inherit__">
-          {weekBox ? `Same as week — ${weekBox.label}` : "No project"}
-        </option>
-        {weekBox && (
-          <option value="__unassigned__">No project — just this day</option>
-        )}
-        {dayPickableBoxes.map((b) => (
+        <option value="">No building</option>
+        {buildingOptions.map((b) => (
           <option key={b.key} value={b.key}>
             {b.label}
           </option>
         ))}
-      </select>
+      </OverlaySelect>
+
+      {day.boxKey && (
+        <>
+          <OverlaySelect
+            display={projectDisplay}
+            placeholder="Project (optional)"
+            ariaLabel={`Project for ${day.date}`}
+            value={projectValue}
+            onChange={onProjectChange}
+            className="border-paper-line bg-paper-bg/40 text-ink-dim"
+          >
+            <option value="">No project</option>
+            {projectOptions.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.phase === "planning" ? `${p.title} (planning)` : p.title}
+              </option>
+            ))}
+            {day.projectId && !chosenProject && (
+              <option value={day.projectId}>(removed project)</option>
+            )}
+            <option value={CUSTOM}>✎ Type my own…</option>
+          </OverlaySelect>
+
+          {typing && (
+            <input
+              value={draft}
+              autoFocus={day.note === null}
+              maxLength={DAY_NOTE_MAX}
+              onChange={(e) => setDraft(e.target.value)}
+              onBlur={commitDraft}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  (e.currentTarget as HTMLInputElement).blur();
+                }
+              }}
+              placeholder="e.g. Dr B 3 pm"
+              aria-label={`Text for ${day.date}`}
+              className="w-full rounded-sm border border-paper-line bg-paper-bg/60 px-1.5 py-1 text-[11px] leading-tight text-ink outline-none placeholder:text-ink-mute/50 focus:border-brass"
+            />
+          )}
+        </>
+      )}
     </div>
   );
 }
