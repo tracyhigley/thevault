@@ -50,13 +50,16 @@ export function CalendarCounts({
 
   const boxesByKey = new Map(boxes.map((b) => [b.key, b]));
 
-  // Priority buildings appear first in this order; others follow sorted by count.
-  const priorityLabels = ["Press", "Library", "Mercantile"];
-  const priorityOrder = (label: string) => {
-    const idx = priorityLabels.findIndex(
-      (p) => p.toLowerCase() === label.toLowerCase(),
+  // Priority buildings: Press, Library, Mercantile appear first (in that order).
+  // Match by checking if key or label contains the keyword (case-insensitive).
+  const priorityKeywords = ["press", "library", "mercantile"];
+  const priorityOrder = (key: string, label: string) => {
+    const keyLower = key.toLowerCase();
+    const labelLower = label.toLowerCase();
+    const idx = priorityKeywords.findIndex(
+      (kw) => keyLower.includes(kw) || labelLower.includes(kw),
     );
-    return idx >= 0 ? idx : priorityLabels.length;
+    return idx >= 0 ? idx : priorityKeywords.length;
   };
 
   const projectChips = Array.from(counts.entries())
@@ -71,8 +74,8 @@ export function CalendarCounts({
       };
     })
     .sort((a, b) => {
-      const aPriority = priorityOrder(a.label);
-      const bPriority = priorityOrder(b.label);
+      const aPriority = priorityOrder(a.key, a.label);
+      const bPriority = priorityOrder(b.key, b.label);
       if (aPriority !== bPriority) return aPriority - bPriority;
       return b.count - a.count;
     });
@@ -103,11 +106,11 @@ export function CalendarCounts({
       <div className="mb-2 font-mono text-[10px] tracking-[0.18em] text-ink-mute">
         {heading}
       </div>
-      <div className="grid grid-cols-2 gap-1.5">
+      <div className="grid grid-cols-2 gap-1.5 sm:flex sm:flex-wrap">
         {projectChips.map((chip) => (
           <span
             key={chip.key}
-            className="inline-flex items-baseline gap-2 rounded-sm border px-2 py-1 text-[12px]"
+            className="inline-flex items-baseline gap-2 whitespace-nowrap rounded-sm border px-2 py-1 text-[12px]"
             style={{
               backgroundColor: hexToRgba(chip.color, 0.18),
               borderColor: hexToRgba(chip.color, 0.5),
@@ -125,7 +128,7 @@ export function CalendarCounts({
           </span>
         ))}
         {unassignedCount > 0 && (
-          <span className="inline-flex items-baseline gap-2 rounded-sm border border-dashed border-paper-line px-2 py-1 text-[12px]">
+          <span className="inline-flex items-baseline gap-2 whitespace-nowrap rounded-sm border border-dashed border-paper-line px-2 py-1 text-[12px]">
             <span className="font-mono tracking-[0.06em] text-ink-mute">
               Unassigned
             </span>
