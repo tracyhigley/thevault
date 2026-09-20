@@ -10,7 +10,6 @@ import { ProjectPhaseControl } from "@/components/project-phase-control";
 import { ProjectLog } from "@/components/project-log";
 import { ProjectTaskEditor } from "@/components/project-task-editor";
 import { DeleteProjectButton } from "@/components/delete-project-button";
-import { fmtHoursFromMinutes } from "@/lib/format-hours";
 
 export default async function ProjectPage({
   params,
@@ -62,9 +61,9 @@ export default async function ProjectPage({
                     .toLocaleDateString([], { month: "short", year: "numeric" })
                     .toUpperCase()}`
                 : ""}
-              {totalMinutes > 0
-                ? ` · ${fmtHoursFromMinutes(totalMinutes)} HRS`
-                : ""}
+            </div>
+            <div className="mt-2 font-mono text-[12px] tracking-[0.1em] text-brass">
+              {totalMinutes} MIN ALLOTTED
             </div>
           </div>
           <ProjectPhaseControl projectId={project.id} phase={project.phase} />
