@@ -319,10 +319,18 @@ function normalizeTasks(raw: unknown): {
     }));
 }
 
-export async function addProjectTask(projectId: string, text: string) {
+export async function addProjectTask(
+  projectId: string,
+  text: string,
+  minutes: number | null = null,
+) {
   const { sb } = await requireUser();
   const clean = text.trim();
   if (!clean) throw new Error("Give the task a name first");
+  const cleanMinutes =
+    typeof minutes === "number" && Number.isFinite(minutes) && minutes >= 0
+      ? Math.round(minutes)
+      : null;
   const { data, error } = await sb
     .from("projects")
     .select("tasks")
@@ -333,7 +341,7 @@ export async function addProjectTask(projectId: string, text: string) {
   const task = {
     id: crypto.randomUUID(),
     text: clean,
-    minutes: null,
+    minutes: cleanMinutes,
     onTaskList: false,
     done: false,
     createdAt: new Date().toISOString(),
@@ -705,6 +713,7 @@ export async function updateProjectTaskMinutes(
     .eq("source_task_id", taskId)
     .is("deleted_at", null);
 
+  revalidatePath("/project-plans", "layout");
   revalidatePath("/project-tasks");
   revalidatePath("/");
   revalidatePath("/maint-tasks");

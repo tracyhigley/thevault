@@ -4,7 +4,9 @@
 // right here (same markProjectTaskDone action the Project Tasks page's DONE
 // button uses) — it shows struck through either way, so finishing something
 // is visible from both places. Deleting a task here is still how you clear
-// it out for good.
+// it out for good. Each task carries a minutes estimate (set when adding, or
+// edited inline on the row) — it lives on the task itself, so it follows the
+// task onto the Project Tasks page when it's checked.
 
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
@@ -19,6 +21,11 @@ import {
 } from "@/lib/plan-actions";
 import type { ProjectTask } from "@/lib/project-phases";
 import { SortableList, type SortableItem } from "@/components/sortable-list";
+import {
+  MinutesInlineInput,
+  parseMinutesField,
+} from "@/components/minutes-inline-input";
+import { EditableProjectTaskMinutes } from "@/components/editable-project-task-minutes";
 
 /** Inline-editable task text — same blend-in-until-focused pattern as
  * EditableText / EditableProjectTaskMinutes, but writes through
@@ -84,18 +91,23 @@ export function ProjectTaskEditor({
 }) {
   const [tasks, setTasks] = useState<ProjectTask[]>(initial);
   const [text, setText] = useState("");
+  const [minutesText, setMinutesText] = useState("");
   const [pending, startTransition] = useTransition();
 
   function add() {
     const clean = text.trim();
     if (!clean) return;
+    const rawMinutes = minutesText;
+    const minutes = parseMinutesField(rawMinutes) ?? null;
     setText("");
+    setMinutesText("");
     startTransition(async () => {
       try {
-        const task = await addProjectTask(projectId, clean);
+        const task = await addProjectTask(projectId, clean, minutes);
         setTasks((prev) => [...prev, task]);
       } catch (e: any) {
         setText(clean);
+        setMinutesText(rawMinutes);
         toast.error(e?.message ?? "Couldn't add the task.");
       }
     });
@@ -193,6 +205,19 @@ export function ProjectTaskEditor({
             }
           />
         </div>
+        <span className="text-ink-mute flex shrink-0 items-baseline justify-end gap-1 font-mono text-[11px] whitespace-nowrap tabular-nums">
+          <EditableProjectTaskMinutes
+            projectId={projectId}
+            taskId={t.id}
+            initial={t.minutes}
+            onSaved={(minutes) =>
+              setTasks((p) =>
+                p.map((x) => (x.id === t.id ? { ...x, minutes } : x)),
+              )
+            }
+          />
+          <span>min</span>
+        </span>
         {t.done ? (
           <span className="text-teal shrink-0 font-mono text-[9px] tracking-[0.14em]">
             ✓ DONE
@@ -243,6 +268,18 @@ export function ProjectTaskEditor({
           placeholder="Add a task…"
           className="border-paper-line bg-paper-bg/60 text-ink placeholder:text-ink-mute/60 focus:border-brass min-w-0 flex-1 rounded-sm border px-2 py-1.5 text-[13px] outline-none"
         />
+        <span
+          className="contents"
+          onKeyDown={(e) => {
+            if (e.key === "Enter") add();
+          }}
+        >
+          <MinutesInlineInput
+            value={minutesText}
+            onChange={setMinutesText}
+            aria-label="Minutes this task will take"
+          />
+        </span>
         <button
           onClick={add}
           disabled={pending || !text.trim()}

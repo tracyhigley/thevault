@@ -12,10 +12,14 @@ export function EditableProjectTaskMinutes({
   projectId,
   taskId,
   initial,
+  onSaved,
 }: {
   projectId: string;
   taskId: string;
   initial: number | null;
+  /** Lets a parent that holds its own copy of the task (the Project Plan's
+   * checklist) keep that copy in step with what was just saved. */
+  onSaved?: (minutes: number | null) => void;
 }) {
   const [value, setValue] = useState(initial ?? "");
   const [pending, startTransition] = useTransition();
@@ -26,6 +30,7 @@ export function EditableProjectTaskMinutes({
     startTransition(async () => {
       try {
         await updateProjectTaskMinutes(projectId, taskId, next);
+        onSaved?.(next);
       } catch (e: any) {
         setValue(initial ?? "");
         toast.error(e?.message ?? "Couldn't update minutes.");
