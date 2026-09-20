@@ -51,12 +51,14 @@ export function CalendarWeekRow({
   week,
   boxes,
   projects,
+  todayRef,
   onSetDay,
   onSetNote,
 }: {
   week: CalendarWeek;
   boxes: Box[];
   projects: CalendarProjectOption[];
+  todayRef?: (el: HTMLElement | null) => void;
   onSetDay: (date: string, plan: DayPlan) => void;
   onSetNote: (note: string | null) => void;
 }) {
@@ -113,6 +115,7 @@ export function CalendarWeekRow({
             day={day}
             boxes={boxes}
             projects={projects}
+            todayRef={day.isToday ? todayRef : undefined}
             onChange={(plan) => onSetDay(day.date, plan)}
           />
         ))}
@@ -175,11 +178,13 @@ function DayCell({
   day,
   boxes,
   projects,
+  todayRef,
   onChange,
 }: {
   day: CalendarDay;
   boxes: Box[];
   projects: CalendarProjectOption[];
+  todayRef?: (el: HTMLElement | null) => void;
   onChange: (plan: DayPlan) => void;
 }) {
   const boxesByKey = new Map(boxes.map((b) => [b.key, b]));
@@ -234,6 +239,7 @@ function DayCell({
 
   return (
     <div
+      ref={todayRef ?? undefined}
       className={clsx(
         "relative flex min-h-[78px] flex-col gap-1.5 rounded-sm border px-2 py-1.5 transition",
         day.isToday ? "border-brass" : "border-paper-line",
