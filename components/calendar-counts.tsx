@@ -106,7 +106,7 @@ export function CalendarCounts({
       <div className="mb-2 font-mono text-[10px] tracking-[0.18em] text-ink-mute">
         {heading}
       </div>
-      <div className="grid grid-cols-2 gap-1.5 sm:flex sm:flex-wrap">
+      <div className="grid grid-cols-2 justify-items-start gap-1.5">
         {projectChips.map((chip) => (
           <span
             key={chip.key}
