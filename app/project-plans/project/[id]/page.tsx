@@ -27,10 +27,9 @@ export default async function ProjectPage({
   const building = buildings.find((b) => b.key === project.building);
   const backHref = building ? `/project-plans/${buildingSlug(building.key)}` : "/project-plans";
   const buildingLabel = building?.label ?? "Uncategorized";
-  const totalMinutes = project.tasks.reduce(
-    (sum, t) => sum + (t.minutes ?? 0),
-    0,
-  );
+  const totalMinutes = project.tasks
+    .filter((t) => !t.done)
+    .reduce((sum, t) => sum + (t.minutes ?? 0), 0);
 
   return (
     <div className="mx-auto max-w-[900px] px-4 py-8 md:px-10">

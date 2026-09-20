@@ -69,7 +69,7 @@ export default async function ActiveProjectPlansPage() {
     });
 
   const sumTaskMinutes = (tasks: Project["tasks"]) =>
-    tasks.reduce((sum, t) => sum + (t.minutes ?? 0), 0);
+    tasks.filter((t) => !t.done).reduce((sum, t) => sum + (t.minutes ?? 0), 0);
 
   const reorderableActive: ReorderableProjectCard[] = active.map((p) => ({
     id: p.id,
@@ -140,10 +140,9 @@ function ProjectCard({
   buildingLabel: string;
 }) {
   const lastLog = project.log.at(-1);
-  const totalMinutes = project.tasks.reduce(
-    (sum, t) => sum + (t.minutes ?? 0),
-    0,
-  );
+  const totalMinutes = project.tasks
+    .filter((t) => !t.done)
+    .reduce((sum, t) => sum + (t.minutes ?? 0), 0);
   return (
     <Link
       href={`/project-plans/project/${project.id}`}
