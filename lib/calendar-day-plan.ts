@@ -1,8 +1,8 @@
 // Client-safe rules for what a single calendar day holds: a building, an
-// optional project inside it, and an optional free-text note that stands in
-// for the project ("Dr B 3 pm"). Shared by the server action (which enforces
-// them) and the calendar UI (which uses them for optimistic updates and to
-// build the project dropdown).
+// optional project inside it, and optional free text alongside it
+// ("Dr B 3 pm"). Shared by the server action (which enforces them) and the
+// calendar UI (which uses them for optimistic updates and to build the
+// project dropdown).
 
 import type { ProjectPhase } from "@/lib/project-phases";
 
@@ -20,13 +20,12 @@ export const EMPTY_DAY_PLAN: DayPlan = {
   note: null,
 };
 
-// Trim the note and enforce the invariants: a project only makes sense inside
-// a building, and typed text replaces the project rather than sitting beside it.
+// Trim the note and enforce the one invariant: a project only makes sense
+// inside a building. Project and text are independent and can both be set.
 export function normalizeDayPlan(plan: DayPlan): DayPlan {
   const note = plan.note?.trim() ?? "";
   const boxKey = plan.boxKey && plan.boxKey !== "" ? plan.boxKey : null;
-  const projectId =
-    boxKey && note === "" && plan.projectId ? plan.projectId : null;
+  const projectId = boxKey && plan.projectId ? plan.projectId : null;
   return { boxKey, projectId, note: note === "" ? null : note };
 }
 

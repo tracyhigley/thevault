@@ -18,9 +18,6 @@ import {
 
 const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-// Sentinel <option> value for "type my own text instead of a project".
-const CUSTOM = "__custom__";
-
 // Boxes the user doesn't want offered as buildings on the calendar.
 // They still exist on Maint Tasks/Project Tasks/Boxes — this only hides them from the
 // calendar's pickers. Matched on label, case-insensitive, whitespace-collapsed.
@@ -205,19 +202,15 @@ function DayCell({
     ? (projects.find((p) => p.id === day.projectId) ?? null)
     : null;
 
-  // "Type my own" mode: on whenever the day has typed text, or right after
-  // the user picks the option (before they've typed anything).
-  const [typing, setTyping] = useState<boolean>(day.note !== null);
+  // Local draft so typing feels instant; we flush to the server on blur.
   const [draft, setDraft] = useState<string>(day.note ?? "");
   useEffect(() => {
     setDraft(day.note ?? "");
-    if (day.note !== null) setTyping(true);
   }, [day.note]);
 
   function onBuildingChange(v: string) {
     if (!v) {
       // No building means nothing else on the day makes sense either.
-      setTyping(false);
       setDraft("");
       onChange({ boxKey: null, projectId: null, note: null });
       return;
@@ -227,35 +220,22 @@ function DayCell({
   }
 
   function onProjectChange(v: string) {
-    if (v === CUSTOM) {
-      setTyping(true);
-      // Typed text replaces the project.
-      if (day.projectId) {
-        onChange({ boxKey: day.boxKey, projectId: null, note: day.note });
-      }
-      return;
-    }
-    setTyping(false);
-    setDraft("");
-    onChange({ boxKey: day.boxKey, projectId: v || null, note: null });
+    onChange({ boxKey: day.boxKey, projectId: v || null, note: day.note });
   }
 
   function commitDraft() {
     const next = draft.trim();
-    if (next === (day.note ?? "")) {
-      if (next === "") setTyping(false);
-      return;
-    }
-    if (next === "") setTyping(false);
-    onChange({ boxKey: day.boxKey, projectId: null, note: next || null });
+    if (next === (day.note ?? "")) return;
+    onChange({
+      boxKey: day.boxKey,
+      projectId: day.projectId,
+      note: next || null,
+    });
   }
 
-  const projectValue = typing ? CUSTOM : (day.projectId ?? "");
-  const projectDisplay = typing
-    ? "✎ Custom text"
-    : day.projectId
-      ? (chosenProject?.title ?? "(removed project)")
-      : null;
+  const projectDisplay = day.projectId
+    ? (chosenProject?.title ?? "(removed project)")
+    : null;
 
   return (
     <div
@@ -322,7 +302,7 @@ function DayCell({
             display={projectDisplay}
             placeholder="Project (optional)"
             ariaLabel={`Project for ${day.date}`}
-            value={projectValue}
+            value={day.projectId ?? ""}
             onChange={onProjectChange}
             className="border-paper-line bg-paper-bg/40 text-ink-dim"
           >
@@ -335,27 +315,24 @@ function DayCell({
             {day.projectId && !chosenProject && (
               <option value={day.projectId}>(removed project)</option>
             )}
-            <option value={CUSTOM}>✎ Type my own…</option>
           </OverlaySelect>
 
-          {typing && (
-            <input
-              value={draft}
-              autoFocus={day.note === null}
-              maxLength={DAY_NOTE_MAX}
-              onChange={(e) => setDraft(e.target.value)}
-              onBlur={commitDraft}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  (e.currentTarget as HTMLInputElement).blur();
-                }
-              }}
-              placeholder="e.g. Dr B 3 pm"
-              aria-label={`Text for ${day.date}`}
-              className="w-full rounded-sm border border-paper-line bg-paper-bg/60 px-1.5 py-1 text-[11px] leading-tight text-ink outline-none placeholder:text-ink-mute/50 focus:border-brass"
-            />
-          )}
+          <textarea
+            value={draft}
+            rows={2}
+            maxLength={DAY_NOTE_MAX}
+            onChange={(e) => setDraft(e.target.value)}
+            onBlur={commitDraft}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                (e.currentTarget as HTMLTextAreaElement).blur();
+              }
+            }}
+            placeholder="Add text… e.g. Dr B 3 pm"
+            aria-label={`Text for ${day.date}`}
+            className="w-full resize-none rounded-sm border border-paper-line bg-paper-bg/60 px-1.5 py-1 text-[11px] leading-tight text-ink outline-none placeholder:text-ink-mute/50 focus:border-brass"
+          />
         </>
       )}
     </div>

@@ -1,5 +1,5 @@
 -- Calendar: each day now carries its own building, an optional project inside
--- that building, and an optional free-text note that stands in for the project
+-- that building, and an optional free-text note alongside it
 -- (e.g. building = The Wellness Center, note = "Dr B 3 pm").
 --
 -- Week-level building assignments are retired from the UI: a day no longer

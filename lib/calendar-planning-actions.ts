@@ -84,8 +84,8 @@ export async function setWeekNote(weekStart: string, note: string | null) {
 }
 
 // Save everything about one day in a single write: its building, an optional
-// project inside that building, and an optional typed note that replaces the
-// project. A day with nothing left on it has its row removed.
+// project inside that building, and optional typed text alongside it. A day
+// with nothing left on it has its row removed.
 export async function setDayPlan(
   date: string,
   plan: { boxKey: string | null; projectId: string | null; note: string | null },

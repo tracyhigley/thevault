@@ -1,6 +1,6 @@
 // Calendar planning surface — each day carries its own building, an optional
-// project inside that building, and an optional free-text note that stands in
-// for the project. Weeks only carry a note. Pure planning data.
+// project inside that building, and optional free text alongside it. Weeks
+// only carry a note. Pure planning data.
 //
 // Week starts on Sunday. Dates are stored as plain YYYY-MM-DD strings (no
 // timezone in the table — these are calendar dates, not instants).
@@ -15,7 +15,7 @@ export type CalendarDay = {
   isToday: boolean;
   boxKey: string | null; // building key
   projectId: string | null; // optional, inside that building
-  note: string | null; // typed text that replaces the project ("Dr B 3 pm")
+  note: string | null; // free text for the day, alongside any project ("Dr B 3 pm")
 };
 
 export type CalendarWeek = {

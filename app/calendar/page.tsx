@@ -27,9 +27,8 @@ export default async function CalendarPage() {
         Plan the days ahead.
       </h1>
       <p className="text-ink-dim mt-2">
-        Pick a building for each day, then optionally a project inside it —
-        or choose &ldquo;Type my own&rdquo; to jot something for that day, like
-        an appointment.
+        Pick a building for each day, then optionally a project inside it, and
+        add any text you like for that day — an appointment, a reminder.
       </p>
 
       <CalendarBoard initialWeeks={weeks} boxes={boxes} projects={projects} />

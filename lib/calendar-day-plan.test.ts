@@ -23,17 +23,23 @@ describe("normalizeDayPlan", () => {
     ).toEqual({ boxKey: "LIB", projectId: null, note: null });
   });
 
-  it("lets typed text replace the project", () => {
+  it("keeps a project together with typed text", () => {
     expect(
       normalizeDayPlan({
         boxKey: "WELL",
         projectId: "p1",
         note: "  Dr B 3 pm ",
       }),
+    ).toEqual({ boxKey: "WELL", projectId: "p1", note: "Dr B 3 pm" });
+  });
+
+  it("keeps typed text without a project", () => {
+    expect(
+      normalizeDayPlan({ boxKey: "WELL", projectId: null, note: "Dr B 3 pm" }),
     ).toEqual({ boxKey: "WELL", projectId: null, note: "Dr B 3 pm" });
   });
 
-  it("treats a blank note as no note, so the project survives", () => {
+  it("treats a blank note as no note", () => {
     expect(
       normalizeDayPlan({ boxKey: "LIB", projectId: "p1", note: "   " }),
     ).toEqual({ boxKey: "LIB", projectId: "p1", note: null });
