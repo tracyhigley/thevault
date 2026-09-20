@@ -19,6 +19,7 @@ import {
   ReorderableProjectCards,
   type ReorderableProjectCard,
 } from "@/components/reorderable-project-cards";
+import { fmtHoursFromMinutes } from "@/lib/format-hours";
 
 export default async function ActiveProjectPlansPage() {
   const [buildings, projects] = await Promise.all([
@@ -67,6 +68,9 @@ export default async function ActiveProjectPlansPage() {
       return (b.modifiedAt ?? "").localeCompare(a.modifiedAt ?? "");
     });
 
+  const sumTaskMinutes = (tasks: Project["tasks"]) =>
+    tasks.reduce((sum, t) => sum + (t.minutes ?? 0), 0);
+
   const reorderableActive: ReorderableProjectCard[] = active.map((p) => ({
     id: p.id,
     title: p.title,
@@ -74,6 +78,7 @@ export default async function ActiveProjectPlansPage() {
     buildingColor: colorFor(p.building),
     lastLogDate: p.log.at(-1)?.date ?? null,
     doneLooksLike: p.doneLooksLike,
+    totalMinutes: sumTaskMinutes(p.tasks),
   }));
 
   return (
@@ -135,6 +140,10 @@ function ProjectCard({
   buildingLabel: string;
 }) {
   const lastLog = project.log.at(-1);
+  const totalMinutes = project.tasks.reduce(
+    (sum, t) => sum + (t.minutes ?? 0),
+    0,
+  );
   return (
     <Link
       href={`/project-plans/project/${project.id}`}
@@ -145,6 +154,9 @@ function ProjectCard({
         <span className="font-mono text-[10px] text-ink-mute">
           {buildingLabel.toUpperCase()}
           {lastLog ? ` · last note ${lastLog.date}` : ""}
+          {totalMinutes > 0
+            ? ` · ${fmtHoursFromMinutes(totalMinutes)} hrs`
+            : ""}
         </span>
       </div>
       {project.doneLooksLike ? (

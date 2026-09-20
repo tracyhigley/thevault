@@ -10,6 +10,7 @@ import { ProjectPhaseControl } from "@/components/project-phase-control";
 import { ProjectLog } from "@/components/project-log";
 import { ProjectTaskEditor } from "@/components/project-task-editor";
 import { DeleteProjectButton } from "@/components/delete-project-button";
+import { fmtHoursFromMinutes } from "@/lib/format-hours";
 
 export default async function ProjectPage({
   params,
@@ -26,6 +27,10 @@ export default async function ProjectPage({
   const building = buildings.find((b) => b.key === project.building);
   const backHref = building ? `/project-plans/${buildingSlug(building.key)}` : "/project-plans";
   const buildingLabel = building?.label ?? "Uncategorized";
+  const totalMinutes = project.tasks.reduce(
+    (sum, t) => sum + (t.minutes ?? 0),
+    0,
+  );
 
   return (
     <div className="mx-auto max-w-[900px] px-4 py-8 md:px-10">
@@ -56,6 +61,9 @@ export default async function ProjectPage({
                 ? ` · COMPLETED ${new Date(project.completedAt)
                     .toLocaleDateString([], { month: "short", year: "numeric" })
                     .toUpperCase()}`
+                : ""}
+              {totalMinutes > 0
+                ? ` · ${fmtHoursFromMinutes(totalMinutes)} HRS`
                 : ""}
             </div>
           </div>

@@ -31,6 +31,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { reorderActiveProjects } from "@/lib/plan-actions";
+import { fmtHoursFromMinutes } from "@/lib/format-hours";
 
 export type ReorderableProjectCard = {
   id: string;
@@ -39,6 +40,7 @@ export type ReorderableProjectCard = {
   buildingColor?: string;
   lastLogDate: string | null;
   doneLooksLike: string | null;
+  totalMinutes: number;
 };
 
 export function ReorderableProjectCards({
@@ -136,6 +138,9 @@ function SortableProjectCard({
         <div className="mt-1 font-mono text-[10px] tracking-[0.14em] text-ink-mute">
           {project.buildingLabel.toUpperCase()}
           {project.lastLogDate ? ` · LAST NOTE ${project.lastLogDate}` : ""}
+          {project.totalMinutes > 0
+            ? ` · ${fmtHoursFromMinutes(project.totalMinutes)} HRS`
+            : ""}
         </div>
         {project.doneLooksLike ? (
           <div className="mt-2 text-[12px] text-ink-dim">

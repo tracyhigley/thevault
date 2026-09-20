@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 import { getBuildings, buildingSlug } from "@/lib/categories";
 import { getProjectsByBuilding, type Project } from "@/lib/projects";
 import { NewProjectRow } from "@/components/new-project-row";
+import { fmtHoursFromMinutes } from "@/lib/format-hours";
 
 export default async function BuildingPage({
   params,
@@ -131,6 +132,10 @@ function ProjectCard({
   accent?: boolean;
 }) {
   const lastLog = project.log.at(-1);
+  const totalMinutes = project.tasks.reduce(
+    (sum, t) => sum + (t.minutes ?? 0),
+    0,
+  );
   return (
     <Link
       href={`/project-plans/project/${project.id}`}
@@ -140,11 +145,13 @@ function ProjectCard({
     >
       <div className="flex flex-wrap items-baseline justify-between gap-x-3">
         <span className="paper-task-title text-ink">{project.title}</span>
-        {lastLog ? (
-          <span className="font-mono text-[10px] text-ink-mute">
-            last note {lastLog.date}
-          </span>
-        ) : null}
+        <span className="font-mono text-[10px] text-ink-mute">
+          {lastLog ? `last note ${lastLog.date}` : ""}
+          {lastLog && totalMinutes > 0 ? " · " : ""}
+          {totalMinutes > 0
+            ? `${fmtHoursFromMinutes(totalMinutes)} hrs`
+            : ""}
+        </span>
       </div>
       {project.doneLooksLike ? (
         <div className="mt-1 text-[12px] text-ink-dim">
