@@ -106,11 +106,11 @@ export function CalendarCounts({
       <div className="mb-2 font-mono text-[10px] tracking-[0.18em] text-ink-mute">
         {heading}
       </div>
-      <div className="grid grid-cols-2 justify-items-start gap-1.5">
+      <div className="inline-grid grid-cols-2 gap-x-2 gap-y-1">
         {projectChips.map((chip) => (
           <span
             key={chip.key}
-            className="inline-flex items-baseline gap-2 whitespace-nowrap rounded-sm border px-2 py-1 text-[12px]"
+            className="inline-flex w-full items-baseline justify-between gap-2 whitespace-nowrap rounded-sm border px-2 py-1 text-[12px]"
             style={{
               backgroundColor: hexToRgba(chip.color, 0.18),
               borderColor: hexToRgba(chip.color, 0.5),
@@ -128,7 +128,7 @@ export function CalendarCounts({
           </span>
         ))}
         {unassignedCount > 0 && (
-          <span className="inline-flex items-baseline gap-2 whitespace-nowrap rounded-sm border border-dashed border-paper-line px-2 py-1 text-[12px]">
+          <span className="inline-flex w-full items-baseline justify-between gap-2 whitespace-nowrap rounded-sm border border-dashed border-paper-line px-2 py-1 text-[12px]">
             <span className="font-mono tracking-[0.06em] text-ink-mute">
               Unassigned
             </span>
