@@ -149,7 +149,7 @@ function OverlaySelect({
   return (
     <div
       className={clsx(
-        "relative rounded-sm border px-1.5 py-1 text-[11px] leading-tight transition hover:border-brass/60",
+        "relative rounded-sm border px-1.5 py-1 leading-tight transition hover:border-brass/60",
         className,
       )}
       style={style}
@@ -275,7 +275,7 @@ function DayCell({
         value={day.boxKey ?? ""}
         onChange={onBuildingChange}
         className={clsx(
-          "font-mono tracking-[0.06em]",
+          "text-[11px] font-mono tracking-[0.06em]",
           activeBox ? "" : "border-dashed border-paper-line",
         )}
         style={
@@ -300,11 +300,11 @@ function DayCell({
         <>
           <OverlaySelect
             display={projectDisplay}
-            placeholder="Project (optional)"
+            placeholder="Project"
             ariaLabel={`Project for ${day.date}`}
             value={day.projectId ?? ""}
             onChange={onProjectChange}
-            className="border-paper-line bg-paper-bg/40 text-ink-dim"
+            className="border-paper-line bg-paper-bg/40 text-[14px] text-ink-dim"
           >
             <option value="">No project</option>
             {projectOptions.map((p) => (
@@ -329,9 +329,8 @@ function DayCell({
                 (e.currentTarget as HTMLTextAreaElement).blur();
               }
             }}
-            placeholder="Add text… e.g. Dr B 3 pm"
             aria-label={`Text for ${day.date}`}
-            className="w-full resize-none rounded-sm border border-paper-line bg-paper-bg/60 px-1.5 py-1 text-[11px] leading-tight text-ink outline-none placeholder:text-ink-mute/50 focus:border-brass"
+            className="w-full resize-none rounded-sm border border-paper-line bg-paper-bg/60 px-1.5 py-1 text-[14px] leading-tight text-ink outline-none focus:border-brass"
           />
         </>
       )}
