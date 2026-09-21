@@ -216,6 +216,7 @@ function DaySetupStep({
           end_of_day: normalizedEnd,
           reference_now: new Date().toISOString(),
           reference_tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          rebuild: true,
         });
         onNext();
       } catch (e: unknown) {

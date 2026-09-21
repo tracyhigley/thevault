@@ -242,6 +242,10 @@ const PartialDayInputs = z.object({
   end_of_day: z.string().optional(),
   reference_now: z.string().optional(),
   reference_tz: z.string().optional(),
+  // When true, wipe today_order on all items and rebuild the Wellness Center
+  // defaults. Should be true only when the wizard is rebuilding the day, not
+  // when just editing end_of_day inline on the Today page.
+  rebuild: z.coerce.boolean().optional(),
 });
 
 export async function saveDayInputsPartial(
@@ -261,8 +265,9 @@ export async function saveDayInputsPartial(
     .eq("date", parsed.date)
     .maybeSingle();
   // Rebuilding the day should always start from a clean "on today" slate,
-  // regardless of whether a day_inputs row already exists.
-  if (parsed.end_of_day !== undefined || parsed.hours_available !== undefined) {
+  // but ONLY when explicitly rebuilding (wizard flow). Inline edits to
+  // end_of_day on the Today page must NOT wipe today selections.
+  if (parsed.rebuild) {
     await sb
       .from("items")
       .update({ today_order: null })
