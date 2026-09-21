@@ -29,6 +29,8 @@ import { SKIP_FIELD_NOTES_LANDING_COOKIE } from "@/lib/nav-cookies";
 import { BuildPromptGreeting } from "@/components/build-prompt-greeting";
 import { DayScratchpad } from "@/components/day-scratchpad";
 import { TodayHoursSummary } from "@/components/today-hours-summary";
+import { TodayEndOfDayEditor } from "@/components/today-end-of-day-editor";
+import { MaintStartHint } from "@/components/maint-start-hint";
 import { todayYmd, zonedDayOfMonth } from "@/lib/day-timezone";
 
 const DAY_GREETINGS = [
@@ -152,6 +154,11 @@ export default async function DocketPage() {
     0,
   );
 
+  const maintMinutes = maintRows.reduce(
+    (sum, r) => sum + (r.minutes ?? 0),
+    0,
+  );
+
   return (
     <div className="mx-auto max-w-[820px] px-4 py-6 md:px-10 md:py-10">
       <UnsealGlow />
@@ -177,10 +184,12 @@ export default async function DocketPage() {
             endOfDay={inputs.endOfDay}
             totalTodayMinutes={totalTodayMinutes}
           />
-          <p className="text-ink-dim mt-1 w-0 min-w-full text-[14px] leading-snug">
-            Subtract Maint Task time from End of Day. Stop working on Projects
-            at that time and switch to Maint Tasks.
-          </p>
+          <TodayEndOfDayEditor date={inputs.date} endOfDay={inputs.endOfDay} />
+          <MaintStartHint
+            date={inputs.date}
+            endOfDay={inputs.endOfDay}
+            maintMinutes={maintMinutes}
+          />
         </div>
         <DayScratchpad
           date={inputs.date}
