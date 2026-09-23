@@ -153,8 +153,10 @@ export default async function DocketPage() {
 
   const buildingOpts = buildings.map((b) => ({ key: b.key, label: b.label }));
 
+  // Evening-marked tasks are left out — this total is compared against the
+  // hours left before End of Day, and evening tasks happen after that.
   const totalTodayMinutes = todayItems.reduce(
-    (sum, it) => sum + (it.minutes ?? 0),
+    (sum, it) => sum + (it.evening ? 0 : (it.minutes ?? 0)),
     0,
   );
 

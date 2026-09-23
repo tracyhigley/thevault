@@ -1,7 +1,8 @@
 "use client";
 
 // Small moon button on each Today row. Marking a task "evening" leaves it
-// out of the "Begin Maint Tasks at…" calculation at the top of the page.
+// out of both calculations at the top of the page: "X hours out of Y hours
+// left" and "Begin Maint Tasks at…".
 
 import { useState, useTransition } from "react";
 import clsx from "clsx";
