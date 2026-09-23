@@ -19,6 +19,7 @@ import { DocketDayRange } from "@/components/docket-day-range";
 import { UnsealGlow } from "@/components/unseal-glow";
 import { SortableList, type SortableItem } from "@/components/sortable-list";
 import { TodayDoneToggle } from "@/components/today-done-toggle";
+import { TodayEveningToggle } from "@/components/today-evening-toggle";
 import { AreaPill } from "@/components/area-pill";
 import { BuildingTag } from "@/components/building-tag";
 import { EditableText } from "@/components/editable-text";
@@ -43,6 +44,7 @@ type TodayRow = {
   itemId: string;
   title: string;
   minutes: number | null;
+  evening: boolean;
   area?: string | null; // raw building key — Maint Tasks rows only
   buildingLabel?: string;
   buildingColor?: string;
@@ -118,6 +120,7 @@ export default async function DocketPage() {
         itemId: it.id,
         title: it.title,
         minutes: it.minutes ?? null,
+        evening: !!it.evening,
         buildingLabel: building?.label ?? proj?.building,
         buildingColor: building?.color,
         projectId: proj?.id,
@@ -135,6 +138,7 @@ export default async function DocketPage() {
         itemId: it.id,
         title: it.title,
         minutes: it.minutes ?? null,
+        evening: !!it.evening,
         area: it.area ?? null,
         buildingLabel: building?.label ?? it.area ?? undefined,
         buildingColor: building?.color,
@@ -154,8 +158,10 @@ export default async function DocketPage() {
     0,
   );
 
+  // Evening-marked Maint tasks are left out — they happen after End of Day,
+  // so they shouldn't push the "Begin Maint Tasks at…" time earlier.
   const maintMinutes = maintRows.reduce(
-    (sum, r) => sum + (r.minutes ?? 0),
+    (sum, r) => sum + (r.evening ? 0 : (r.minutes ?? 0)),
     0,
   );
 
@@ -314,6 +320,7 @@ function TodayRowContent({
   return (
     <div className="bg-paper-panel/40 flex min-w-0 items-center gap-3 rounded-sm border border-paper-line/60 px-3 py-2">
       <TodayDoneToggle itemId={row.itemId} />
+      <TodayEveningToggle itemId={row.itemId} initial={row.evening} />
       {buildingMode === "editable" && (
         <AreaPill
           itemId={row.itemId}

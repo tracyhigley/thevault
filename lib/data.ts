@@ -38,6 +38,7 @@ function rowToItem(r: any): Item {
     actualEnd: r.actual_end,
     state: r.state,
     pinned: !!r.pinned,
+    evening: !!r.evening,
     createdAt: r.created_at,
     modifiedAt: r.modified_at,
     deletedAt: r.deleted_at,

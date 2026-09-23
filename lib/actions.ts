@@ -384,6 +384,13 @@ export async function setItemPinned(itemId: string, pinned: boolean) {
   revalidatePath("/");
 }
 
+export async function setItemEvening(itemId: string, evening: boolean) {
+  const { sb } = await requireUser();
+  const { error } = await sb.from("items").update({ evening }).eq("id", itemId);
+  if (error) throw new Error(error.message);
+  revalidatePath("/");
+}
+
 export async function moveItemToBox(itemId: string, box: string) {
   const { sb } = await requireUser();
   await sb.from("items").update({ box }).eq("id", itemId);

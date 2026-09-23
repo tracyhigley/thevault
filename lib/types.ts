@@ -47,6 +47,9 @@ export type Item = {
   actualEnd?: string | null;
   state?: ItemState | null;
   pinned: boolean;
+  // Today page: task is meant for the evening — excluded from the
+  // "Begin Maint Tasks at…" calculation.
+  evening?: boolean;
 
   createdAt: string;
   modifiedAt: string;
