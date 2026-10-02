@@ -1082,6 +1082,35 @@ export async function appendDocument(labelRaw: string, folderKey: string) {
 
 
 /**
+ * Rename a note from its own page. The visible note title is the label on
+ * its settings.documents entry, so that's what changes; the key (and so the
+ * URL slug) stays put so links and the stored body keep resolving. The note's
+ * item row title is kept in step, same as saveDocument already does.
+ */
+export async function renameDocument(key: string, labelRaw: string) {
+  const label = labelRaw.trim();
+  if (!label) throw new Error("A note needs a title.");
+  if (label.length > 60) throw new Error("Keep the title to 60 characters.");
+  const docs = await getDocuments();
+  if (!docs.some((d) => d.key === key)) throw new Error("Note not found.");
+  await saveDocumentConfig(
+    docs.map((d) => (d.key === key ? { ...d, label } : d)),
+  );
+  const { sb } = await requireUser();
+  const vaultId = await currentVaultId();
+  if (vaultId) {
+    const { error } = await sb
+      .from("items")
+      .update({ title: label })
+      .eq("vault_id", vaultId)
+      .eq("box", key)
+      .is("deleted_at", null);
+    if (error) throw new Error(error.message);
+  }
+  revalidatePath("/documents", "layout");
+}
+
+/**
  * Delete a note category from within the note itself. Removes the
  * settings.documents entry (so the note disappears from the hub, its
  * building, and stops resolving at /documents/<slug>) but — same as the

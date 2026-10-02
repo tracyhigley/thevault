@@ -14,6 +14,7 @@ import { slugifyDocumentKey } from "@/lib/document-folders";
 import { DocumentsEditor } from "@/components/documents-editor";
 import { ConvertToProjectButton } from "@/components/convert-to-project-button";
 import { DeleteNoteButton } from "@/components/delete-note-button";
+import { NoteTitleEditor } from "@/components/note-title-editor";
 import type { BoxKey } from "@/lib/types";
 
 export default async function DocumentPage({
@@ -83,9 +84,7 @@ export default async function DocumentPage({
         </Link>
       </div>
       <div className="eyebrow">— Note —</div>
-      <h1 className="mt-2 font-sans text-[32px] font-semibold leading-tight tracking-tight text-ink md:text-[36px]">
-        {meta.label}
-      </h1>
+      <NoteTitleEditor key={meta.label} docKey={key} label={meta.label} />
       {meta.meta && (
         <p className="mt-1 font-sans text-[16px] leading-snug text-ink-dim">
           {meta.meta}
