@@ -31,6 +31,7 @@ export type ProjectTaskRow = {
   taskId: string;
   text: string;
   minutes: number | null;
+  urgent: boolean;
   buildingLabel: string;
   buildingColor?: string;
   projectTitle: string;
@@ -325,7 +326,12 @@ function ReviewStep({
   // Local "on today" tally, seeded from the server-provided items and kept
   // live as the user taps + TODAY, so the minutes counter updates as they go.
   const [onTodayIds, setOnTodayIds] = useState<Set<string>>(
-    () => new Set(items.filter((it) => (it.todayOrder ?? null) !== null).map((it) => it.id)),
+    () =>
+      new Set(
+        items
+          .filter((it) => (it.todayOrder ?? null) !== null)
+          .map((it) => it.id),
+      ),
   );
   const minutesById = useMemo(
     () => new Map(items.map((it) => [it.id, it.minutes ?? 0])),
@@ -510,6 +516,7 @@ function ProjectTasksStep({
               taskId={r.taskId}
               text={r.text}
               minutes={r.minutes}
+              urgent={r.urgent}
               buildingLabel={r.buildingLabel}
               buildingColor={r.buildingColor}
               projectTitle={r.projectTitle}

@@ -66,6 +66,7 @@ function normalizeTasks(raw: unknown): ProjectTask[] {
       minutes: typeof t.minutes === "number" ? t.minutes : null,
       onTaskList: !!t.onTaskList,
       done: !!t.done,
+      urgent: !!t.urgent,
       createdAt:
         typeof t.createdAt === "string"
           ? t.createdAt

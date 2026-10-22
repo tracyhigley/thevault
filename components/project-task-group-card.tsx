@@ -12,11 +12,14 @@ import { EditableProjectTaskMinutes } from "./editable-project-task-minutes";
 import { ProjectTaskTodayToggle } from "./project-task-today-toggle";
 import { ProjectTaskDeleteButton } from "./project-task-delete-button";
 import { ProjectTaskDoneButton } from "./project-task-done-button";
+import { ProjectTaskUrgentFlag } from "./project-task-urgent-flag";
+import clsx from "clsx";
 
 type GroupTask = {
   taskId: string;
   text: string;
   minutes: number | null;
+  urgent: boolean;
   onToday: boolean;
 };
 
@@ -30,10 +33,22 @@ function GroupTaskRow({
   onHide: () => void;
 }) {
   const [hidden, setHidden] = useState(false);
+  const [urgent, setUrgent] = useState(task.urgent);
   if (hidden) return null;
 
   return (
-    <div className="flex min-w-0 items-center gap-3 px-4 py-2">
+    <div
+      className={clsx(
+        "flex min-w-0 items-center gap-3 py-2 pr-4",
+        urgent ? "bg-amber-500/5 pl-3" : "pl-4",
+      )}
+    >
+      {urgent ? (
+        <div
+          className="w-1 shrink-0 self-stretch rounded-sm bg-amber-500"
+          aria-hidden
+        />
+      ) : null}
       <span className="text-ink-dim min-w-0 flex-1 text-[13px] leading-snug">
         {task.text}
       </span>
@@ -45,6 +60,12 @@ function GroupTaskRow({
         />
         <span>min</span>
       </span>
+      <ProjectTaskUrgentFlag
+        projectId={projectId}
+        taskId={task.taskId}
+        initial={task.urgent}
+        onChange={setUrgent}
+      />
       <ProjectTaskTodayToggle
         projectId={projectId}
         taskId={task.taskId}

@@ -86,6 +86,7 @@ export default async function BuildDayPage({
             taskId: t.id,
             text: t.text,
             minutes: t.minutes,
+            urgent: t.urgent,
             createdAt: t.createdAt,
             buildingLabel: building?.label ?? p.building,
             buildingColor: building?.color,
@@ -94,7 +95,11 @@ export default async function BuildDayPage({
           };
         }),
     )
-    .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+    .sort(
+      (a, b) =>
+        Number(b.urgent) - Number(a.urgent) ||
+        a.createdAt.localeCompare(b.createdAt),
+    );
 
   if (step > 5) redirect("/");
 

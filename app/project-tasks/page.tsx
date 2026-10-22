@@ -23,6 +23,7 @@ type GroupTask = {
   taskId: string;
   text: string;
   minutes: number | null;
+  urgent: boolean;
   createdAt: string;
   onToday: boolean;
 };
@@ -112,10 +113,17 @@ export default async function ProjectTasksPage() {
         taskId: t.id,
         text: t.text,
         minutes: t.minutes,
+        urgent: t.urgent,
         createdAt: t.createdAt,
         onToday: todayLinks[t.id]?.onToday ?? false,
       }))
-      .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+      // Urgent (⚡) tasks float to the top of their project card, then
+      // oldest-pulled first — same idea as Maint Tasks' Urgent section.
+      .sort(
+        (a, b) =>
+          Number(b.urgent) - Number(a.urgent) ||
+          a.createdAt.localeCompare(b.createdAt),
+      );
     groups.push({
       projectId: p.id,
       projectTitle: p.title,
@@ -123,7 +131,10 @@ export default async function ProjectTasksPage() {
       buildingLabel: building?.label ?? p.building,
       buildingColor: building?.color,
       tasks,
-      earliestCreatedAt: tasks[0].createdAt,
+      earliestCreatedAt: tasks.reduce(
+        (min, t) => (t.createdAt < min ? t.createdAt : min),
+        tasks[0].createdAt,
+      ),
       taskGroupOrder: p.taskGroupOrder,
     });
   }
@@ -141,8 +152,7 @@ export default async function ProjectTasksPage() {
 
   const todayMinutes = groups.reduce(
     (sum, g) =>
-      sum +
-      g.tasks.reduce((s, t) => s + (t.onToday ? (t.minutes ?? 0) : 0), 0),
+      sum + g.tasks.reduce((s, t) => s + (t.onToday ? (t.minutes ?? 0) : 0), 0),
     0,
   );
 

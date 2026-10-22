@@ -13,6 +13,8 @@ import { EditableProjectTaskMinutes } from "./editable-project-task-minutes";
 import { ProjectTaskTodayToggle } from "./project-task-today-toggle";
 import { ProjectTaskDeleteButton } from "./project-task-delete-button";
 import { ProjectTaskDoneButton } from "./project-task-done-button";
+import { ProjectTaskUrgentFlag } from "./project-task-urgent-flag";
+import clsx from "clsx";
 
 /** Static building tag — sizing matches Maint Tasks' AreaPill chip. */
 function BuildingTag({ label, color }: { label: string; color?: string }) {
@@ -36,6 +38,7 @@ export function ProjectTaskRollupItem({
   taskId,
   text,
   minutes,
+  urgent: initialUrgent,
   buildingLabel,
   buildingColor,
   projectTitle,
@@ -45,17 +48,30 @@ export function ProjectTaskRollupItem({
   taskId: string;
   text: string;
   minutes: number | null;
+  urgent: boolean;
   buildingLabel: string;
   buildingColor?: string;
   projectTitle: string;
   onToday: boolean;
 }) {
   const [hidden, setHidden] = useState(false);
+  const [urgent, setUrgent] = useState(initialUrgent);
 
   if (hidden) return null;
 
   return (
-    <div className="border-paper-line/60 bg-paper-panel/40 flex min-w-0 items-center gap-3 rounded-sm border px-3 py-2 transition">
+    <div
+      className={clsx(
+        "bg-paper-panel/40 flex min-w-0 items-center gap-3 rounded-sm border px-3 py-2 transition",
+        urgent ? "border-amber-500/45" : "border-paper-line/60",
+      )}
+    >
+      {urgent ? (
+        <div
+          className="w-1 shrink-0 self-stretch rounded-sm bg-amber-500"
+          aria-hidden
+        />
+      ) : null}
       <BuildingTag label={buildingLabel} color={buildingColor} />
       <span className="min-w-0 flex-1">
         <span className="paper-task-title text-ink block">{projectTitle}</span>
@@ -71,6 +87,12 @@ export function ProjectTaskRollupItem({
         />
         <span>min</span>
       </span>
+      <ProjectTaskUrgentFlag
+        projectId={projectId}
+        taskId={taskId}
+        initial={initialUrgent}
+        onChange={setUrgent}
+      />
       <ProjectTaskTodayToggle
         projectId={projectId}
         taskId={taskId}

@@ -83,9 +83,7 @@ export async function saveWeekBuildings(day: DayKey, buildingKeys: string[]) {
   if (!vaultId) throw new Error("No vault");
   const clean = Array.from(
     new Set(
-      buildingKeys.filter(
-        (k) => typeof k === "string" && k.trim().length > 0,
-      ),
+      buildingKeys.filter((k) => typeof k === "string" && k.trim().length > 0),
     ),
   );
   const { data } = await sb
@@ -105,7 +103,10 @@ export async function saveWeekBuildings(day: DayKey, buildingKeys: string[]) {
   for (const buildingKey of Object.keys(dayProjects)) {
     if (!clean.includes(buildingKey)) delete dayProjects[buildingKey];
   }
-  const nextProjects: WeekDayProjects = { ...currentProjects, [day]: dayProjects };
+  const nextProjects: WeekDayProjects = {
+    ...currentProjects,
+    [day]: dayProjects,
+  };
 
   const { error } = await sb.from("settings").upsert({
     vault_id: vaultId,
@@ -299,6 +300,7 @@ function normalizeTasks(raw: unknown): {
   minutes: number | null;
   onTaskList: boolean;
   done: boolean;
+  urgent: boolean;
   createdAt: string;
 }[] {
   if (!Array.isArray(raw)) return [];
@@ -312,6 +314,7 @@ function normalizeTasks(raw: unknown): {
       minutes: typeof t.minutes === "number" ? t.minutes : null,
       onTaskList: !!t.onTaskList,
       done: !!t.done,
+      urgent: !!t.urgent,
       createdAt:
         typeof t.createdAt === "string"
           ? t.createdAt
@@ -344,6 +347,7 @@ export async function addProjectTask(
     minutes: cleanMinutes,
     onTaskList: false,
     done: false,
+    urgent: false,
     createdAt: new Date().toISOString(),
   };
   const { error: updateError } = await sb
@@ -463,7 +467,10 @@ export async function deleteProjectTask(projectId: string, taskId: string) {
 // Order lives purely in array position within the `tasks` JSON column, so
 // this just re-sorts that array — same shape as every other project-task
 // mutation here (read, transform, write whole array back).
-export async function reorderProjectTasks(projectId: string, taskIds: string[]) {
+export async function reorderProjectTasks(
+  projectId: string,
+  taskIds: string[],
+) {
   const { sb } = await requireUser();
   const { data, error } = await sb
     .from("projects")
@@ -499,7 +506,10 @@ export async function reorderActiveProjects(projectIds: string[]) {
   const { sb } = await requireUser();
   await Promise.all(
     projectIds.map((id, i) =>
-      sb.from("projects").update({ active_order: i + 1 }).eq("id", id),
+      sb
+        .from("projects")
+        .update({ active_order: i + 1 })
+        .eq("id", id),
     ),
   );
   revalidatePath("/project-plans", "layout");
@@ -512,7 +522,10 @@ export async function reorderProjectTaskGroups(projectIds: string[]) {
   const { sb } = await requireUser();
   await Promise.all(
     projectIds.map((id, i) =>
-      sb.from("projects").update({ task_group_order: i + 1 }).eq("id", id),
+      sb
+        .from("projects")
+        .update({ task_group_order: i + 1 })
+        .eq("id", id),
     ),
   );
   revalidatePath("/project-tasks");
@@ -600,13 +613,21 @@ export async function addProjectTaskToToday(
       if (error) throw new Error(error.message);
     }
   } else {
+    // Carry the task's ⚡ urgent flag onto its Today item.
+    const { data: proj } = await sb
+      .from("projects")
+      .select("tasks")
+      .eq("id", projectId)
+      .maybeSingle();
+    const urgent =
+      normalizeTasks(proj?.tasks).find((t) => t.id === taskId)?.urgent ?? false;
     const { error } = await sb.from("items").insert({
       vault_id: vaultId,
       user_id: user.id,
       box: "COUNTER",
       title: text,
       minutes,
-      urgent: false,
+      urgent,
       must: false,
       should: false,
       today_order: nextOrder,
@@ -717,4 +738,41 @@ export async function updateProjectTaskMinutes(
   revalidatePath("/project-tasks");
   revalidatePath("/");
   revalidatePath("/maint-tasks");
+}
+
+// ⚡ toggle for a Project Tasks row. Writes the flag onto the task in the
+// project's tasks jsonb, and mirrors it onto the linked Today item (if the
+// task is currently on Today) so it counts as urgent there too.
+export async function updateProjectTaskUrgent(
+  projectId: string,
+  taskId: string,
+  urgent: boolean,
+) {
+  const { sb } = await requireUser();
+  const { data, error } = await sb
+    .from("projects")
+    .select("tasks")
+    .eq("id", projectId)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  const tasks = normalizeTasks(data?.tasks).map((t) =>
+    t.id === taskId ? { ...t, urgent } : t,
+  );
+  const { error: updateError } = await sb
+    .from("projects")
+    .update({ tasks, modified_at: new Date().toISOString() })
+    .eq("id", projectId);
+  if (updateError) throw new Error(updateError.message);
+
+  await sb
+    .from("items")
+    .update({ urgent })
+    .eq("source_project_id", projectId)
+    .eq("source_task_id", taskId)
+    .is("deleted_at", null);
+
+  revalidatePath("/project-plans", "layout");
+  revalidatePath("/project-tasks");
+  revalidatePath("/build");
+  revalidatePath("/");
 }

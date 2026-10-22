@@ -31,5 +31,6 @@ export type ProjectTask = {
   minutes: number | null; // editable estimate, shown/edited from Project Tasks
   onTaskList: boolean;
   done: boolean; // finished via the Project Tasks page — shows struck through here
+  urgent: boolean; // ⚡ flag, toggled from Project Tasks — same meaning as on Maint Tasks
   createdAt: string; // ISO timestamp
 };

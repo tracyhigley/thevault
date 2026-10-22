@@ -20,6 +20,7 @@ export type ProjectTaskCard = {
     taskId: string;
     text: string;
     minutes: number | null;
+    urgent: boolean;
     onToday: boolean;
   }[];
 };
@@ -49,10 +50,7 @@ export function ProjectTaskBuildingGroups({
     setSections(initialSections);
   }, [initialSections]);
 
-  function handleSectionReorder(
-    sectionKey: string,
-    nextItems: SortableItem[],
-  ) {
+  function handleSectionReorder(sectionKey: string, nextItems: SortableItem[]) {
     const order = nextItems.map((i) => i.id);
     let fullIds: string[] = [];
     setSections((prev) => {
