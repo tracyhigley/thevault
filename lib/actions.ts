@@ -54,16 +54,20 @@ type DailyWellnessCenterDefault = {
 // without Tracy having to re-add them by hand. Identified by a dedicated
 // `tag` (not title) so renaming one later doesn't spawn a duplicate.
 const DAILY_WELLNESS_CENTER_DEFAULTS: DailyWellnessCenterDefault[] = [
-  { tag: "DAILY_WELLNESS_CENTER:WATER", title: "Drink 64 oz water", minutes: 0 },
-  {
-    tag: "DAILY_WELLNESS_CENTER:LIFT",
-    title: "Weight Training (M-W-F) or Cardio Zone 2 for 60 min (T-Th-Sa)",
-    minutes: 30,
-    skipDays: [0], // Sunday is a rest day -- no task at all.
-  },
-  { tag: "DAILY_WELLNESS_CENTER:STEPS", title: "Walk 10k steps", minutes: 60 },
-  { tag: "DAILY_WELLNESS_CENTER:SUPPLEMENTS", title: "Take supplements", minutes: 0 },
-  { tag: "DAILY_WELLNESS_CENTER:MACROS", title: "Eat 30p/10f three times", minutes: 0 },
+  { tag: "DAILY_WELLNESS_CENTER:MORNING_SCORE", title: "Log Morning Score", minutes: 0 },
+  { tag: "DAILY_WELLNESS_CENTER:AFTERNOON_SCORE", title: "Log Afternoon Score", minutes: 0 },
+];
+
+// Former daily defaults that have been retired. Any copy of these that is
+// still open (not done) gets soft-deleted on the next day build so it stops
+// showing up on Maint Tasks / Today. Completed rows are left untouched so
+// their history on /done stays intact.
+const RETIRED_DAILY_WELLNESS_CENTER_TAGS = [
+  "DAILY_WELLNESS_CENTER:WATER",
+  "DAILY_WELLNESS_CENTER:LIFT",
+  "DAILY_WELLNESS_CENTER:STEPS",
+  "DAILY_WELLNESS_CENTER:SUPPLEMENTS",
+  "DAILY_WELLNESS_CENTER:MACROS",
 ];
 
 // Hard-coded the same way app/page.tsx and lib/calendar-work-life.ts
@@ -71,7 +75,7 @@ const DAILY_WELLNESS_CENTER_DEFAULTS: DailyWellnessCenterDefault[] = [
 const WELLNESS_CENTER_BUILDING_KEY = "THE_WELLNESS_CENTER";
 
 /**
- * Makes sure the five fixed Wellness Center habit tasks are on today's plan
+ * Makes sure the fixed daily Wellness Center tasks are on today's plan
  * whenever the day gets (re)built. Called from inside
  * saveDayInputsPartial's step-1 today_order wipe, which fires both on the
  * first build of a day and on every rebuild ("REBUILD DAY").
@@ -96,6 +100,16 @@ async function ensureDailyWellnessCenterDefaults(
   userId: string,
   date: string,
 ) {
+  // Clear out any still-open copies of retired daily defaults.
+  await sb
+    .from("items")
+    .update({ deleted_at: new Date().toISOString(), today_order: null })
+    .eq("vault_id", vaultId)
+    .eq("box", "COUNTER")
+    .is("deleted_at", null)
+    .or("state.is.null,state.neq.done")
+    .in("tag", RETIRED_DAILY_WELLNESS_CENTER_TAGS);
+
   const tags = DAILY_WELLNESS_CENTER_DEFAULTS.map((d) => d.tag);
   // Newest row per tag decides what happens — not "is there a row from
   // `date`". An unfinished habit task has to carry forward across as many
