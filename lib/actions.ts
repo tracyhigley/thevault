@@ -405,6 +405,44 @@ export async function setItemEvening(itemId: string, evening: boolean) {
   revalidatePath("/");
 }
 
+// ⚡ toggle on a Today row. Flips the item's urgent flag, and if the item
+// is a Project Task pulled onto Today, flips the flag on that task in the
+// project's checklist too, so Project Tasks shows the same bolt.
+export async function setItemUrgent(itemId: string, urgent: boolean) {
+  const { sb } = await requireUser();
+  const { data: item, error } = await sb
+    .from("items")
+    .update({ urgent })
+    .eq("id", itemId)
+    .select("source_project_id, source_task_id")
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+
+  if (item?.source_project_id && item?.source_task_id) {
+    const { data: proj } = await sb
+      .from("projects")
+      .select("tasks")
+      .eq("id", item.source_project_id)
+      .maybeSingle();
+    if (Array.isArray(proj?.tasks)) {
+      // Edit the raw jsonb so no other task fields get dropped.
+      const tasks = (proj.tasks as any[]).map((t) =>
+        t && t.id === item.source_task_id ? { ...t, urgent } : t,
+      );
+      await sb
+        .from("projects")
+        .update({ tasks, modified_at: new Date().toISOString() })
+        .eq("id", item.source_project_id);
+    }
+  }
+
+  revalidatePath("/");
+  revalidatePath("/maint-tasks");
+  revalidatePath("/project-tasks");
+  revalidatePath("/project-plans", "layout");
+  revalidatePath("/build");
+}
+
 export async function moveItemToBox(itemId: string, box: string) {
   const { sb } = await requireUser();
   await sb.from("items").update({ box }).eq("id", itemId);

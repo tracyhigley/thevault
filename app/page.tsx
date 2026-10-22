@@ -20,6 +20,7 @@ import { UnsealGlow } from "@/components/unseal-glow";
 import { SortableList, type SortableItem } from "@/components/sortable-list";
 import { TodayDoneToggle } from "@/components/today-done-toggle";
 import { TodayEveningToggle } from "@/components/today-evening-toggle";
+import { TodayUrgentToggle } from "@/components/today-urgent-toggle";
 import { AreaPill } from "@/components/area-pill";
 import { BuildingTag } from "@/components/building-tag";
 import { EditableText } from "@/components/editable-text";
@@ -45,6 +46,7 @@ type TodayRow = {
   title: string;
   minutes: number | null;
   evening: boolean;
+  urgent: boolean;
   area?: string | null; // raw building key — Maint Tasks rows only
   buildingLabel?: string;
   buildingColor?: string;
@@ -121,6 +123,7 @@ export default async function DocketPage() {
         title: it.title,
         minutes: it.minutes ?? null,
         evening: !!it.evening,
+        urgent: !!it.urgent,
         buildingLabel: building?.label ?? proj?.building,
         buildingColor: building?.color,
         projectId: proj?.id,
@@ -139,6 +142,7 @@ export default async function DocketPage() {
         title: it.title,
         minutes: it.minutes ?? null,
         evening: !!it.evening,
+        urgent: !!it.urgent,
         area: it.area ?? null,
         buildingLabel: building?.label ?? it.area ?? undefined,
         buildingColor: building?.color,
@@ -323,6 +327,7 @@ function TodayRowContent({
     <div className="bg-paper-panel/40 flex min-w-0 items-center gap-3 rounded-sm border border-paper-line/60 px-3 py-2">
       <TodayDoneToggle itemId={row.itemId} />
       <TodayEveningToggle itemId={row.itemId} initial={row.evening} />
+      <TodayUrgentToggle itemId={row.itemId} initial={row.urgent} />
       {buildingMode === "editable" && (
         <AreaPill
           itemId={row.itemId}
