@@ -34,6 +34,22 @@ import { TodayHoursSummary } from "@/components/today-hours-summary";
 import { TodayEndOfDayEditor } from "@/components/today-end-of-day-editor";
 import { MaintStartHint } from "@/components/maint-start-hint";
 import { todayYmd, zonedDayOfMonth } from "@/lib/day-timezone";
+import { getRoutineDay } from "@/lib/routine-data";
+import { scoreDay } from "@/lib/routine";
+import { RoutineScoreTiles } from "@/components/routine-score-tiles";
+
+// Today rows for these daily defaults get a LOG button that opens the
+// matching routine checklist (see lib/actions.ts for the defaults).
+const ROUTINE_LOG_LINKS: Record<string, { href: string; label: string }> = {
+  "DAILY_WELLNESS_CENTER:MORNING_SCORE": {
+    href: "/routine?slot=morning",
+    label: "LOG MORNING",
+  },
+  "DAILY_WELLNESS_CENTER:AFTERNOON_SCORE": {
+    href: "/routine?slot=lunch",
+    label: "LOG LUNCH",
+  },
+};
 
 const DAY_GREETINGS = [
   "Today",
@@ -47,6 +63,7 @@ type TodayRow = {
   minutes: number | null;
   evening: boolean;
   urgent: boolean;
+  tag?: string | null;
   area?: string | null; // raw building key — Maint Tasks rows only
   buildingLabel?: string;
   buildingColor?: string;
@@ -60,13 +77,14 @@ export default async function DocketPage() {
   const skipDropLanding =
     cookieStore.get(SKIP_FIELD_NOTES_LANDING_COOKIE)?.value === "1";
 
-  const [counterItems, dayRow, dropItems, buildings, projects] =
+  const [counterItems, dayRow, dropItems, buildings, projects, routineChecked] =
     await Promise.all([
       getItemsByBox("COUNTER"),
       getDayInputs(date),
       getItemsByBox("DROP"),
       getBuildings(),
       getProjects(),
+      getRoutineDay(date),
     ]);
 
   // Anything in Field Notes → open there first (fresh session / login). Once you’ve
@@ -92,7 +110,9 @@ export default async function DocketPage() {
   const greeting = DAY_GREETINGS[zonedDayOfMonth() % DAY_GREETINGS.length];
 
   const buildingByKey = new Map(buildings.map((b) => [b.key, b]));
-  const wellnessCenterBuilding = buildings.find((b) => b.key === "THE_WELLNESS_CENTER");
+  const wellnessCenterBuilding = buildings.find(
+    (b) => b.key === "THE_WELLNESS_CENTER",
+  );
 
   const projectByTaskId = new Map<string, { id: string; building: string }>();
   for (const p of projects) {
@@ -129,7 +149,10 @@ export default async function DocketPage() {
         projectId: proj?.id,
         taskId: it.sourceTaskId,
       };
-      if (wellnessCenterBuilding && proj?.building === wellnessCenterBuilding.key) {
+      if (
+        wellnessCenterBuilding &&
+        proj?.building === wellnessCenterBuilding.key
+      ) {
         wellnessCenterRows.push(row);
       } else {
         projectRows.push(row);
@@ -143,6 +166,7 @@ export default async function DocketPage() {
         minutes: it.minutes ?? null,
         evening: !!it.evening,
         urgent: !!it.urgent,
+        tag: it.tag ?? null,
         area: it.area ?? null,
         buildingLabel: building?.label ?? it.area ?? undefined,
         buildingColor: building?.color,
@@ -219,6 +243,25 @@ export default async function DocketPage() {
           buildingMode="none"
           buildingOpts={buildingOpts}
           emptyLabel="Nothing marked Today for The Wellness Center."
+          footer={
+            <div className="mt-4">
+              <div className="mb-1.5 flex items-center justify-between gap-2">
+                <Link
+                  href="/routine?slot=morning"
+                  className="text-ink-mute hover:text-brass font-mono text-[10px] tracking-[0.18em]"
+                >
+                  TODAY&rsquo;S SCORES
+                </Link>
+                <Link
+                  href="/routine?slot=evening"
+                  className="border-paper-line text-ink-mute hover:border-brass/40 hover:text-brass rounded-sm border px-2 py-0.5 font-mono text-[10px] tracking-wider whitespace-nowrap transition"
+                >
+                  ☾ LOG EVENING
+                </Link>
+              </div>
+              <RoutineScoreTiles scores={scoreDay(routineChecked)} size="sm" />
+            </div>
+          }
         />
         <TodayCard
           title="Maint Tasks"
@@ -324,7 +367,7 @@ function TodayRowContent({
   buildingOpts: { key: string; label: string }[];
 }) {
   return (
-    <div className="bg-paper-panel/40 flex min-w-0 items-center gap-3 rounded-sm border border-paper-line/60 px-3 py-2">
+    <div className="bg-paper-panel/40 border-paper-line/60 flex min-w-0 items-center gap-3 rounded-sm border px-3 py-2">
       <TodayDoneToggle itemId={row.itemId} />
       <TodayEveningToggle itemId={row.itemId} initial={row.evening} />
       <TodayUrgentToggle itemId={row.itemId} initial={row.urgent} />
@@ -346,6 +389,14 @@ function TodayRowContent({
         className="paper-task-title min-w-0 flex-1 truncate"
         placeholder="(no title)"
       />
+      {row.tag && ROUTINE_LOG_LINKS[row.tag] ? (
+        <Link
+          href={ROUTINE_LOG_LINKS[row.tag].href}
+          className="border-brass/50 text-brass hover:bg-brass/15 shrink-0 rounded-sm border px-2 py-0.5 font-mono text-[10px] tracking-wider whitespace-nowrap transition"
+        >
+          {ROUTINE_LOG_LINKS[row.tag].label} →
+        </Link>
+      ) : null}
       <span className="text-ink-mute flex shrink-0 items-baseline justify-end gap-1 font-mono text-[11px] whitespace-nowrap tabular-nums">
         {row.projectId && row.taskId ? (
           <EditableProjectTaskMinutes

@@ -54,8 +54,8 @@ type DailyWellnessCenterDefault = {
 // without Tracy having to re-add them by hand. Identified by a dedicated
 // `tag` (not title) so renaming one later doesn't spawn a duplicate.
 const DAILY_WELLNESS_CENTER_DEFAULTS: DailyWellnessCenterDefault[] = [
-  { tag: "DAILY_WELLNESS_CENTER:MORNING_SCORE", title: "Log Morning Score", minutes: 0 },
-  { tag: "DAILY_WELLNESS_CENTER:AFTERNOON_SCORE", title: "Log Afternoon Score", minutes: 0 },
+  { tag: "DAILY_WELLNESS_CENTER:MORNING_SCORE", title: "Log Morning Routine", minutes: 0 },
+  { tag: "DAILY_WELLNESS_CENTER:AFTERNOON_SCORE", title: "Log Lunch Routine", minutes: 0 },
 ];
 
 // Former daily defaults that have been retired. Any copy of these that is
@@ -164,11 +164,12 @@ async function ensureDailyWellnessCenterDefaults(
     const latest = latestByTag.get(def.tag);
     if (latest && latest.state !== "done") {
       // Still open, whenever it was created — carry it forward onto
-      // today's plan instead of spawning a duplicate.
+      // today's plan instead of spawning a duplicate. Title is re-synced
+      // too, so renaming a default renames the open copy in place.
       nextOrder += 1;
       await sb
         .from("items")
-        .update({ today_order: nextOrder })
+        .update({ today_order: nextOrder, title: def.title })
         .eq("id", latest.id);
       continue;
     }
