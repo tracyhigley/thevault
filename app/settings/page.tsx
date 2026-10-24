@@ -22,9 +22,8 @@ export default async function SettingsPage() {
         Settings.
       </h1>
       <p className="mt-1 text-[13px] text-ink-dim">
-        How the blueprint behaves. The tabs below cover members, the categories
-        you file into, the energies that power Project Tasks matching, Google Calendar
-        to Field Notes, and how to connect your phone and Mac.
+        How the blueprint behaves. The tabs below cover the buildings you file
+        into and how to connect your phone and Mac.
       </p>
 
       <div className="mt-4">

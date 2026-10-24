@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { syncAllCalendarsToFieldNotes } from "@/lib/google-calendar-sync";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { sendAllDue } from "@/lib/future-tasks-db";
 import { getSiteUrlFromEnv } from "@/lib/site-url";
 
 export const runtime = "nodejs";
 
+// The daily morning job (see vercel.json). It used to import Google
+// Calendar events into Field Notes; that's retired (Oct 2026) in favor of
+// Future Tasks. The path keeps its old name so the Vercel cron config and
+// CRON_SECRET don't need touching.
 export async function GET(req: NextRequest) {
   const secret = process.env.CRON_SECRET?.trim();
   const auth = req.headers
@@ -16,24 +19,23 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // Hobby plan allows one cron invocation per day (see vercel.json). Import
-  // every connected blueprint on that run; each still uses its own timezone
-  // to decide which calendar day is "today".
-  const calendar = await syncAllCalendarsToFieldNotes();
-
-  // Same morning run: today's Future Tasks go into Field Notes, plus one
-  // Slack alert per blueprint. Runs even if the calendar import failed.
-  let futureTasks;
+  // Today's Future Tasks go into Field Notes, plus one Slack alert per
+  // blueprint.
   try {
-    futureTasks = await sendAllDue(supabaseAdmin(), {
+    const futureTasks = await sendAllDue(supabaseAdmin(), {
       siteUrl: getSiteUrlFromEnv(),
     });
+    return NextResponse.json({ futureTasks });
   } catch (e) {
-    futureTasks = {
-      ok: false,
-      sent: 0,
-      errors: [e instanceof Error ? e.message : String(e)],
-    };
+    return NextResponse.json(
+      {
+        futureTasks: {
+          ok: false,
+          sent: 0,
+          errors: [e instanceof Error ? e.message : String(e)],
+        },
+      },
+      { status: 500 },
+    );
   }
-  return NextResponse.json({ ...calendar, futureTasks });
 }

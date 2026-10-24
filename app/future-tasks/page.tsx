@@ -1,5 +1,5 @@
 // Future Tasks — to-dos that belong to a later date (or "someday"). On a
-// task's day the morning job (app/api/cron/calendar-to-drop) puts it into
+// task's day the morning job (app/api/cron/calendar-to-drop, which kept its old name) puts it into
 // Field Notes and sends a Slack alert. Logic: lib/future-tasks.ts.
 
 import { getCurrentBlueprint } from "@/lib/data";

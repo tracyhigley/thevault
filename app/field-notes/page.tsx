@@ -52,14 +52,6 @@ export default async function DropPage() {
                 + ADD BUILDINGS
               </Link>
             )}
-            {energies.length === 0 && (
-              <Link
-                href="/settings/energies"
-                className="brass-button px-4 py-2 font-mono text-[10px] tracking-[0.18em]"
-              >
-                + ADD ENERGIES
-              </Link>
-            )}
           </div>
         </div>
       )}

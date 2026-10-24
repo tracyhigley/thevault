@@ -30,13 +30,6 @@ export function buildItems(fiftyFdHref: string): NavItem[] {
       button: true,
     },
     {
-      href: "/future-tasks",
-      label: "FUTURE TASKS",
-      hint: "g t",
-      match: (p) => p.startsWith("/future-tasks"),
-      button: true,
-    },
-    {
       href: "/this-week",
       label: "THIS WEEK",
       hint: "g w",
@@ -59,7 +52,7 @@ export function buildItems(fiftyFdHref: string): NavItem[] {
     },
     {
       href: "/project-plans",
-      label: "PROJECT PLANS",
+      label: "BLDG PLANS",
       hint: "g p",
       match: (p) =>
         p.startsWith("/project-plans") &&
@@ -72,6 +65,13 @@ export function buildItems(fiftyFdHref: string): NavItem[] {
       label: "ALL PLANS",
       hint: "g u",
       match: (p) => p.startsWith("/project-plans/active"),
+      button: true,
+    },
+    {
+      href: "/future-tasks",
+      label: "FUTURE TASKS",
+      hint: "g t",
+      match: (p) => p.startsWith("/future-tasks"),
       button: true,
     },
     {
@@ -88,13 +88,6 @@ export function buildItems(fiftyFdHref: string): NavItem[] {
       match: (p) =>
         p === "/documents" ||
         (p.startsWith("/documents/") && !p.startsWith(fiftyFdHref)),
-      button: true,
-    },
-    {
-      href: "/calendar",
-      label: "CALENDAR",
-      hint: "g k",
-      match: (p) => p.startsWith("/calendar"),
       button: true,
     },
     {

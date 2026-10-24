@@ -24,8 +24,7 @@ export function GlobalShortcuts() {
   useShortcut("g c", go("/maint-tasks"), { label: "Maint Tasks", group: "Navigate" });
   useShortcut("g a", go("/project-tasks"), { label: "Project Tasks", group: "Navigate" });
   useShortcut("g e", go("/documents"), { label: "NOTES", group: "Navigate" });
-  useShortcut("g k", go("/calendar"), { label: "Calendar", group: "Navigate" });
-  useShortcut("g p", go("/project-plans"), { label: "Master Project Plans", group: "Navigate" });
+  useShortcut("g p", go("/project-plans"), { label: "Bldg Plans", group: "Navigate" });
   useShortcut("g u", go("/project-plans/active"), { label: "All Plans", group: "Navigate" });
   useShortcut("g f", go("/project-plans/completed"), { label: "Completed Projects", group: "Navigate" });
   useShortcut("g s", go("/settings"), { label: "Settings", group: "Navigate" });
