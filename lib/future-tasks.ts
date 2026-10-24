@@ -23,6 +23,7 @@ export const REPEATS = [
   { key: "biweekly", label: "Every 2 weeks" },
   { key: "monthly", label: "Every month" },
   { key: "quarterly", label: "Every 3 months" },
+  { key: "every90days", label: "Every 90 days" },
   { key: "semiannual", label: "Every 6 months" },
   { key: "yearly", label: "Every year" },
 ] as const;
@@ -117,6 +118,8 @@ export function stepRepeat(
       return addMonths(date, 1, anchor);
     case "quarterly":
       return addMonths(date, 3, anchor);
+    case "every90days":
+      return addDays(date, 90);
     case "semiannual":
       return addMonths(date, 6, anchor);
     case "yearly":
