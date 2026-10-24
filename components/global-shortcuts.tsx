@@ -21,7 +21,6 @@ export function GlobalShortcuts() {
   useShortcut("g r", go("/field-notes"), { label: "Field Notes", group: "Navigate" });
   useShortcut("g w", go("/this-week"), { label: "This Week", group: "Navigate" });
   useShortcut("g c", go("/maint-tasks"), { label: "Maint Tasks", group: "Navigate" });
-  useShortcut("g o", go("/done"), { label: "Done", group: "Navigate" });
   useShortcut("g a", go("/project-tasks"), { label: "Project Tasks", group: "Navigate" });
   useShortcut("g e", go("/documents"), { label: "NOTES", group: "Navigate" });
   useShortcut("g k", go("/calendar"), { label: "Calendar", group: "Navigate" });

@@ -63,7 +63,7 @@ export default async function BuildDayPage({
   // mirrors the same exclusions as the standalone Maint Tasks page: items
   // linked to a Project Task pulled onto Today (see addProjectTaskToToday),
   // custom blocks added from the Docket, and items already finished via
-  // completeTodayItem (state "done" — archived to /done, not re-offered
+  // completeTodayItem (state "done" — finished, not re-offered
   // here every time the wizard runs). `counterItems` itself stays
   // unfiltered for the Time Left step, which needs every Today item
   // regardless of source.

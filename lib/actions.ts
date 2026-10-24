@@ -60,8 +60,7 @@ const DAILY_WELLNESS_CENTER_DEFAULTS: DailyWellnessCenterDefault[] = [
 
 // Former daily defaults that have been retired. Any copy of these that is
 // still open (not done) gets soft-deleted on the next day build so it stops
-// showing up on Maint Tasks / Today. Completed rows are left untouched so
-// their history on /done stays intact.
+// showing up on Maint Tasks / Today. Completed rows are left untouched.
 const RETIRED_DAILY_WELLNESS_CENTER_TAGS = [
   "DAILY_WELLNESS_CENTER:WATER",
   "DAILY_WELLNESS_CENTER:LIFT",
@@ -92,7 +91,7 @@ const WELLNESS_CENTER_BUILDING_KEY = "THE_WELLNESS_CENTER";
  *     rebuild doesn't un-finish an already-checked-off task.
  *   - newest is done but finished on an earlier day -> that habit cycle
  *     is closed; create a fresh row for `date` so the earlier
- *     completion stays intact as its own record on /done.
+ *     completion stays intact as its own record.
  */
 async function ensureDailyWellnessCenterDefaults(
   sb: Awaited<ReturnType<typeof supabaseServer>>,
@@ -482,9 +481,9 @@ export async function softDeleteItem(itemId: string) {
  *   - Maint Task (plain Counter/ATM item): taken off today's plan and
  *     archived — state "done" + actual_end stamped, today_order cleared —
  *     so it disappears from Today and from Maint Tasks (see the state
- *     !== "done" filter there) and instead shows up on the /done page,
- *     grouped under today's date. Not soft-deleted, so undoTodayItemDone
- *     can restore it.
+ *     !== "done" filter there). Not soft-deleted, so the toast's Undo
+ *     (undoTodayItemDone) can restore it. (There used to be a /done
+ *     "Maint Done" page listing these — removed 2026-10-24.)
  */
 export async function completeTodayItem(
   itemId: string,
@@ -527,7 +526,6 @@ export async function completeTodayItem(
   revalidatePath("/field-notes");
   revalidatePath("/boxes");
   revalidatePath("/documents");
-  revalidatePath("/done");
   return { archivedAs };
 }
 
@@ -555,7 +553,6 @@ export async function undoTodayItemDone(itemId: string) {
   if (error) throw new Error(error.message);
   revalidatePath("/");
   revalidatePath("/maint-tasks");
-  revalidatePath("/done");
 }
 
 /** Permanently removes the row (use sparingly; soft-delete is the default elsewhere). */

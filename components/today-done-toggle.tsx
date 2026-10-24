@@ -31,7 +31,7 @@ export function TodayDoneToggle({ itemId }: { itemId: string }) {
           try {
             const { archivedAs } = await completeTodayItem(itemId);
             if (archivedAs === "maint") {
-              toast.success("Done — moved to your Done log.", {
+              toast.success("Done.", {
                 action: {
                   label: "Undo",
                   onClick: () => {

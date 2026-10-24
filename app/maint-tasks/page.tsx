@@ -84,8 +84,8 @@ export default async function CounterPage({
   // Project Tasks, not Maint Tasks, so they're excluded here entirely.
   // Custom blocks added from the Docket work the same way: tagged
   // CUSTOM_BLOCK so they show on Today but never land on Maint Tasks.
-  // Items finished from Today's docket (state "done") move to the /done
-  // archive instead of lingering here — see completeTodayItem.
+  // Items finished from Today's docket (state "done") drop off here —
+  // see completeTodayItem.
   const all = counterItems.filter(
     (it) =>
       !it.sourceTaskId && it.tag !== "CUSTOM_BLOCK" && it.state !== "done",
