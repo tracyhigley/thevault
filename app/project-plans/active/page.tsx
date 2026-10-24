@@ -103,7 +103,7 @@ export default async function AllProjectPlansPage() {
         const count = groups.reduce((n, g) => n + g.projects.length, 0);
         return (
           <section key={section.phase} className="mt-12">
-            <h2 className="border-paper-line text-brass border-b pb-2 font-mono text-[12px] tracking-[0.2em] uppercase">
+            <h2 className="serif-h border-paper-line text-brass border-b-2 pb-2 text-[30px] leading-tight md:text-[34px]">
               {section.label}
               {count > 0 ? ` · ${count}` : ""}
             </h2>
