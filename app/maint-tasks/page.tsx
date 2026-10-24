@@ -3,7 +3,7 @@ import Link from "next/link";
 import clsx from "clsx";
 import { getItemsByBox } from "@/lib/data";
 import { getBuildings } from "@/lib/categories";
-import { buildCounterGroups } from "@/lib/counter-groups";
+import { buildCounterGroups, UNASSIGNED_AREA_KEY } from "@/lib/counter-groups";
 import { EditableText, EditableFlag } from "@/components/editable-text";
 import { AreaPill } from "@/components/area-pill";
 import { NewCounterItemRow } from "@/components/new-counter-item-row";
@@ -33,6 +33,24 @@ const FILTERS: { key: Filter; label: string }[] = [
 
 // Second row: the same two maintenance groups as the Today page's cards.
 const GROUP_FILTERS: MaintGroup[] = ["general", "business"];
+
+// Top-level sections on the page: Urgent first (flat list), then the two
+// maintenance groups with their buildings nested underneath. Unassigned
+// items — and any building not listed in lib/maint-groups.ts — fall under
+// General Life, matching maintGroupFor().
+type PageSection = "urgent" | MaintGroup;
+const PAGE_SECTIONS: Record<PageSection, { rank: number; title: string }> = {
+  urgent: { rank: 0, title: "Urgent" },
+  general: { rank: 1, title: "General Life Maintenance Tasks" },
+  business: { rank: 2, title: "Business & Creative Maintenance Tasks" },
+};
+function pageSectionFor(groupKey: string): PageSection {
+  if (groupKey === "urgent") return "urgent";
+  return (
+    maintGroupFor(groupKey === UNASSIGNED_AREA_KEY ? null : groupKey) ??
+    "general"
+  );
+}
 
 const VALID_FILTERS: readonly Filter[] = [
   "all",
@@ -119,17 +137,25 @@ export default async function CounterPage({
   const counterGroups: CounterSectionGroup[] = buildCounterGroups(
     filtered,
     buildings,
-  ).map((g) => ({
-    key: g.key,
-    title: g.title,
-    color: g.color,
-    items: g.items.map(
-      (it): SortableItem => ({
-        id: it.id,
-        content: <CounterRow item={it} boxes={boxOpts} />,
-      }),
-    ),
-  }));
+  )
+    .map((g) => ({ g, section: pageSectionFor(g.key) }))
+    // Stable sort keeps building order inside each section.
+    .sort(
+      (a, b) => PAGE_SECTIONS[a.section].rank - PAGE_SECTIONS[b.section].rank,
+    )
+    .map(({ g, section }) => ({
+      key: g.key,
+      title: g.title,
+      color: g.color,
+      section: { key: section, title: PAGE_SECTIONS[section].title },
+      hideTitle: section === "urgent",
+      items: g.items.map(
+        (it): SortableItem => ({
+          id: it.id,
+          content: <CounterRow item={it} boxes={boxOpts} />,
+        }),
+      ),
+    }));
 
   return (
     <div className="mx-auto max-w-[1400px] px-4 py-8 md:px-10">

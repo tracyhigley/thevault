@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { Fragment, useEffect, useState, useTransition } from "react";
 import clsx from "clsx";
 import { SortableList, type SortableItem } from "@/components/sortable-list";
 import { reorderItems } from "@/lib/actions";
@@ -12,6 +12,13 @@ export type CounterSectionGroup = {
   /** Building's assigned color (hex), if any — tints the section heading. */
   color?: string;
   items: SortableItem[];
+  /** Optional top-level section (e.g. Urgent / General Life / Business &
+   *  Creative). A big header is drawn wherever this changes between
+   *  consecutive groups. */
+  section?: { key: string; title: string };
+  /** Skip the small "— Title —" heading (when the section header already
+   *  says the same thing, e.g. Urgent). */
+  hideTitle?: boolean;
 };
 
 /** Groups are already in display order — just flatten their items in place. */
@@ -58,26 +65,49 @@ export function CounterSectionedLists({
 
   return (
     <div className="space-y-6">
-      {groups.map((g) => (
-        <section key={g.key} aria-labelledby={`counter-section-${g.key}`}>
-          <h2
-            id={`counter-section-${g.key}`}
-            className={clsx(
-              "font-mono text-[14px] font-semibold tracking-[0.16em] uppercase",
-              !g.color && "text-ink-mute",
-            )}
-            style={g.color ? { color: g.color } : undefined}
-          >
-            — {g.title} —
-          </h2>
-          <div className="mt-2">
-            <SortableList
-              items={g.items}
-              onReorder={(next) => handleSectionReorder(g.key, next)}
-            />
-          </div>
-        </section>
-      ))}
+      {groups.map((g, i) => {
+        const startsSection =
+          g.section != null && g.section.key !== groups[i - 1]?.section?.key;
+        return (
+          <Fragment key={g.key}>
+            {startsSection ? (
+              <h2
+                className={clsx(
+                  "serif-h border-paper-line text-brass border-b-2 pb-2 text-[26px] leading-tight md:text-[30px]",
+                  i > 0 && "!mt-12",
+                )}
+              >
+                {g.section!.title}
+              </h2>
+            ) : null}
+            <section
+              aria-labelledby={
+                g.hideTitle ? undefined : `counter-section-${g.key}`
+              }
+              aria-label={g.hideTitle ? g.title : undefined}
+            >
+              {g.hideTitle ? null : (
+                <h3
+                  id={`counter-section-${g.key}`}
+                  className={clsx(
+                    "font-mono text-[14px] font-semibold tracking-[0.16em] uppercase",
+                    !g.color && "text-ink-mute",
+                  )}
+                  style={g.color ? { color: g.color } : undefined}
+                >
+                  — {g.title} —
+                </h3>
+              )}
+              <div className="mt-2">
+                <SortableList
+                  items={g.items}
+                  onReorder={(next) => handleSectionReorder(g.key, next)}
+                />
+              </div>
+            </section>
+          </Fragment>
+        );
+      })}
     </div>
   );
 }
