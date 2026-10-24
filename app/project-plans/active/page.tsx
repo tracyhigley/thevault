@@ -7,11 +7,12 @@
 // Route stays /project-plans/active (formerly "Active Plans") so nav
 // shortcuts and old links keep working.
 //
-// Under Construction rows keep the saved drag order (projects.active_order)
-// within each building, since This Week's per-building project picker
-// sorts by it — see app/this-week/page.tsx. The drag handles themselves
-// went away with the simple list (2026-10-24); ReorderableProjectCards is
-// no longer used here.
+// Within each building, projects sort by Priority (1 → 3, unset last).
+// Ties fall back to the saved drag order (projects.active_order) for Under
+// Construction — This Week's per-building project picker still sorts by
+// that, see app/this-week/page.tsx — or newest-edited for the others.
+// The drag handles themselves went away with the simple list (2026-10-24);
+// ReorderableProjectCards is no longer used here.
 
 import Link from "next/link";
 import { getBuildings } from "@/lib/categories";
@@ -60,6 +61,11 @@ export default async function AllProjectPlansPage() {
     const inPhase = projects
       .filter((p) => p.phase === phase && !isExcluded(p.title))
       .sort((a, b) => {
+        // Priority 1 → 3 first; unset priority goes last. Ties fall back
+        // to the previous order below.
+        const pa = a.priority ?? 99;
+        const pb = b.priority ?? 99;
+        if (pa !== pb) return pa - pb;
         if (phase === "building") {
           if (a.activeOrder != null && b.activeOrder != null) {
             return a.activeOrder - b.activeOrder;
