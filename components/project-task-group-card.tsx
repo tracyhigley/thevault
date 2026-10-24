@@ -3,13 +3,13 @@
 // header — replaces repeating the project title on every row when a
 // project has more than one task pulled onto this page. Header carries the
 // project title once; each task underneath is a slim row with just its own
-// controls (minutes, today toggle, done, delete). The building itself is
+// controls (minutes, done, delete). Checking a task on its Project Plan is
+// what puts it on Today now, so there is no separate Today toggle here. The building itself is
 // shown once, on the section heading these cards sit under (see
 // ProjectTaskBuildingGroups) — not repeated per card.
 
 import { useState } from "react";
 import { EditableProjectTaskMinutes } from "./editable-project-task-minutes";
-import { ProjectTaskTodayToggle } from "./project-task-today-toggle";
 import { ProjectTaskDeleteButton } from "./project-task-delete-button";
 import { ProjectTaskDoneButton } from "./project-task-done-button";
 import { ProjectTaskUrgentFlag } from "./project-task-urgent-flag";
@@ -65,14 +65,6 @@ function GroupTaskRow({
         taskId={task.taskId}
         initial={task.urgent}
         onChange={setUrgent}
-      />
-      <ProjectTaskTodayToggle
-        projectId={projectId}
-        taskId={task.taskId}
-        text={task.text}
-        minutes={task.minutes}
-        on={task.onToday}
-        size="sm"
       />
       <ProjectTaskDoneButton
         projectId={projectId}

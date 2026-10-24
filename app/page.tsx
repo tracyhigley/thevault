@@ -15,8 +15,7 @@ import { redirect } from "next/navigation";
 import { getItemsByBox, getDayInputs } from "@/lib/data";
 import { getBuildings } from "@/lib/categories";
 import { getProjects } from "@/lib/projects";
-import { getProjectTaskTodayLinks } from "@/lib/plan-actions";
-import { ProjectTaskGroupCard } from "@/components/project-task-group-card";
+import { ProjectTaskDoneToggle } from "@/components/project-task-done-toggle";
 import { CustomBlockForm } from "@/components/custom-block-form";
 import { DocketDayRange } from "@/components/docket-day-range";
 import { UnsealGlow } from "@/components/unseal-glow";
@@ -97,23 +96,15 @@ export default async function DocketPage() {
   const skipDropLanding =
     cookieStore.get(SKIP_FIELD_NOTES_LANDING_COOKIE)?.value === "1";
 
-  const [
-    counterItems,
-    dayRow,
-    dropItems,
-    buildings,
-    projects,
-    routineChecked,
-    projectTaskTodayLinks,
-  ] = await Promise.all([
-    getItemsByBox("COUNTER"),
-    getDayInputs(date),
-    getItemsByBox("DROP"),
-    getBuildings(),
-    getProjects(),
-    getRoutineDay(date),
-    getProjectTaskTodayLinks(),
-  ]);
+  const [counterItems, dayRow, dropItems, buildings, projects, routineChecked] =
+    await Promise.all([
+      getItemsByBox("COUNTER"),
+      getDayInputs(date),
+      getItemsByBox("DROP"),
+      getBuildings(),
+      getProjects(),
+      getRoutineDay(date),
+    ]);
 
   // Anything in Field Notes → open there first (fresh session / login). Once you’ve
   // built today, respect “take me to Today” via cookie from nav / wizard exit.
@@ -142,16 +133,13 @@ export default async function DocketPage() {
     (b) => b.key === "THE_WELLNESS_CENTER",
   );
 
-  const projectByTaskId = new Map<string, { id: string; building: string }>();
-  for (const p of projects) {
-    for (const t of p.tasks) {
-      projectByTaskId.set(t.id, { id: p.id, building: p.building });
-    }
-  }
-
   // Everything currently on today's plan, still open (not done/skipped).
+  // Project-Task-linked items are left out: a task checked on its Project
+  // Plan is what puts it on Today now (Currently Under Construction card),
+  // so any leftover "+ TODAY" links would just double it up.
   const todayItems = counterItems.filter(
     (it) =>
+      !it.sourceTaskId &&
       (it.todayOrder ?? null) !== null &&
       it.state !== "done" &&
       it.state !== "skipped",
@@ -162,57 +150,32 @@ export default async function DocketPage() {
   const businessCreativeRows: TodayRow[] = [];
 
   for (const it of todayItems) {
-    if (it.sourceTaskId) {
-      // Project Task pulled onto Today — building lives on the project.
-      const proj = projectByTaskId.get(it.sourceTaskId);
-      const building = proj ? buildingByKey.get(proj.building) : undefined;
-      const row: TodayRow = {
-        itemId: it.id,
-        title: it.title,
-        minutes: it.minutes ?? null,
-        evening: !!it.evening,
-        urgent: !!it.urgent,
-        buildingLabel: building?.label ?? proj?.building,
-        buildingColor: building?.color,
-        projectId: proj?.id,
-        taskId: it.sourceTaskId,
-      };
-      if (
-        wellnessCenterBuilding &&
-        proj?.building === wellnessCenterBuilding.key
-      ) {
-        wellnessCenterRows.push(row);
-      }
-      // Other Today-marked Project Tasks show up (with their Today toggle
-      // on) in the Currently Under Construction card below instead.
-    } else {
-      // Maint task (incl. custom quick-adds) — building lives on the item.
-      const building = it.area ? buildingByKey.get(it.area) : undefined;
-      const row: TodayRow = {
-        itemId: it.id,
-        title: it.title,
-        minutes: it.minutes ?? null,
-        evening: !!it.evening,
-        urgent: !!it.urgent,
-        tag: it.tag ?? null,
-        area: it.area ?? null,
-        buildingLabel: building?.label ?? it.area ?? undefined,
-        buildingColor: building?.color,
-      };
-      if (
-        wellnessCenterBuilding &&
-        it.area === wellnessCenterBuilding.key &&
-        (it.tag ?? "").startsWith("DAILY_")
-      ) {
-        // The fixed daily defaults stay in The Wellness Center card.
-        wellnessCenterRows.push(row);
-      } else if (it.area && BUSINESS_CREATIVE_BUILDINGS.has(it.area)) {
-        businessCreativeRows.push(row);
-      } else if (!it.area || GENERAL_LIFE_BUILDINGS.has(it.area)) {
-        // No-building items (custom quick-adds) land here too, since
-        // that's where the "+ ADD A CUSTOM TASK" button lives.
-        generalLifeRows.push(row);
-      }
+    // Maint task (incl. custom quick-adds) — building lives on the item.
+    const building = it.area ? buildingByKey.get(it.area) : undefined;
+    const row: TodayRow = {
+      itemId: it.id,
+      title: it.title,
+      minutes: it.minutes ?? null,
+      evening: !!it.evening,
+      urgent: !!it.urgent,
+      tag: it.tag ?? null,
+      area: it.area ?? null,
+      buildingLabel: building?.label ?? it.area ?? undefined,
+      buildingColor: building?.color,
+    };
+    if (
+      wellnessCenterBuilding &&
+      it.area === wellnessCenterBuilding.key &&
+      (it.tag ?? "").startsWith("DAILY_")
+    ) {
+      // The fixed daily defaults stay in The Wellness Center card.
+      wellnessCenterRows.push(row);
+    } else if (it.area && BUSINESS_CREATIVE_BUILDINGS.has(it.area)) {
+      businessCreativeRows.push(row);
+    } else if (!it.area || GENERAL_LIFE_BUILDINGS.has(it.area)) {
+      // No-building items (custom quick-adds) land here too, since
+      // that's where the "+ ADD A CUSTOM TASK" button lives.
+      generalLifeRows.push(row);
     }
   }
 
@@ -247,7 +210,6 @@ export default async function DocketPage() {
           text: t.text,
           minutes: t.minutes,
           urgent: t.urgent,
-          onToday: projectTaskTodayLinks[t.id]?.onToday ?? false,
         })),
     }));
   const underConstructionMinutes = underConstruction.reduce(
@@ -257,10 +219,11 @@ export default async function DocketPage() {
 
   // Evening-marked tasks are left out — this total is compared against the
   // hours left before End of Day, and evening tasks happen after that.
-  const totalTodayMinutes = todayItems.reduce(
-    (sum, it) => sum + (it.evening ? 0 : (it.minutes ?? 0)),
-    0,
-  );
+  const totalTodayMinutes =
+    todayItems.reduce(
+      (sum, it) => sum + (it.evening ? 0 : (it.minutes ?? 0)),
+      0,
+    ) + underConstructionMinutes;
 
   // Evening-marked Maint tasks are left out — they happen after End of Day,
   // so they shouldn't push the "Begin Maint Tasks at…" time earlier.
@@ -375,34 +338,47 @@ export default async function DocketPage() {
               No projects are Under Construction right now.
             </p>
           ) : (
-            <div className="space-y-3">
-              {underConstruction.map((g) =>
-                g.tasks.length > 0 ? (
-                  <ProjectTaskGroupCard
-                    key={g.projectId}
-                    projectId={g.projectId}
-                    projectTitle={g.projectTitle}
-                    tasks={g.tasks}
-                  />
-                ) : (
-                  <div
-                    key={g.projectId}
-                    className="border-paper-line/60 bg-paper-panel/40 rounded-sm border"
+            <div className="space-y-4">
+              {underConstruction.map((g) => (
+                <div key={g.projectId}>
+                  <Link
+                    href={`/project-plans/project/${g.projectId}`}
+                    className="text-ink hover:text-brass mb-1.5 block font-mono text-[11px] tracking-[0.14em] uppercase"
                   >
-                    <div className="border-paper-line/60 border-b px-4 py-2">
-                      <Link
-                        href={`/project-plans/project/${g.projectId}`}
-                        className="paper-task-title text-ink hover:text-brass"
-                      >
-                        {g.projectTitle}
-                      </Link>
-                    </div>
-                    <p className="text-ink-mute px-4 py-2 text-[12px]">
+                    {g.projectTitle}
+                  </Link>
+                  {g.tasks.length === 0 ? (
+                    <p className="text-ink-mute text-[12px]">
                       No checked tasks — open the plan to check some off.
                     </p>
-                  </div>
-                ),
-              )}
+                  ) : (
+                    <div className="space-y-1.5">
+                      {g.tasks.map((t) => (
+                        <div
+                          key={t.taskId}
+                          className="bg-paper-panel/40 border-paper-line/60 flex min-w-0 items-center gap-3 rounded-sm border px-3 py-2"
+                        >
+                          <ProjectTaskDoneToggle
+                            projectId={g.projectId}
+                            taskId={t.taskId}
+                          />
+                          <span className="paper-task-title min-w-0 flex-1 truncate">
+                            {t.text}
+                          </span>
+                          <span className="text-ink-mute flex shrink-0 items-baseline justify-end gap-1 font-mono text-[11px] whitespace-nowrap tabular-nums">
+                            <EditableProjectTaskMinutes
+                              projectId={g.projectId}
+                              taskId={t.taskId}
+                              initial={t.minutes}
+                            />
+                            <span>min</span>
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
           )}
         </div>
