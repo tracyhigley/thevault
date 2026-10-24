@@ -12,7 +12,6 @@ import { DropTriageRow } from "@/components/drop-triage-row";
 import { EditableText } from "@/components/editable-text";
 import { NewCounterItemRow } from "@/components/new-counter-item-row";
 import { TodayToggle } from "./today-toggle";
-import { ProjectTaskRollupItem } from "./project-task-rollup-item";
 import type { DayInputs, Item } from "@/lib/types";
 import type { Box, EnergyType } from "@/lib/categories";
 import { useShortcut } from "@/lib/shortcuts";
@@ -22,21 +21,8 @@ const STEPS = [
   { n: 1, title: "End Time" },
   { n: 2, title: "Field Notes" },
   { n: 3, title: "Maint Tasks" },
-  { n: 4, title: "Project Tasks" },
-  { n: 5, title: "Time Left" },
+  { n: 4, title: "Time Left" },
 ] as const;
-
-export type ProjectTaskRow = {
-  projectId: string;
-  taskId: string;
-  text: string;
-  minutes: number | null;
-  urgent: boolean;
-  buildingLabel: string;
-  buildingColor?: string;
-  projectTitle: string;
-  onToday: boolean;
-};
 
 export function BuildWizard({
   step,
@@ -46,7 +32,7 @@ export function BuildWizard({
   buildings,
   energies,
   maintItems,
-  projectRows,
+  projectMinutes,
 }: {
   step: number;
   inputs: DayInputs;
@@ -55,7 +41,7 @@ export function BuildWizard({
   buildings: Box[];
   energies: EnergyType[];
   maintItems: Item[];
-  projectRows: ProjectTaskRow[];
+  projectMinutes: number;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -90,12 +76,12 @@ export function BuildWizard({
   useShortcut(
     "enter",
     () => {
-      if (step === 3 || step === 4) next();
+      if (step === 3) next();
     },
     {
       label: "Continue",
       group: "Build day",
-      options: { enabled: step === 3 || step === 4 },
+      options: { enabled: step === 3 },
     },
   );
 
@@ -124,11 +110,11 @@ export function BuildWizard({
         {step === 3 && (
           <ReviewStep buildings={buildings} items={maintItems} onNext={next} />
         )}
-        {step === 4 && <ProjectTasksStep rows={projectRows} onNext={next} />}
-        {step === 5 && (
+        {step === 4 && (
           <TimeLeftStep
             inputs={inputs}
             counterItems={counterItems}
+            projectMinutes={projectMinutes}
             onFinish={finish}
           />
         )}
@@ -229,7 +215,7 @@ function DaySetupStep({
   return (
     <Step
       title="When does your day end?"
-      hint="Set your end-of-day time first. Next, you will clear Field Notes before choosing Maint Tasks and Project Tasks items for today."
+      hint="Set your end-of-day time first. Next, you will clear Field Notes before choosing Maint Tasks for today."
       pending={pending}
       onSubmit={submit}
       submitLabel="NEXT"
@@ -360,7 +346,7 @@ function ReviewStep({
           ? "Nothing on Maint Tasks yet — add items below, or continue with an empty plan."
           : "Edit titles and minutes as needed. Tap + TODAY on what you want scheduled; add more items anytime before you continue."
       }
-      submitLabel="ON TO PROJECT TASKS →"
+      submitLabel="ON TO TIME LEFT →"
       onSubmit={onNext}
     >
       <p className="text-ink-mute font-mono text-[11px] tracking-wider">
@@ -483,67 +469,33 @@ function formatDurationFromMinutes(totalMin: number): string {
   return `${m} min`;
 }
 
-// Step 4: pull tasks off Project Plans, same row + + TODAY toggle as the
-// standalone Project Tasks page.
-function ProjectTasksStep({
-  rows,
-  onNext,
-}: {
-  rows: ProjectTaskRow[];
-  onNext: () => void;
-}) {
-  return (
-    <Step
-      title="Anything to pull from Project Plans?"
-      hint={
-        rows.length === 0
-          ? "Nothing pulled onto Project Tasks yet — check off a task on a project that's under construction, or continue with none."
-          : "Tap + TODAY on anything you want to work on today."
-      }
-      submitLabel="ON TO TIME LEFT →"
-      onSubmit={onNext}
-    >
-      {rows.length === 0 ? (
-        <p className="border-paper-line/60 text-ink-mute rounded-sm border border-dashed px-4 py-6 text-center">
-          Nothing on Project Tasks right now.
-        </p>
-      ) : (
-        <div className="space-y-2">
-          {rows.map((r) => (
-            <ProjectTaskRollupItem
-              key={r.taskId}
-              projectId={r.projectId}
-              taskId={r.taskId}
-              text={r.text}
-              minutes={r.minutes}
-              urgent={r.urgent}
-              buildingLabel={r.buildingLabel}
-              buildingColor={r.buildingColor}
-              projectTitle={r.projectTitle}
-              onToday={r.onToday}
-            />
-          ))}
-        </div>
-      )}
-    </Step>
-  );
-}
-
-// Step 5: no more slider — just the leftover time in the day window, with
+// Step 4: no more slider — just the leftover time in the day window, with
 // a way to go pull more from Project Plans or head straight to Today.
 function TimeLeftStep({
   inputs,
   counterItems,
+  projectMinutes,
   onFinish,
 }: {
   inputs: DayInputs;
   counterItems: Item[];
+  projectMinutes: number;
   onFinish: () => void;
 }) {
   const windowMinutes = roundHoursToMinutes(Math.max(0, inputs.hoursAvailable));
-  const onTodayMinutes = counterItems
-    .filter((i) => (i.todayOrder ?? null) !== null)
-    .reduce((s, i) => s + (i.minutes ?? 0), 0);
+  // Maint items on Today + the checked Project Plan tasks the Today page
+  // shows under Currently Under Construction. Old "+ TODAY" project links
+  // (sourceTaskId) are skipped — Today no longer shows them.
+  const onTodayMinutes =
+    counterItems
+      .filter(
+        (i) =>
+          (i.todayOrder ?? null) !== null &&
+          !i.sourceTaskId &&
+          i.state !== "done" &&
+          i.state !== "skipped",
+      )
+      .reduce((s, i) => s + (i.minutes ?? 0), 0) + projectMinutes;
   const leftoverMinutes = windowMinutes - onTodayMinutes;
 
   return (
@@ -557,10 +509,10 @@ function TimeLeftStep({
       </h1>
       <p className="text-ink-dim mt-2">
         {leftoverMinutes > 0
-          ? `${formatDurationFromMinutes(leftoverMinutes)} still open after Maint Tasks and Project Tasks on Today.`
+          ? `${formatDurationFromMinutes(leftoverMinutes)} still open after maintenance and Under Construction tasks on Today.`
           : leftoverMinutes === 0
-            ? "Maint Tasks and Project Tasks on Today exactly fill your day window."
-            : `Maint Tasks and Project Tasks on Today run ${formatDurationFromMinutes(-leftoverMinutes)} past your day window.`}
+            ? "Maintenance and Under Construction tasks on Today exactly fill your day window."
+            : `Maintenance and Under Construction tasks on Today run ${formatDurationFromMinutes(-leftoverMinutes)} past your day window.`}
       </p>
 
       <div className="border-paper-line/60 bg-paper-panel/40 mt-10 rounded-sm border p-6 text-center">

@@ -1,12 +1,16 @@
 // Wizard: build today — set end time, clear Field Notes, review Maint Tasks,
-// pull Project Tasks, then see what's left in the day.
+// then see what's left in the day. (Project tasks are no longer pulled here:
+// checking a task on its Project Plan puts it on Today directly.)
 
 import { redirect } from "next/navigation";
 import { getDayInputs, getItemsByBox, getSettings } from "@/lib/data";
 import { defaultDayInputs } from "@/lib/data";
 import { getBuildings, getEnergies } from "@/lib/categories";
 import { getProjects } from "@/lib/projects";
-import { getProjectTaskTodayLinks } from "@/lib/plan-actions";
+import {
+  underConstructionGroups,
+  underConstructionMinutes,
+} from "@/lib/under-construction";
 import { BuildWizard } from "@/components/build-wizard";
 import type { DayInputs } from "@/lib/types";
 import { todayYmd } from "@/lib/day-timezone";
@@ -20,7 +24,7 @@ export default async function BuildDayPage({
   const date = todayYmd();
   let s = Number(stepParam ?? 1);
   if (!Number.isFinite(s) || s < 1) s = 1;
-  const step = Math.max(1, Math.min(5, s));
+  const step = Math.max(1, Math.min(4, s));
 
   const [
     dayRow,
@@ -30,7 +34,6 @@ export default async function BuildDayPage({
     energies,
     settings,
     projects,
-    todayLinks,
   ] = await Promise.all([
     getDayInputs(date),
     getItemsByBox("DROP"),
@@ -39,7 +42,6 @@ export default async function BuildDayPage({
     getEnergies(),
     getSettings(),
     getProjects(),
-    getProjectTaskTodayLinks(),
   ]);
 
   const dayRaw = dayRow ?? {
@@ -70,38 +72,13 @@ export default async function BuildDayPage({
       !it.sourceTaskId && it.tag !== "CUSTOM_BLOCK" && it.state !== "done",
   );
 
-  // Flatten Project Plans' onTaskList tasks the same way the standalone
-  // Project Tasks page does: one list, building tag per row, sorted
-  // oldest-pulled-first.
-  const buildingByKey = new Map(buildings.map((b) => [b.key, b]));
-  const active = projects.filter((p) => p.phase === "building");
-  const projectRows = active
-    .flatMap((p) =>
-      p.tasks
-        .filter((t) => t.onTaskList)
-        .map((t) => {
-          const building = buildingByKey.get(p.building);
-          return {
-            projectId: p.id,
-            taskId: t.id,
-            text: t.text,
-            minutes: t.minutes,
-            urgent: t.urgent,
-            createdAt: t.createdAt,
-            buildingLabel: building?.label ?? p.building,
-            buildingColor: building?.color,
-            projectTitle: p.title,
-            onToday: todayLinks[t.id]?.onToday ?? false,
-          };
-        }),
-    )
-    .sort(
-      (a, b) =>
-        Number(b.urgent) - Number(a.urgent) ||
-        a.createdAt.localeCompare(b.createdAt),
-    );
+  // Checked Project Plan tasks shown on Today (same set the Today page's
+  // Currently Under Construction card shows) — counted in Time Left.
+  const projectMinutes = underConstructionMinutes(
+    underConstructionGroups(projects),
+  );
 
-  if (step > 5) redirect("/");
+  if (step > 4) redirect("/");
 
   // Nothing to triage — skip the dead Field Notes step in both directions
   // (arriving fresh, or having just cleared the last item mid-step).
@@ -116,7 +93,7 @@ export default async function BuildDayPage({
       buildings={buildings}
       energies={energies}
       maintItems={maintReviewItems}
-      projectRows={projectRows}
+      projectMinutes={projectMinutes}
     />
   );
 }

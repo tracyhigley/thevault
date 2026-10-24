@@ -15,6 +15,10 @@ import { redirect } from "next/navigation";
 import { getItemsByBox, getDayInputs } from "@/lib/data";
 import { getBuildings } from "@/lib/categories";
 import { getProjects } from "@/lib/projects";
+import {
+  underConstructionGroups,
+  underConstructionMinutes,
+} from "@/lib/under-construction";
 import { ProjectTaskDoneToggle } from "@/components/project-task-done-toggle";
 import { CustomBlockForm } from "@/components/custom-block-form";
 import { DocketDayRange } from "@/components/docket-day-range";
@@ -66,9 +70,6 @@ const BUSINESS_CREATIVE_BUILDINGS = new Set([
   "THE_PRESS",
   "THE_MERCANTILE",
 ]);
-
-// Max checked tasks shown per project in Currently Under Construction.
-const UNDER_CONSTRUCTION_TASK_LIMIT = 3;
 
 const DAY_GREETINGS = [
   "Today",
@@ -181,41 +182,8 @@ export default async function DocketPage() {
 
   const buildingOpts = buildings.map((b) => ({ key: b.key, label: b.label }));
 
-  // Currently Under Construction: every project in the "building" phase,
-  // each with up to 3 of its checked (onTaskList) tasks — urgent first,
-  // then oldest-checked. Same project order as the Project Tasks page.
-  const underConstruction = projects
-    .filter((p) => p.phase === "building")
-    .sort((a, b) => {
-      if (a.taskGroupOrder != null && b.taskGroupOrder != null) {
-        return a.taskGroupOrder - b.taskGroupOrder;
-      }
-      if (a.taskGroupOrder != null) return -1;
-      if (b.taskGroupOrder != null) return 1;
-      return a.createdAt.localeCompare(b.createdAt);
-    })
-    .map((p) => ({
-      projectId: p.id,
-      projectTitle: p.title,
-      tasks: p.tasks
-        .filter((t) => t.onTaskList)
-        .sort(
-          (a, b) =>
-            Number(b.urgent) - Number(a.urgent) ||
-            a.createdAt.localeCompare(b.createdAt),
-        )
-        .slice(0, UNDER_CONSTRUCTION_TASK_LIMIT)
-        .map((t) => ({
-          taskId: t.id,
-          text: t.text,
-          minutes: t.minutes,
-          urgent: t.urgent,
-        })),
-    }));
-  const underConstructionMinutes = underConstruction.reduce(
-    (sum, g) => sum + g.tasks.reduce((s, t) => s + (t.minutes ?? 0), 0),
-    0,
-  );
+  const underConstruction = underConstructionGroups(projects);
+  const ucMinutes = underConstructionMinutes(underConstruction);
 
   // Evening-marked tasks are left out — this total is compared against the
   // hours left before End of Day, and evening tasks happen after that.
@@ -223,7 +191,7 @@ export default async function DocketPage() {
     todayItems.reduce(
       (sum, it) => sum + (it.evening ? 0 : (it.minutes ?? 0)),
       0,
-    ) + underConstructionMinutes;
+    ) + ucMinutes;
 
   // Evening-marked Maint tasks are left out — they happen after End of Day,
   // so they shouldn't push the "Begin Maint Tasks at…" time earlier.
@@ -330,7 +298,7 @@ export default async function DocketPage() {
               Currently Under Construction
             </h2>
             <span className="text-ink-mute shrink-0 font-mono text-[14px] tracking-wider tabular-nums">
-              {fmtHoursFromMinutes(underConstructionMinutes)}h
+              {fmtHoursFromMinutes(ucMinutes)}h
             </span>
           </div>
           {underConstruction.length === 0 ? (
