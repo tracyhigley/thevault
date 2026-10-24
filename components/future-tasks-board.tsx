@@ -160,7 +160,12 @@ export function FutureTasksBoard({
             <span className={labelCls}>Show it on</span>
             <input
               type="date"
-              className={inputCls}
+              // Hide the browser's "mm/dd/yyyy" hint while empty so the
+              // field doesn't look filled in; it shows again on focus.
+              className={clsx(
+                inputCls,
+                !form.show_on && "focus:text-ink! text-transparent!",
+              )}
               value={form.show_on}
               onChange={set("show_on")}
             />
