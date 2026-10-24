@@ -75,7 +75,7 @@ export default async function BuildDayPage({
   // Checked Project Plan tasks shown on Today (same set the Today page's
   // Currently Under Construction card shows) — counted in Time Left.
   const projectMinutes = underConstructionMinutes(
-    underConstructionGroups(projects),
+    underConstructionGroups(projects, date),
   );
 
   if (step > 4) redirect("/");

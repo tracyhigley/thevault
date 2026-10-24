@@ -12,6 +12,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { supabaseServer } from "@/lib/supabase/server";
 import { describeZodError } from "@/lib/zod-error";
+import { todayYmd } from "@/lib/day-timezone";
 import {
   isDayKey,
   type DayKey,
@@ -303,6 +304,7 @@ function normalizeTasks(raw: unknown): {
   onTaskList: boolean;
   done: boolean;
   urgent: boolean;
+  todayDate: string | null;
   createdAt: string;
 }[] {
   if (!Array.isArray(raw)) return [];
@@ -317,6 +319,7 @@ function normalizeTasks(raw: unknown): {
       onTaskList: !!t.onTaskList,
       done: !!t.done,
       urgent: !!t.urgent,
+      todayDate: typeof t.todayDate === "string" ? t.todayDate : null,
       createdAt:
         typeof t.createdAt === "string"
           ? t.createdAt
@@ -350,6 +353,7 @@ export async function addProjectTask(
     onTaskList: false,
     done: false,
     urgent: false,
+    todayDate: null,
     createdAt: new Date().toISOString(),
   };
   const { error: updateError } = await sb
@@ -777,4 +781,32 @@ export async function updateProjectTaskUrgent(
   revalidatePath("/project-tasks");
   revalidatePath("/build");
   revalidatePath("/");
+}
+
+// ☀ toggle on Today's Currently Under Construction rows: "I'm working on
+// this one today." Stores today's date on the task (so it lapses on its own
+// tomorrow); only sun-marked tasks count toward Today's hour totals.
+export async function setProjectTaskToday(
+  projectId: string,
+  taskId: string,
+  on: boolean,
+) {
+  const { sb } = await requireUser();
+  const { data, error } = await sb
+    .from("projects")
+    .select("tasks")
+    .eq("id", projectId)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  const date = todayYmd();
+  const tasks = normalizeTasks(data?.tasks).map((t) =>
+    t.id === taskId ? { ...t, todayDate: on ? date : null } : t,
+  );
+  const { error: updateError } = await sb
+    .from("projects")
+    .update({ tasks, modified_at: new Date().toISOString() })
+    .eq("id", projectId);
+  if (updateError) throw new Error(updateError.message);
+  revalidatePath("/");
+  revalidatePath("/build");
 }

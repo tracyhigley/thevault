@@ -20,6 +20,7 @@ import {
   underConstructionMinutes,
 } from "@/lib/under-construction";
 import { ProjectTaskDoneToggle } from "@/components/project-task-done-toggle";
+import { ProjectTaskSunToggle } from "@/components/project-task-sun-toggle";
 import { CustomBlockForm } from "@/components/custom-block-form";
 import { DocketDayRange } from "@/components/docket-day-range";
 import { UnsealGlow } from "@/components/unseal-glow";
@@ -182,7 +183,7 @@ export default async function DocketPage() {
 
   const buildingOpts = buildings.map((b) => ({ key: b.key, label: b.label }));
 
-  const underConstruction = underConstructionGroups(projects);
+  const underConstruction = underConstructionGroups(projects, date);
   const ucMinutes = underConstructionMinutes(underConstruction);
 
   // Evening-marked tasks are left out — this total is compared against the
@@ -330,6 +331,11 @@ export default async function DocketPage() {
                           <ProjectTaskDoneToggle
                             projectId={g.projectId}
                             taskId={t.taskId}
+                          />
+                          <ProjectTaskSunToggle
+                            projectId={g.projectId}
+                            taskId={t.taskId}
+                            initial={t.sun}
                           />
                           <span className="paper-task-title min-w-0 flex-1 truncate">
                             {t.text}

@@ -32,5 +32,8 @@ export type ProjectTask = {
   onTaskList: boolean;
   done: boolean; // finished via the Project Tasks page — shows struck through here
   urgent: boolean; // ⚡ flag, toggled from Project Tasks — same meaning as on Maint Tasks
+  // ☀ on Today's Currently Under Construction card: the YYYY-MM-DD it was
+  // chosen to work on. Only counts when it equals today, so it resets daily.
+  todayDate: string | null;
   createdAt: string; // ISO timestamp
 };

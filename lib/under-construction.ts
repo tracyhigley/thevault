@@ -22,6 +22,7 @@ export type UnderConstructionTask = {
   taskId: string;
   text: string;
   minutes: number | null;
+  sun: boolean; // ☀ chosen to work on today — only these count toward hours
 };
 
 export type UnderConstructionGroup = {
@@ -33,6 +34,7 @@ export type UnderConstructionGroup = {
 
 export function underConstructionGroups(
   projects: Project[],
+  today: string, // YYYY-MM-DD — a task's ☀ only counts on the day it was set
 ): UnderConstructionGroup[] {
   return projects
     .filter(
@@ -59,15 +61,22 @@ export function underConstructionGroups(
             a.createdAt.localeCompare(b.createdAt),
         )
         .slice(0, UNDER_CONSTRUCTION_TASK_LIMIT)
-        .map((t) => ({ taskId: t.id, text: t.text, minutes: t.minutes })),
+        .map((t) => ({
+          taskId: t.id,
+          text: t.text,
+          minutes: t.minutes,
+          sun: t.todayDate === today,
+        })),
     }));
 }
 
+// Minutes of the ☀-marked tasks only — the ones she's actually doing today.
 export function underConstructionMinutes(
   groups: UnderConstructionGroup[],
 ): number {
   return groups.reduce(
-    (sum, g) => sum + g.tasks.reduce((s, t) => s + (t.minutes ?? 0), 0),
+    (sum, g) =>
+      sum + g.tasks.reduce((s, t) => s + (t.sun ? (t.minutes ?? 0) : 0), 0),
     0,
   );
 }
