@@ -311,7 +311,7 @@ export default async function DocketPage() {
                 <div key={g.projectId}>
                   <Link
                     href={`/project-plans/project/${g.projectId}`}
-                    className="text-ink hover:text-brass mb-1.5 block font-mono text-[11px] tracking-[0.14em] uppercase"
+                    className="text-ink hover:text-brass mb-2 block text-[16px] font-bold"
                   >
                     {g.projectTitle}
                   </Link>

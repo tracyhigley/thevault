@@ -3,16 +3,20 @@
 // checked (onTaskList) on its Project Plan is what puts it on Today now;
 // there's no separate "+ TODAY" pull anymore.
 //
-// Which projects: everything in the "building" (Under Construction) phase,
-// plus any not-yet-complete project in The Support Center. Each shows up to
-// UNDER_CONSTRUCTION_TASK_LIMIT checked tasks — urgent first, then oldest.
+// Which projects: only those in the "building" (Under Construction) phase,
+// and only from The Support Center, Library, Press, and Mercantile. Each
+// shows up to UNDER_CONSTRUCTION_TASK_LIMIT checked tasks — urgent first, then oldest.
 
 import type { Project } from "./projects";
 
 export const UNDER_CONSTRUCTION_TASK_LIMIT = 3;
 
-// Buildings whose projects show on Today in any phase except Complete.
-const ALWAYS_SHOWN_BUILDINGS = new Set(["THE_SUPPORT_CENTER"]);
+const UNDER_CONSTRUCTION_BUILDINGS = new Set([
+  "THE_SUPPORT_CENTER",
+  "THE_LIBRARY",
+  "THE_PRESS",
+  "THE_MERCANTILE",
+]);
 
 export type UnderConstructionTask = {
   taskId: string;
@@ -32,8 +36,7 @@ export function underConstructionGroups(
   return projects
     .filter(
       (p) =>
-        p.phase === "building" ||
-        (p.phase !== "complete" && ALWAYS_SHOWN_BUILDINGS.has(p.building)),
+        p.phase === "building" && UNDER_CONSTRUCTION_BUILDINGS.has(p.building),
     )
     .sort((a, b) => {
       if (a.taskGroupOrder != null && b.taskGroupOrder != null) {
