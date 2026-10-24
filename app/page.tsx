@@ -1,5 +1,6 @@
-// The Docket — today's tasks, grouped into three cards (The Wellness Center,
-// Maint Tasks, Project Tasks). App home.
+// The Docket — today's tasks, grouped into four cards (The Wellness Center,
+// General Life Maintenance, Business & Creative Maintenance, Currently Under
+// Construction). App home.
 //
 // If today's day_inputs row hasn't been built yet, show a single calm
 // "Build my day" entry. Once she's been through the wizard, show the cards.
@@ -14,6 +15,8 @@ import { redirect } from "next/navigation";
 import { getItemsByBox, getDayInputs } from "@/lib/data";
 import { getBuildings } from "@/lib/categories";
 import { getProjects } from "@/lib/projects";
+import { getProjectTaskTodayLinks } from "@/lib/plan-actions";
+import { ProjectTaskGroupCard } from "@/components/project-task-group-card";
 import { CustomBlockForm } from "@/components/custom-block-form";
 import { DocketDayRange } from "@/components/docket-day-range";
 import { UnsealGlow } from "@/components/unseal-glow";
@@ -51,6 +54,23 @@ const ROUTINE_LOG_LINKS: Record<string, { href: string; label: string }> = {
   },
 };
 
+// Which buildings' Maint Tasks land in which Today maintenance card.
+const GENERAL_LIFE_BUILDINGS = new Set([
+  "THE_WELLNESS_CENTER",
+  "THE_SUPPORT_CENTER",
+  "THE_PORT",
+  "THE_GROUNDS",
+  "THE_FAMILY_LODGE",
+]);
+const BUSINESS_CREATIVE_BUILDINGS = new Set([
+  "THE_LIBRARY",
+  "THE_PRESS",
+  "THE_MERCANTILE",
+]);
+
+// Max checked tasks shown per project in Currently Under Construction.
+const UNDER_CONSTRUCTION_TASK_LIMIT = 3;
+
 const DAY_GREETINGS = [
   "Today",
   "Today is going to be great!",
@@ -77,15 +97,23 @@ export default async function DocketPage() {
   const skipDropLanding =
     cookieStore.get(SKIP_FIELD_NOTES_LANDING_COOKIE)?.value === "1";
 
-  const [counterItems, dayRow, dropItems, buildings, projects, routineChecked] =
-    await Promise.all([
-      getItemsByBox("COUNTER"),
-      getDayInputs(date),
-      getItemsByBox("DROP"),
-      getBuildings(),
-      getProjects(),
-      getRoutineDay(date),
-    ]);
+  const [
+    counterItems,
+    dayRow,
+    dropItems,
+    buildings,
+    projects,
+    routineChecked,
+    projectTaskTodayLinks,
+  ] = await Promise.all([
+    getItemsByBox("COUNTER"),
+    getDayInputs(date),
+    getItemsByBox("DROP"),
+    getBuildings(),
+    getProjects(),
+    getRoutineDay(date),
+    getProjectTaskTodayLinks(),
+  ]);
 
   // Anything in Field Notes → open there first (fresh session / login). Once you’ve
   // built today, respect “take me to Today” via cookie from nav / wizard exit.
@@ -130,8 +158,8 @@ export default async function DocketPage() {
   );
 
   const wellnessCenterRows: TodayRow[] = [];
-  const maintRows: TodayRow[] = [];
-  const projectRows: TodayRow[] = [];
+  const generalLifeRows: TodayRow[] = [];
+  const businessCreativeRows: TodayRow[] = [];
 
   for (const it of todayItems) {
     if (it.sourceTaskId) {
@@ -154,9 +182,9 @@ export default async function DocketPage() {
         proj?.building === wellnessCenterBuilding.key
       ) {
         wellnessCenterRows.push(row);
-      } else {
-        projectRows.push(row);
       }
+      // Other Today-marked Project Tasks show up (with their Today toggle
+      // on) in the Currently Under Construction card below instead.
     } else {
       // Maint task (incl. custom quick-adds) — building lives on the item.
       const building = it.area ? buildingByKey.get(it.area) : undefined;
@@ -171,15 +199,61 @@ export default async function DocketPage() {
         buildingLabel: building?.label ?? it.area ?? undefined,
         buildingColor: building?.color,
       };
-      if (wellnessCenterBuilding && it.area === wellnessCenterBuilding.key) {
+      if (
+        wellnessCenterBuilding &&
+        it.area === wellnessCenterBuilding.key &&
+        (it.tag ?? "").startsWith("DAILY_")
+      ) {
+        // The fixed daily defaults stay in The Wellness Center card.
         wellnessCenterRows.push(row);
-      } else {
-        maintRows.push(row);
+      } else if (it.area && BUSINESS_CREATIVE_BUILDINGS.has(it.area)) {
+        businessCreativeRows.push(row);
+      } else if (!it.area || GENERAL_LIFE_BUILDINGS.has(it.area)) {
+        // No-building items (custom quick-adds) land here too, since
+        // that's where the "+ ADD A CUSTOM TASK" button lives.
+        generalLifeRows.push(row);
       }
     }
   }
 
   const buildingOpts = buildings.map((b) => ({ key: b.key, label: b.label }));
+
+  // Currently Under Construction: every project in the "building" phase,
+  // each with up to 3 of its checked (onTaskList) tasks — urgent first,
+  // then oldest-checked. Same project order as the Project Tasks page.
+  const underConstruction = projects
+    .filter((p) => p.phase === "building")
+    .sort((a, b) => {
+      if (a.taskGroupOrder != null && b.taskGroupOrder != null) {
+        return a.taskGroupOrder - b.taskGroupOrder;
+      }
+      if (a.taskGroupOrder != null) return -1;
+      if (b.taskGroupOrder != null) return 1;
+      return a.createdAt.localeCompare(b.createdAt);
+    })
+    .map((p) => ({
+      projectId: p.id,
+      projectTitle: p.title,
+      tasks: p.tasks
+        .filter((t) => t.onTaskList)
+        .sort(
+          (a, b) =>
+            Number(b.urgent) - Number(a.urgent) ||
+            a.createdAt.localeCompare(b.createdAt),
+        )
+        .slice(0, UNDER_CONSTRUCTION_TASK_LIMIT)
+        .map((t) => ({
+          taskId: t.id,
+          text: t.text,
+          minutes: t.minutes,
+          urgent: t.urgent,
+          onToday: projectTaskTodayLinks[t.id]?.onToday ?? false,
+        })),
+    }));
+  const underConstructionMinutes = underConstruction.reduce(
+    (sum, g) => sum + g.tasks.reduce((s, t) => s + (t.minutes ?? 0), 0),
+    0,
+  );
 
   // Evening-marked tasks are left out — this total is compared against the
   // hours left before End of Day, and evening tasks happen after that.
@@ -190,7 +264,7 @@ export default async function DocketPage() {
 
   // Evening-marked Maint tasks are left out — they happen after End of Day,
   // so they shouldn't push the "Begin Maint Tasks at…" time earlier.
-  const maintMinutes = maintRows.reduce(
+  const maintMinutes = [...generalLifeRows, ...businessCreativeRows].reduce(
     (sum, r) => sum + (r.evening ? 0 : (r.minutes ?? 0)),
     0,
   );
@@ -264,12 +338,12 @@ export default async function DocketPage() {
           }
         />
         <TodayCard
-          title="Maint Tasks"
+          title="General Life Maintenance"
           tint="#eab308"
-          rows={maintRows}
+          rows={generalLifeRows}
           buildingMode="editable"
           buildingOpts={buildingOpts}
-          emptyLabel="Nothing marked Today from Maint Tasks."
+          emptyLabel="Nothing marked Today for General Life Maintenance."
           footer={
             <div className="mt-3">
               <CustomBlockForm />
@@ -277,13 +351,61 @@ export default async function DocketPage() {
           }
         />
         <TodayCard
-          title="Project Tasks"
-          tint="#3b82f6"
-          rows={projectRows}
-          buildingMode="tag"
+          title="Business & Creative Maintenance"
+          tint="#a855f7"
+          rows={businessCreativeRows}
+          buildingMode="editable"
           buildingOpts={buildingOpts}
-          emptyLabel="Nothing marked Today from Project Tasks."
+          emptyLabel="Nothing marked Today for Business & Creative Maintenance."
         />
+        <div
+          className="border-paper-line/60 rounded-sm border p-4"
+          style={{ backgroundColor: "#3b82f61f" }}
+        >
+          <div className="mb-3 flex items-center justify-between gap-2">
+            <h2 className="serif-h text-ink text-[18px]">
+              Currently Under Construction
+            </h2>
+            <span className="text-ink-mute shrink-0 font-mono text-[14px] tracking-wider tabular-nums">
+              {fmtHoursFromMinutes(underConstructionMinutes)}h
+            </span>
+          </div>
+          {underConstruction.length === 0 ? (
+            <p className="text-ink-mute text-[13px]">
+              No projects are Under Construction right now.
+            </p>
+          ) : (
+            <div className="space-y-3">
+              {underConstruction.map((g) =>
+                g.tasks.length > 0 ? (
+                  <ProjectTaskGroupCard
+                    key={g.projectId}
+                    projectId={g.projectId}
+                    projectTitle={g.projectTitle}
+                    tasks={g.tasks}
+                  />
+                ) : (
+                  <div
+                    key={g.projectId}
+                    className="border-paper-line/60 bg-paper-panel/40 rounded-sm border"
+                  >
+                    <div className="border-paper-line/60 border-b px-4 py-2">
+                      <Link
+                        href={`/project-plans/project/${g.projectId}`}
+                        className="paper-task-title text-ink hover:text-brass"
+                      >
+                        {g.projectTitle}
+                      </Link>
+                    </div>
+                    <p className="text-ink-mute px-4 py-2 text-[12px]">
+                      No checked tasks — open the plan to check some off.
+                    </p>
+                  </div>
+                ),
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
