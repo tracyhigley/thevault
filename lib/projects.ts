@@ -35,6 +35,9 @@ export type Project = {
   // active projects — same reasoning as items.today_order vs atm_order.
   activeOrder: number | null;
   taskGroupOrder: number | null;
+  // Project Plan dropdowns — 1, 2, or 3, null until set.
+  priority: number | null;
+  daysToBuild: number | null;
 };
 
 function envReady() {
@@ -92,6 +95,8 @@ function rowToProject(r: any): Project {
     activeOrder: typeof r.active_order === "number" ? r.active_order : null,
     taskGroupOrder:
       typeof r.task_group_order === "number" ? r.task_group_order : null,
+    priority: typeof r.priority === "number" ? r.priority : null,
+    daysToBuild: typeof r.days_to_build === "number" ? r.days_to_build : null,
   };
 }
 

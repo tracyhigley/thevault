@@ -225,6 +225,8 @@ const ProjectPatch = z.object({
   sketch: z.string().nullable().optional(),
   systems: z.string().nullable().optional(),
   building: z.string().min(1).max(40).optional(),
+  priority: z.number().int().min(1).max(3).nullable().optional(),
+  days_to_build: z.number().int().min(1).max(3).nullable().optional(),
 });
 
 export async function updateProjectPatch(

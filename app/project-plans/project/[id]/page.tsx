@@ -7,6 +7,7 @@ import { getBuildings, buildingSlug } from "@/lib/categories";
 import { getProject } from "@/lib/projects";
 import { ProjectFieldEditor } from "@/components/project-field-editor";
 import { ProjectPhaseControl } from "@/components/project-phase-control";
+import { ProjectNumberSelect } from "@/components/project-number-select";
 import { ProjectLog } from "@/components/project-log";
 import { ProjectTaskEditor } from "@/components/project-task-editor";
 import { DeleteProjectButton } from "@/components/delete-project-button";
@@ -64,6 +65,20 @@ export default async function ProjectPage({
             </div>
             <div className="mt-2 text-[13px] text-ink-dim">
               {fmtHoursFromMinutes(totalMinutes)} hours allotted
+            </div>
+            <div className="mt-3 flex flex-wrap items-center gap-4">
+              <ProjectNumberSelect
+                projectId={project.id}
+                field="priority"
+                label="Priority"
+                initial={project.priority}
+              />
+              <ProjectNumberSelect
+                projectId={project.id}
+                field="days_to_build"
+                label="Days to Build"
+                initial={project.daysToBuild}
+              />
             </div>
           </div>
           <ProjectPhaseControl projectId={project.id} phase={project.phase} />
