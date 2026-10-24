@@ -200,6 +200,13 @@ export function DropTriageRow({
         </select>
       </div>
 
+      {/* Notes carried in from Future Tasks (link, notes, "was due…") */}
+      {item.notes && (
+        <div className="text-ink-dim pr-4 pb-2 pl-6 text-[12px] break-words whitespace-pre-line">
+          <LinkifiedText text={item.notes} />
+        </div>
+      )}
+
       {/* Line 2 — metadata + actions, anchored right */}
       <div className="border-paper-line/30 bg-paper-bg/20 flex flex-wrap items-center gap-3 border-t py-1.5 pr-3 pl-6">
         <Minutes
@@ -378,5 +385,30 @@ function FlagToggle({
     >
       <FlagIcon kind={kind} filled={on} size={12} />
     </button>
+  );
+}
+
+// Turns bare https:// links in plain text into clickable links (new tab).
+// React escapes everything else.
+function LinkifiedText({ text }: { text: string }) {
+  const parts = text.split(/(https?:\/\/[^\s]+)/g);
+  return (
+    <>
+      {parts.map((part, i) =>
+        /^https?:\/\//.test(part) ? (
+          <a
+            key={i}
+            href={part}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-brass hover:underline"
+          >
+            {part}
+          </a>
+        ) : (
+          <span key={i}>{part}</span>
+        ),
+      )}
+    </>
   );
 }
