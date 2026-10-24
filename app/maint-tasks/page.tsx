@@ -17,8 +17,13 @@ import { CounterDoneButton } from "@/components/counter-done-button";
 import { DeleteItemButton } from "@/components/delete-item-button";
 import { fmtHoursFromMinutes } from "@/lib/format-hours";
 import type { Item } from "@/lib/types";
+import {
+  MAINT_GROUP_LABELS,
+  maintGroupFor,
+  type MaintGroup,
+} from "@/lib/maint-groups";
 
-type Filter = "all" | "urgent" | "quick" | "byarea";
+type Filter = "all" | "urgent" | "quick" | MaintGroup;
 
 const FILTERS: { key: Filter; label: string }[] = [
   { key: "all", label: "All" },
@@ -26,7 +31,15 @@ const FILTERS: { key: Filter; label: string }[] = [
   { key: "quick", label: "Quick (5–15)" },
 ];
 
-const VALID_FILTERS: readonly Filter[] = ["all", "urgent", "quick", "byarea"];
+// Second row: the same two maintenance groups as the Today page's cards.
+const GROUP_FILTERS: MaintGroup[] = ["general", "business"];
+
+const VALID_FILTERS: readonly Filter[] = [
+  "all",
+  "urgent",
+  "quick",
+  ...GROUP_FILTERS,
+];
 
 function sumMinutes(items: Item[]): number {
   return items.reduce((sum, item) => sum + (item.minutes ?? 0), 0);
@@ -51,7 +64,7 @@ function coerceFilter(raw: string | undefined): Filter {
   return VALID_FILTERS.includes(r as Filter) ? (r as Filter) : "all";
 }
 
-function applyFilter(items: Item[], f: Filter, area?: string): Item[] {
+function applyFilter(items: Item[], f: Filter): Item[] {
   switch (f) {
     case "urgent":
       return items.filter((i) => i.urgent);
@@ -59,8 +72,9 @@ function applyFilter(items: Item[], f: Filter, area?: string): Item[] {
       return items.filter(
         (i) => (i.minutes ?? 0) >= 5 && (i.minutes ?? 0) <= 15,
       );
-    case "byarea":
-      return area ? items.filter((i) => i.area === area) : items;
+    case "general":
+    case "business":
+      return items.filter((i) => maintGroupFor(i.area) === f);
     case "all":
     default:
       return items;
@@ -70,11 +84,10 @@ function applyFilter(items: Item[], f: Filter, area?: string): Item[] {
 export default async function CounterPage({
   searchParams,
 }: {
-  searchParams: Promise<{ filter?: string; area?: string }>;
+  searchParams: Promise<{ filter?: string }>;
 }) {
   const sp = await searchParams;
   const active = coerceFilter(firstQuery(sp.filter));
-  const area = firstQuery(sp.area);
   const [counterItems, buildings] = await Promise.all([
     getItemsByBox("COUNTER"),
     getBuildings(),
@@ -90,18 +103,13 @@ export default async function CounterPage({
     (it) =>
       !it.sourceTaskId && it.tag !== "CUSTOM_BLOCK" && it.state !== "done",
   );
-  const filtered = applyFilter(all, active, area);
-  const areas = buildings
-    .filter((b) => all.some((it) => it.area === b.key))
-    .map((b) => ({
-      key: b.key,
-      label: b.label,
-      minutes: sumMinutes(all.filter((it) => it.area === b.key)),
-    }));
-  const filterTotals: Partial<Record<Filter, number>> = {
+  const filtered = applyFilter(all, active);
+  const filterTotals: Record<Filter, number> = {
     all: sumMinutes(all),
     urgent: sumMinutes(applyFilter(all, "urgent")),
     quick: sumMinutes(applyFilter(all, "quick")),
+    general: sumMinutes(applyFilter(all, "general")),
+    business: sumMinutes(applyFilter(all, "business")),
   };
   const todayMinutes = sumMinutes(
     all.filter((it) => (it.todayOrder ?? null) !== null),
@@ -140,7 +148,12 @@ export default async function CounterPage({
           <span className="inline-block transition-transform group-open:rotate-90">
             ›
           </span>{" "}
-          {active === "all" ? "FILTER" : `FILTER · ${active.toUpperCase()}`}
+          {active === "all"
+            ? "FILTER"
+            : `FILTER · ${(active === "general" || active === "business"
+                ? MAINT_GROUP_LABELS[active]
+                : active
+              ).toUpperCase()}`}
         </summary>
         <div className="mt-3 space-y-2">
           <div className="flex flex-wrap gap-2">
@@ -159,7 +172,7 @@ export default async function CounterPage({
                       : "border-paper-line text-ink-mute hover:border-brass/40 hover:text-brass",
                   )}
                 >
-                  {`${f.label}: ${formatMinutesShort(filterTotals[f.key] ?? 0)}`}
+                  {`${f.label}: ${formatMinutesShort(filterTotals[f.key])}`}
                 </Link>
                 {f.key === "all" ? (
                   <span
@@ -172,30 +185,28 @@ export default async function CounterPage({
               </Fragment>
             ))}
           </div>
-          {areas.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {areas.map((a) => (
-                <Link
-                  key={a.key}
-                  href={`/maint-tasks?filter=byarea&area=${encodeURIComponent(a.key)}`}
-                  className={clsx(
-                    "rounded-sm border px-4 py-1.5 font-mono text-[11px] tracking-wider transition",
-                    active === "byarea" && area === a.key
-                      ? "border-brass bg-brass/10 text-brass"
-                      : "border-paper-line text-ink-mute hover:border-brass/40 hover:text-brass",
-                  )}
-                >
-                  {`${a.label}: ${formatMinutesShort(a.minutes)}`}
-                </Link>
-              ))}
-            </div>
-          )}
+          <div className="flex flex-wrap gap-2">
+            {GROUP_FILTERS.map((g) => (
+              <Link
+                key={g}
+                href={`/maint-tasks?filter=${g}`}
+                className={clsx(
+                  "rounded-sm border px-4 py-1.5 font-mono text-[11px] tracking-wider transition",
+                  active === g
+                    ? "border-brass bg-brass/10 text-brass"
+                    : "border-paper-line text-ink-mute hover:border-brass/40 hover:text-brass",
+                )}
+              >
+                {`${MAINT_GROUP_LABELS[g]}: ${formatMinutesShort(filterTotals[g])}`}
+              </Link>
+            ))}
+          </div>
         </div>
       </details>
 
       <div className="mt-6">
         <div className="mb-3">
-          <NewCounterItemRow boxes={boxOpts} initialArea={area ?? ""} />
+          <NewCounterItemRow boxes={boxOpts} initialArea="" />
         </div>
         {filtered.length === 0 ? (
           <p className="text-ink-mute mt-4 text-[13px]">
@@ -205,7 +216,7 @@ export default async function CounterPage({
           </p>
         ) : (
           <CounterSectionedLists
-            listKey={`${active}:${area ?? ""}`}
+            listKey={active}
             syncSignature={counterGroups
               .map((g) => `${g.key}:${g.items.map((i) => i.id).join(",")}`)
               .join("|")}
@@ -243,7 +254,7 @@ function CounterRow({
     >
       {item.urgent ? (
         <div
-          className="bg-amber-500 w-1 shrink-0 self-stretch rounded-sm"
+          className="w-1 shrink-0 self-stretch rounded-sm bg-amber-500"
           aria-hidden
         />
       ) : null}

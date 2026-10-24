@@ -15,6 +15,7 @@ import { redirect } from "next/navigation";
 import { getItemsByBox, getDayInputs } from "@/lib/data";
 import { getBuildings } from "@/lib/categories";
 import { getProjects } from "@/lib/projects";
+import { maintGroupFor } from "@/lib/maint-groups";
 import {
   underConstructionGroups,
   underConstructionMinutes,
@@ -57,20 +58,6 @@ const ROUTINE_LOG_LINKS: Record<string, { href: string; label: string }> = {
     label: "LOG LUNCH",
   },
 };
-
-// Which buildings' Maint Tasks land in which Today maintenance card.
-const GENERAL_LIFE_BUILDINGS = new Set([
-  "THE_WELLNESS_CENTER",
-  "THE_SUPPORT_CENTER",
-  "THE_PORT",
-  "THE_GROUNDS",
-  "THE_FAMILY_LODGE",
-]);
-const BUSINESS_CREATIVE_BUILDINGS = new Set([
-  "THE_LIBRARY",
-  "THE_PRESS",
-  "THE_MERCANTILE",
-]);
 
 const DAY_GREETINGS = [
   "Today",
@@ -172,9 +159,9 @@ export default async function DocketPage() {
     ) {
       // The fixed daily defaults stay in The Wellness Center card.
       wellnessCenterRows.push(row);
-    } else if (it.area && BUSINESS_CREATIVE_BUILDINGS.has(it.area)) {
+    } else if (maintGroupFor(it.area) === "business") {
       businessCreativeRows.push(row);
-    } else if (!it.area || GENERAL_LIFE_BUILDINGS.has(it.area)) {
+    } else if (maintGroupFor(it.area) === "general") {
       // No-building items (custom quick-adds) land here too, since
       // that's where the "+ ADD A CUSTOM TASK" button lives.
       generalLifeRows.push(row);
