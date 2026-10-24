@@ -4,8 +4,9 @@
 // there's no separate "+ TODAY" pull anymore.
 //
 // Which projects: only those in the "building" (Under Construction) phase,
-// and only from The Library, Press, Mercantile, and Support Center — always
-// listed in that building order (Tracy's choice, 2026-10-24). Within a
+// from these buildings, always listed in this order (Tracy's choice,
+// 2026-10-24): Library, Press, Mercantile, Support Center, then Wellness
+// Center, Grounds, Port, Family Lodge. Within a
 // building, projects keep their saved task-group order, then oldest first.
 // Each shows up to UNDER_CONSTRUCTION_TASK_LIMIT checked tasks — urgent
 // first, then oldest.
@@ -20,6 +21,10 @@ const UNDER_CONSTRUCTION_BUILDING_ORDER = [
   "THE_PRESS",
   "THE_MERCANTILE",
   "THE_SUPPORT_CENTER",
+  "THE_WELLNESS_CENTER",
+  "THE_GROUNDS",
+  "THE_PORT",
+  "THE_FAMILY_LODGE",
 ];
 const UNDER_CONSTRUCTION_BUILDINGS = new Set(UNDER_CONSTRUCTION_BUILDING_ORDER);
 const buildingRank = (key: string) =>
