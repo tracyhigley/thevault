@@ -20,17 +20,6 @@ import { getProjects, type Project } from "@/lib/projects";
 import type { ProjectPhase } from "@/lib/project-phases";
 import { ProjectNumberSelect } from "@/components/project-number-select";
 
-// Always hidden from this view — not part of the campus's building projects.
-// Matched by prefix since these recur as numbered instances, e.g.
-// "Build Endurance Project #1", "Build Endurance Project #2", etc.
-const EXCLUDED_TITLE_PREFIXES = [
-  "Build Muscle",
-  "Build Endurance",
-  "Sculpt Leaner Body",
-];
-const isExcluded = (title: string) =>
-  EXCLUDED_TITLE_PREFIXES.some((prefix) => title.startsWith(prefix));
-
 const SECTIONS: { phase: ProjectPhase; label: string; empty: string }[] = [
   {
     phase: "building",
@@ -60,7 +49,7 @@ export default async function AllProjectPlansPage() {
 
   function groupsFor(phase: ProjectPhase): BuildingGroup[] {
     const inPhase = projects
-      .filter((p) => p.phase === phase && !isExcluded(p.title))
+      .filter((p) => p.phase === phase)
       .sort((a, b) => {
         // Priority 1 → 3 first; unset priority goes last. Ties fall back
         // to the previous order below.
