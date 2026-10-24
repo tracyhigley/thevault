@@ -1,168 +1,163 @@
-// Active plans — everything currently under construction or in planning,
-// across the whole campus, grouped under those two headings. Each card shows
-// its building so you know where it lives without leaving this page.
+// All Plans — every project that isn't complete, in three sections
+// (Under Construction, Planning, Idea). Inside each section, projects are
+// grouped under a large building heading (in the settings' building order)
+// and listed simply: title, plus the Priority and Days to Build set on the
+// project's own page.
 //
-// The "Under construction" section absorbed the old standalone
-// /project-plans/under-construction page (2026-09-13) — that page showed
-// the exact same phase==="building" projects as this section, just without
-// the Planning section and without this page's title exclusions, which let
-// the two views quietly disagree. Its one real feature, drag-to-reorder
-// (writes projects.active_order, which This Week's per-building project
-// picker sorts by — see app/this-week/page.tsx), now lives here instead via
-// ReorderableProjectCards. Planning stays a plain list since there's
-// nothing to reorder there.
+// Route stays /project-plans/active (formerly "Active Plans") so nav
+// shortcuts and old links keep working.
+//
+// Under Construction rows keep the saved drag order (projects.active_order)
+// within each building, since This Week's per-building project picker
+// sorts by it — see app/this-week/page.tsx. The drag handles themselves
+// went away with the simple list (2026-10-24); ReorderableProjectCards is
+// no longer used here.
 
 import Link from "next/link";
 import { getBuildings } from "@/lib/categories";
 import { getProjects, type Project } from "@/lib/projects";
-import {
-  ReorderableProjectCards,
-  type ReorderableProjectCard,
-} from "@/components/reorderable-project-cards";
-import { fmtHoursFromMinutes } from "@/lib/format-hours";
+import type { ProjectPhase } from "@/lib/project-phases";
 
-export default async function ActiveProjectPlansPage() {
+// Always hidden from this view — not part of the campus's building projects.
+// Matched by prefix since these recur as numbered instances, e.g.
+// "Build Endurance Project #1", "Build Endurance Project #2", etc.
+const EXCLUDED_TITLE_PREFIXES = [
+  "Build Muscle",
+  "Build Endurance",
+  "Sculpt Leaner Body",
+];
+const isExcluded = (title: string) =>
+  EXCLUDED_TITLE_PREFIXES.some((prefix) => title.startsWith(prefix));
+
+const SECTIONS: { phase: ProjectPhase; label: string; empty: string }[] = [
+  {
+    phase: "building",
+    label: "Under Construction",
+    empty: "Nothing under construction — the campus is at rest.",
+  },
+  {
+    phase: "planning",
+    label: "Planning",
+    empty: "Nothing on the drafting table.",
+  },
+  { phase: "idea", label: "Idea", empty: "No ideas waiting." },
+];
+
+type BuildingGroup = {
+  key: string;
+  label: string;
+  color?: string;
+  projects: Project[];
+};
+
+export default async function AllProjectPlansPage() {
   const [buildings, projects] = await Promise.all([
     getBuildings(),
     getProjects(),
   ]);
 
-  const buildingByKey = new Map(buildings.map((b) => [b.key, b]));
-  const labelFor = (key: string) => buildingByKey.get(key)?.label ?? "Uncategorized";
-  const colorFor = (key: string) => buildingByKey.get(key)?.color;
-  const buildingOrder = new Map(buildings.map((b, i) => [b.key, i]));
-  const orderFor = (key: string) =>
-    buildingOrder.get(key) ?? Number.MAX_SAFE_INTEGER;
-
-  // Always hidden from this view — not part of the campus's building projects.
-  // Matched by prefix since these recur as numbered instances, e.g.
-  // "Build Endurance Project #1", "Build Endurance Project #2", etc.
-  const EXCLUDED_TITLE_PREFIXES = [
-    "Build Muscle",
-    "Build Endurance",
-    "Sculpt Leaner Body",
-  ];
-  const isExcluded = (title: string) =>
-    EXCLUDED_TITLE_PREFIXES.some((prefix) => title.startsWith(prefix));
-
-  // Under construction: manual drag order (active_order) first, else newest
-  // note first — same ordering the old standalone page used, since that
-  // order is what This Week's project picker reads.
-  const active = projects
-    .filter((p) => p.phase === "building" && !isExcluded(p.title))
-    .sort((a, b) => {
-      if (a.activeOrder != null && b.activeOrder != null) {
-        return a.activeOrder - b.activeOrder;
-      }
-      if (a.activeOrder != null) return -1;
-      if (b.activeOrder != null) return 1;
-      return (b.modifiedAt ?? "").localeCompare(a.modifiedAt ?? "");
-    });
-
-  // Planning has nothing to reorder, so it keeps the building-grouped sort.
-  const planning = projects
-    .filter((p) => p.phase === "planning" && !isExcluded(p.title))
-    .sort((a, b) => {
-      const buildingDiff = orderFor(a.building) - orderFor(b.building);
-      if (buildingDiff !== 0) return buildingDiff;
-      return (b.modifiedAt ?? "").localeCompare(a.modifiedAt ?? "");
-    });
-
-  const sumTaskMinutes = (tasks: Project["tasks"]) =>
-    tasks.filter((t) => !t.done).reduce((sum, t) => sum + (t.minutes ?? 0), 0);
-
-  const reorderableActive: ReorderableProjectCard[] = active.map((p) => ({
-    id: p.id,
-    title: p.title,
-    buildingLabel: labelFor(p.building),
-    buildingColor: colorFor(p.building),
-    lastLogDate: p.log.at(-1)?.date ?? null,
-    doneLooksLike: p.doneLooksLike,
-    totalMinutes: sumTaskMinutes(p.tasks),
-  }));
+  function groupsFor(phase: ProjectPhase): BuildingGroup[] {
+    const inPhase = projects
+      .filter((p) => p.phase === phase && !isExcluded(p.title))
+      .sort((a, b) => {
+        if (phase === "building") {
+          if (a.activeOrder != null && b.activeOrder != null) {
+            return a.activeOrder - b.activeOrder;
+          }
+          if (a.activeOrder != null) return -1;
+          if (b.activeOrder != null) return 1;
+        }
+        return (b.modifiedAt ?? "").localeCompare(a.modifiedAt ?? "");
+      });
+    const groups: BuildingGroup[] = buildings.map((b) => ({
+      key: b.key,
+      label: b.label,
+      color: b.color,
+      projects: inPhase.filter((p) => p.building === b.key),
+    }));
+    const known = new Set(buildings.map((b) => b.key));
+    const other = inPhase.filter((p) => !known.has(p.building));
+    if (other.length > 0) {
+      groups.push({ key: "__other", label: "Uncategorized", projects: other });
+    }
+    return groups.filter((g) => g.projects.length > 0);
+  }
 
   return (
-    <div className="mx-auto max-w-[1400px] px-4 py-8 md:px-10">
+    <div className="mx-auto max-w-[900px] px-4 py-8 md:px-10">
       <Link
         href="/project-plans"
-        className="font-mono text-[10px] tracking-[0.2em] text-ink-mute hover:text-brass"
+        className="text-ink-mute hover:text-brass font-mono text-[10px] tracking-[0.2em]"
       >
         ← MASTER PROJECT PLANS
       </Link>
       <h1 className="serif-h mt-3 text-[28px] leading-tight md:text-[36px]">
-        Active plans.
+        All plans.
       </h1>
-      <p className="mt-1 text-[13px] text-ink-dim">
-        Everything under construction or in planning, across the whole campus.
+      <p className="text-ink-dim mt-1 text-[13px]">
+        Every project under construction, in planning, or still an idea.
       </p>
 
-      <SectionHeader
-        label={`Under construction${active.length > 0 ? ` · ${active.length}` : ""}`}
-        accent
-      />
-      {active.length === 0 ? (
-        <p className="text-[13px] text-ink-mute">
-          Nothing under construction — the campus is at rest.
-        </p>
-      ) : (
-        <ReorderableProjectCards projects={reorderableActive} />
-      )}
-
-      <SectionHeader label={`Planning${planning.length > 0 ? ` · ${planning.length}` : ""}`} />
-      {planning.length === 0 ? (
-        <p className="text-[13px] text-ink-mute">Nothing on the drafting table.</p>
-      ) : (
-        <div className="mx-auto max-w-[900px] space-y-2">
-          {planning.map((p) => (
-            <ProjectCard key={p.id} project={p} buildingLabel={labelFor(p.building)} />
-          ))}
-        </div>
-      )}
+      {SECTIONS.map((section) => {
+        const groups = groupsFor(section.phase);
+        const count = groups.reduce((n, g) => n + g.projects.length, 0);
+        return (
+          <section key={section.phase} className="mt-12">
+            <h2 className="border-paper-line text-brass border-b pb-2 font-mono text-[12px] tracking-[0.2em] uppercase">
+              {section.label}
+              {count > 0 ? ` · ${count}` : ""}
+            </h2>
+            {groups.length === 0 ? (
+              <p className="text-ink-mute mt-4 text-[13px]">{section.empty}</p>
+            ) : (
+              groups.map((g) => (
+                <div key={g.key} className="mt-6">
+                  <h3 className="text-ink flex items-center gap-2.5 text-[22px] leading-tight font-bold">
+                    {g.color ? (
+                      <span
+                        className="h-3 w-3 shrink-0 rounded-full"
+                        style={{ background: g.color }}
+                        aria-hidden
+                      />
+                    ) : null}
+                    {g.label}
+                  </h3>
+                  <div className="mt-2 space-y-1.5">
+                    {g.projects.map((p) => (
+                      <ProjectRow key={p.id} project={p} />
+                    ))}
+                  </div>
+                </div>
+              ))
+            )}
+          </section>
+        );
+      })}
     </div>
   );
 }
 
-function SectionHeader({ label, accent }: { label: string; accent?: boolean }) {
-  return (
-    <div
-      className={`mt-10 mb-3 font-mono text-[10px] uppercase tracking-[0.2em] ${accent ? "text-brass" : "text-ink-mute"}`}
-    >
-      {label}
-    </div>
-  );
-}
-
-function ProjectCard({
-  project,
-  buildingLabel,
-}: {
-  project: Project;
-  buildingLabel: string;
-}) {
-  const lastLog = project.log.at(-1);
-  const totalMinutes = project.tasks
-    .filter((t) => !t.done)
-    .reduce((sum, t) => sum + (t.minutes ?? 0), 0);
+function ProjectRow({ project }: { project: Project }) {
   return (
     <Link
       href={`/project-plans/project/${project.id}`}
-      className="block rounded-sm border border-paper-line bg-paper-panel px-4 py-3 transition hover:border-brass/60"
+      className="border-paper-line bg-paper-panel hover:border-brass/60 flex flex-wrap items-center justify-between gap-x-4 gap-y-1 rounded-sm border px-4 py-2.5 transition"
     >
-      <div className="flex flex-wrap items-baseline justify-between gap-x-3">
-        <span className="paper-task-title text-ink">{project.title}</span>
-        <span className="font-mono text-[10px] text-ink-mute">
-          {buildingLabel.toUpperCase()}
-          {lastLog ? ` · last note ${lastLog.date}` : ""}
-          {totalMinutes > 0
-            ? ` · ${fmtHoursFromMinutes(totalMinutes)} hrs`
-            : ""}
+      <span className="paper-task-title text-ink min-w-0">{project.title}</span>
+      <span className="text-ink-mute flex shrink-0 gap-3 font-mono text-[11px] tracking-wider whitespace-nowrap">
+        <span>
+          PRIORITY{" "}
+          <span className="text-ink font-semibold">
+            {project.priority ?? "—"}
+          </span>
         </span>
-      </div>
-      {project.doneLooksLike ? (
-        <div className="mt-1 text-[12px] text-ink-dim">
-          Done looks like: {project.doneLooksLike}
-        </div>
-      ) : null}
+        <span>
+          DAYS TO BUILD{" "}
+          <span className="text-ink font-semibold">
+            {project.daysToBuild ?? "—"}
+          </span>
+        </span>
+      </span>
     </Link>
   );
 }

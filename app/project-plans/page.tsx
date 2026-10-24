@@ -43,7 +43,7 @@ export default async function MasterPlanPage() {
         href="/project-plans/active"
         className="mt-4 inline-block font-mono text-[10px] tracking-[0.2em] text-brass hover:text-brass-bright"
       >
-        VIEW ALL ACTIVE PLANS →
+        VIEW ALL PLANS →
       </Link>
 
       {buildings.length === 0 ? (

@@ -62,7 +62,7 @@ export function buildItems(fiftyFdHref: string): NavItem[] {
     },
     {
       href: "/project-plans/active",
-      label: "ACTIVE PLANS",
+      label: "ALL PLANS",
       hint: "g u",
       match: (p) => p.startsWith("/project-plans/active"),
       button: true,
