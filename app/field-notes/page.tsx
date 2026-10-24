@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getItemsByBox } from "@/lib/data";
-import { getBuildings, getEnergies } from "@/lib/categories";
+import { getBuildings } from "@/lib/categories";
 import { NewItemRow } from "@/components/new-item-row";
 import { SortableList } from "@/components/sortable-list";
 import { DropTriageRow } from "@/components/drop-triage-row";
@@ -9,10 +9,9 @@ import { DropKeyboardController } from "@/components/drop-keyboard-controller";
 import { Kbd } from "@/components/kbd";
 
 export default async function DropPage() {
-  const [list, buildings, energies] = await Promise.all([
+  const [list, buildings] = await Promise.all([
     getItemsByBox("DROP"),
     getBuildings(),
-    getEnergies(),
   ]);
 
   // Nothing left to triage — hand back to "/", which decides what's next
@@ -21,7 +20,7 @@ export default async function DropPage() {
     redirect("/");
   }
 
-  const ready = buildings.length > 0 && energies.length > 0;
+  const ready = buildings.length > 0;
 
   return (
     <div className="mx-auto max-w-[1400px] px-4 py-8 md:px-10">
@@ -30,8 +29,8 @@ export default async function DropPage() {
       </h1>
       <p className="text-ink-dim mt-1 text-[13px]">
         {ready
-          ? "Triage each thought — pick a building, set time/flags/energy, send."
-          : "Untriaged captures. Set up your buildings and energies before triaging."}
+          ? "Triage each thought — pick a building, set time/flags, send."
+          : "Untriaged captures. Set up your buildings before triaging."}
       </p>
 
       {!ready && (
@@ -40,18 +39,15 @@ export default async function DropPage() {
             Set up your blueprint first.
           </h3>
           <p className="text-ink-dim mt-1 text-[13px]">
-            Triage needs at least one building (where things go) and one energy
-            (which decides Project Tasks vs Maint Tasks).
+            Triage needs at least one building (where things go).
           </p>
           <div className="mt-4 flex flex-wrap gap-3">
-            {buildings.length === 0 && (
-              <Link
-                href="/settings/buildings"
-                className="brass-button px-4 py-2 font-mono text-[10px] tracking-[0.18em]"
-              >
-                + ADD BUILDINGS
-              </Link>
-            )}
+            <Link
+              href="/settings/buildings"
+              className="brass-button px-4 py-2 font-mono text-[10px] tracking-[0.18em]"
+            >
+              + ADD BUILDINGS
+            </Link>
           </div>
         </div>
       )}
@@ -67,8 +63,7 @@ export default async function DropPage() {
             Maint Tasks
           </span>
           <span className="flex items-center gap-1.5">
-            <Kbd keys="b" size="xs" /> box <Kbd keys="t" size="xs" /> time{" "}
-            <Kbd keys="e" size="xs" /> energy
+            <Kbd keys="b" size="xs" /> box <Kbd keys="t" size="xs" /> time
           </span>
           <span className="flex items-center gap-1.5">
             <Kbd keys="u" size="xs" /> urgent <Kbd keys="m" size="xs" /> must{" "}
@@ -93,7 +88,7 @@ export default async function DropPage() {
           items={list.map((it) => ({
             id: it.id,
             content: (
-              <DropTriageRow item={it} boxes={buildings} energies={energies} />
+              <DropTriageRow item={it} boxes={buildings} />
             ),
           }))}
         />
@@ -104,7 +99,7 @@ export default async function DropPage() {
         <Link href="/field-notes/add" className="text-brass underline">
           Add a Field Note
         </Link>{" "}
-        page. Edit buildings and energies under{" "}
+        page. Edit buildings under{" "}
         <Link href="/settings/buildings" className="text-brass underline">
           Settings
         </Link>

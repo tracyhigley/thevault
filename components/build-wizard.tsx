@@ -13,7 +13,7 @@ import { EditableText } from "@/components/editable-text";
 import { NewCounterItemRow } from "@/components/new-counter-item-row";
 import { TodayToggle } from "./today-toggle";
 import type { DayInputs, Item } from "@/lib/types";
-import type { Box, EnergyType } from "@/lib/categories";
+import type { Box } from "@/lib/categories";
 import { useShortcut } from "@/lib/shortcuts";
 import { Kbd } from "./kbd";
 
@@ -30,7 +30,6 @@ export function BuildWizard({
   dropItems,
   counterItems,
   buildings,
-  energies,
   maintItems,
   projectMinutes,
 }: {
@@ -39,7 +38,6 @@ export function BuildWizard({
   dropItems: Item[];
   counterItems: Item[];
   buildings: Box[];
-  energies: EnergyType[];
   maintItems: Item[];
   projectMinutes: number;
 }) {
@@ -103,7 +101,6 @@ export function BuildWizard({
           <DropStep
             dropItems={dropItems}
             buildings={buildings}
-            energies={energies}
             onNext={next}
           />
         )}
@@ -238,12 +235,10 @@ function DaySetupStep({
 function DropStep({
   dropItems,
   buildings,
-  energies,
   onNext,
 }: {
   dropItems: Item[];
   buildings: Box[];
-  energies: EnergyType[];
   onNext: () => void;
 }) {
   const router = useRouter();
@@ -276,7 +271,6 @@ function DropStep({
               key={item.id}
               item={item}
               boxes={buildings}
-              energies={energies}
             />
           ))}
           <p className="text-ink-mute pt-2 text-[12px]">

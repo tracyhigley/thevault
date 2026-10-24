@@ -7,7 +7,7 @@ import { EditableText } from "@/components/editable-text";
 import { FlagIcon, type FlagKind } from "@/components/flag-icons";
 import { Kbd } from "@/components/kbd";
 import { useShortcut } from "@/lib/shortcuts";
-import type { Box, Destination, EnergyType } from "@/lib/categories";
+import type { Box, Destination } from "@/lib/categories";
 import type { Item } from "@/lib/types";
 
 // Field Notes row, two compact lines:
@@ -22,11 +22,9 @@ import type { Item } from "@/lib/types";
 export function DropTriageRow({
   item,
   boxes,
-  energies: _energies,
 }: {
   item: Item;
   boxes: Box[];
-  energies: EnergyType[];
 }) {
   const [boxKey, setBoxKey] = useState<string>(
     item.area ?? item.category ?? "",

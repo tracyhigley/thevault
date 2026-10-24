@@ -1,7 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
   classify,
-  pickAtmCandidates,
   buildSchedule,
   ceilToNextFiveMinuteLocal,
   formatEndOfDay12h,
@@ -75,80 +74,6 @@ describe("classify", () => {
     ];
     const r = classify(items);
     expect(r.stressors).toHaveLength(1);
-  });
-});
-
-describe("pickAtmCandidates", () => {
-  it("includes creative when creative > prob-solv", () => {
-    const items = [
-      baseItem({ box: "ATM", energy: "CREATIVE", minutes: 30, title: "a" }),
-      baseItem({ box: "ATM", energy: "PROB-SOLV", minutes: 30, title: "b" }),
-    ];
-    const r = pickAtmCandidates(items, { ...inputs, creative: 4, probSolv: 2 });
-    expect(r.map((x) => x.title)).toEqual(["a"]);
-  });
-
-  it("filters out items longer than available hours", () => {
-    const items = [
-      baseItem({
-        box: "ATM",
-        energy: "PROB-SOLV",
-        minutes: 9999,
-        title: "huge",
-      }),
-    ];
-    const r = pickAtmCandidates(items, inputs);
-    expect(r).toEqual([]);
-  });
-
-  it("low total energy only surfaces LEISURE/PEOPLE areas", () => {
-    const items = [
-      baseItem({
-        box: "ATM",
-        energy: "LEISURE",
-        category: "LEISURE",
-        minutes: 30,
-        title: "rest",
-      }),
-      baseItem({
-        box: "ATM",
-        energy: "CREATIVE",
-        category: "ECO",
-        minutes: 20,
-        title: "deep work",
-      }),
-    ];
-    const r = pickAtmCandidates(items, {
-      ...inputs,
-      creative: 2,
-      probSolv: 2,
-    });
-    expect(r.map((x) => x.title)).toEqual(["rest"]);
-  });
-
-  it("low total energy excludes creative even when creative > prob-solv", () => {
-    const items = [
-      baseItem({
-        box: "ATM",
-        energy: "CREATIVE",
-        category: "ECO",
-        minutes: 30,
-        title: "work",
-      }),
-      baseItem({
-        box: "ATM",
-        energy: "LEISURE",
-        area: "PEOPLE",
-        minutes: 15,
-        title: "call a friend",
-      }),
-    ];
-    const r = pickAtmCandidates(items, {
-      ...inputs,
-      creative: 4,
-      probSolv: 1,
-    });
-    expect(r.map((x) => x.title)).toEqual(["call a friend"]);
   });
 });
 

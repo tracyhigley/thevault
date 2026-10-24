@@ -5,7 +5,7 @@
 import { redirect } from "next/navigation";
 import { getDayInputs, getItemsByBox, getSettings } from "@/lib/data";
 import { defaultDayInputs } from "@/lib/data";
-import { getBuildings, getEnergies } from "@/lib/categories";
+import { getBuildings } from "@/lib/categories";
 import { getProjects } from "@/lib/projects";
 import {
   underConstructionGroups,
@@ -31,7 +31,6 @@ export default async function BuildDayPage({
     dropItems,
     counterItems,
     buildings,
-    energies,
     settings,
     projects,
   ] = await Promise.all([
@@ -39,7 +38,6 @@ export default async function BuildDayPage({
     getItemsByBox("DROP"),
     getItemsByBox("COUNTER"),
     getBuildings(),
-    getEnergies(),
     getSettings(),
     getProjects(),
   ]);
@@ -91,7 +89,6 @@ export default async function BuildDayPage({
       dropItems={dropItems}
       counterItems={counterItems}
       buildings={buildings}
-      energies={energies}
       maintItems={maintReviewItems}
       projectMinutes={projectMinutes}
     />

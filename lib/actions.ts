@@ -963,26 +963,6 @@ export async function saveBoxConfig(boxes: z.input<typeof BoxConfig>[]) {
   revalidatePath("/", "layout");
 }
 
-const EnergyConfig = z.object({
-  key: z
-    .string()
-    .min(1)
-    .max(40)
-    .transform((v) => v.toUpperCase().replace(/\s/g, "-")),
-  label: z.string().min(1).max(60),
-});
-
-export async function saveEnergyConfig(
-  energies: z.input<typeof EnergyConfig>[],
-) {
-  const { sb } = await requireUser();
-  const vaultId = await currentVaultId();
-  if (!vaultId) throw new Error("No vault");
-  const parsed = energies.map((e) => EnergyConfig.parse(e));
-  await sb.from("settings").upsert({ vault_id: vaultId, energies: parsed });
-  revalidatePath("/", "layout");
-}
-
 // Folder now holds a building key (e.g. "THE_WELLNESS_CENTER") from
 // settings.buildings, which is user-configurable — so this is a free string,
 // not a fixed enum. normalizeDocumentFolderKey still translates any leftover

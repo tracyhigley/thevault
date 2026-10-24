@@ -7,7 +7,7 @@
 //   ATM     — energy-matched pulls; carries `category`, `energy`, `minutes`
 //   COUNTER — obligations; carries `area`, `urgent`, `must`, `minutes`
 //
-// Buildings, documents, and energies all live in `settings` JSONB so
+// Buildings and documents all live in `settings` JSONB so
 // they're editable from the Settings UI. No defaults — vaults start empty.
 
 import { normalizeDocumentFolderKey } from "@/lib/document-folders";
@@ -39,32 +39,6 @@ function normalize(raw: any): Box | null {
 }
 
 export type Destination = "ATM" | "COUNTER";
-
-// Energies are pure metadata — they live on ATM items, used by the daily
-// energy-matching to decide what to pick today. Counter items don't
-// carry energy.
-export type EnergyType = {
-  key: string;
-  label: string;
-};
-
-function normalizeEnergy(raw: any): EnergyType | null {
-  if (!raw || typeof raw !== "object") return null;
-  const key = typeof raw.key === "string" ? raw.key : null;
-  if (!key) return null;
-  return {
-    key,
-    label: typeof raw.label === "string" ? raw.label : key,
-  };
-}
-
-export async function getEnergies(): Promise<EnergyType[]> {
-  const sb = await supabaseServer();
-  const { data } = await sb.from("settings").select("energies").maybeSingle();
-  const raw = (data?.energies as any[]) ?? null;
-  if (!raw || !Array.isArray(raw)) return [];
-  return raw.map(normalizeEnergy).filter((e): e is EnergyType => e !== null);
-}
 
 // Buildings are the Master Project Plans' life domains (The Library, The Press, …) —
 // same shape as boxes, separately configured so the planning layer never
