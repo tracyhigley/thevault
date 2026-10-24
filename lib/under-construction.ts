@@ -27,6 +27,7 @@ export type UnderConstructionTask = {
 export type UnderConstructionGroup = {
   projectId: string;
   projectTitle: string;
+  building: string; // building key — Today shows its label before the title
   tasks: UnderConstructionTask[];
 };
 
@@ -49,6 +50,7 @@ export function underConstructionGroups(
     .map((p) => ({
       projectId: p.id,
       projectTitle: p.title,
+      building: p.building,
       tasks: p.tasks
         .filter((t) => t.onTaskList)
         .sort(

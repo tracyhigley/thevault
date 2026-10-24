@@ -313,6 +313,7 @@ export default async function DocketPage() {
                     href={`/project-plans/project/${g.projectId}`}
                     className="text-ink hover:text-brass mb-2 block text-[16px] font-bold"
                   >
+                    {buildingByKey.get(g.building)?.label ?? g.building}:{" "}
                     {g.projectTitle}
                   </Link>
                   {g.tasks.length === 0 ? (
