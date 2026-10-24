@@ -18,6 +18,7 @@ import Link from "next/link";
 import { getBuildings } from "@/lib/categories";
 import { getProjects, type Project } from "@/lib/projects";
 import type { ProjectPhase } from "@/lib/project-phases";
+import { ProjectNumberSelect } from "@/components/project-number-select";
 
 // Always hidden from this view — not part of the campus's building projects.
 // Matched by prefix since these recur as numbered instances, e.g.
@@ -143,27 +144,32 @@ export default async function AllProjectPlansPage() {
   );
 }
 
+// Only the title is a link — the Priority / Days to Build dropdowns sit
+// beside it and save in place (same component as the Project Plan page),
+// and the list re-sorts by Priority once a change saves.
 function ProjectRow({ project }: { project: Project }) {
   return (
-    <Link
-      href={`/project-plans/project/${project.id}`}
-      className="border-paper-line bg-paper-panel hover:border-brass/60 flex flex-wrap items-center justify-between gap-x-4 gap-y-1 rounded-sm border px-4 py-2.5 transition"
-    >
-      <span className="paper-task-title text-ink min-w-0">{project.title}</span>
-      <span className="text-ink-mute flex shrink-0 gap-3 font-mono text-[11px] tracking-wider whitespace-nowrap">
-        <span>
-          PRIORITY{" "}
-          <span className="text-ink font-semibold">
-            {project.priority ?? "—"}
-          </span>
-        </span>
-        <span>
-          DAYS TO BUILD{" "}
-          <span className="text-ink font-semibold">
-            {project.daysToBuild ?? "—"}
-          </span>
-        </span>
-      </span>
-    </Link>
+    <div className="border-paper-line bg-paper-panel hover:border-brass/60 flex flex-wrap items-center justify-between gap-x-4 gap-y-1 rounded-sm border px-4 py-2 transition">
+      <Link
+        href={`/project-plans/project/${project.id}`}
+        className="paper-task-title text-ink hover:text-brass min-w-0"
+      >
+        {project.title}
+      </Link>
+      <div className="flex shrink-0 items-center gap-4">
+        <ProjectNumberSelect
+          projectId={project.id}
+          field="priority"
+          label="Priority"
+          initial={project.priority}
+        />
+        <ProjectNumberSelect
+          projectId={project.id}
+          field="days_to_build"
+          label="Days to Build"
+          initial={project.daysToBuild}
+        />
+      </div>
+    </div>
   );
 }
