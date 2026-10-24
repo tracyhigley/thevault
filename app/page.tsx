@@ -189,7 +189,7 @@ export default async function DocketPage() {
   );
 
   return (
-    <div className="mx-auto max-w-[820px] px-4 py-6 md:px-10 md:py-10">
+    <div className="mx-auto max-w-[1100px] px-4 py-6 md:px-10 md:py-10">
       <UnsealGlow />
       <div className="flex items-start gap-4">
         <div className="shrink-0">
