@@ -108,11 +108,22 @@ export default async function AllProjectPlansPage() {
       {SECTIONS.map((section) => {
         const groups = groupsFor(section.phase);
         const count = groups.reduce((n, g) => n + g.projects.length, 0);
+        // Sum of Days to Build across the section; unset counts as 0.
+        const totalDays = groups.reduce(
+          (n, g) =>
+            n + g.projects.reduce((m, p) => m + (p.daysToBuild ?? 0), 0),
+          0,
+        );
         return (
           <section key={section.phase} className="mt-12">
-            <h2 className="serif-h border-paper-line text-brass border-b-2 pb-2 text-[30px] leading-tight md:text-[34px]">
-              {section.label}
-              {count > 0 ? ` · ${count}` : ""}
+            <h2 className="serif-h border-paper-line text-brass flex items-baseline justify-between gap-4 border-b-2 pb-2 text-[30px] leading-tight md:text-[34px]">
+              <span>
+                {section.label}
+                {count > 0 ? ` · ${count}` : ""}
+              </span>
+              <span className="shrink-0 text-[20px] md:text-[22px]">
+                Total Days: {totalDays}
+              </span>
             </h2>
             {groups.length === 0 ? (
               <p className="text-ink-mute mt-4 text-[13px]">{section.empty}</p>
