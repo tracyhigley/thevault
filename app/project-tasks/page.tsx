@@ -12,7 +12,7 @@
 import Link from "next/link";
 import { getBuildings } from "@/lib/categories";
 import { getProjects } from "@/lib/projects";
-import { getProjectTaskTodayLinks } from "@/lib/plan-actions";
+import { todayYmd } from "@/lib/day-timezone";
 import {
   ProjectTaskBuildingGroups,
   type ProjectTaskBuildingSection,
@@ -94,11 +94,14 @@ function groupsByBuilding(
 }
 
 export default async function ProjectTasksPage() {
-  const [buildings, projects, todayLinks] = await Promise.all([
+  const [buildings, projects] = await Promise.all([
     getBuildings(),
     getProjects(),
-    getProjectTaskTodayLinks(),
   ]);
+  // "On today" = ☀-marked today, the same rule the Today page's Currently
+  // Under Construction card uses (see lib/under-construction.ts), so the
+  // two pages' hours agree.
+  const today = todayYmd();
 
   const buildingByKey = new Map(buildings.map((b) => [b.key, b]));
   const active = projects.filter((p) => p.phase === "building");
@@ -115,7 +118,7 @@ export default async function ProjectTasksPage() {
         minutes: t.minutes,
         urgent: t.urgent,
         createdAt: t.createdAt,
-        onToday: todayLinks[t.id]?.onToday ?? false,
+        onToday: t.todayDate === today,
       }))
       // Urgent (⚡) tasks float to the top of their project card, then
       // oldest-pulled first — same idea as Maint Tasks' Urgent section.
