@@ -45,10 +45,10 @@ export function ProjectTaskSunToggle({
         });
       }}
       className={clsx(
-        "flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-[13px] leading-none transition disabled:opacity-60",
+        "flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-[19px] leading-none transition disabled:opacity-60",
         on
-          ? "border-orange-400 bg-orange-400/20 text-orange-600"
-          : "border-paper-line/60 text-ink-mute/50 hover:border-orange-300 hover:text-orange-500",
+          ? "border-yellow-400 bg-yellow-300/30 text-yellow-400"
+          : "border-paper-line/60 text-ink-mute/50 hover:border-yellow-300 hover:text-yellow-400",
       )}
     >
       {/* text-style sun (U+FE0E) so it matches the ☾, not an emoji */}
