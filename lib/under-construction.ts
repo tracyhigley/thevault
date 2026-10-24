@@ -4,19 +4,26 @@
 // there's no separate "+ TODAY" pull anymore.
 //
 // Which projects: only those in the "building" (Under Construction) phase,
-// and only from The Support Center, Library, Press, and Mercantile. Each
-// shows up to UNDER_CONSTRUCTION_TASK_LIMIT checked tasks — urgent first, then oldest.
+// and only from The Library, Press, Mercantile, and Support Center — always
+// listed in that building order (Tracy's choice, 2026-10-24). Within a
+// building, projects keep their saved task-group order, then oldest first.
+// Each shows up to UNDER_CONSTRUCTION_TASK_LIMIT checked tasks — urgent
+// first, then oldest.
 
 import type { Project } from "./projects";
 
 export const UNDER_CONSTRUCTION_TASK_LIMIT = 3;
 
-const UNDER_CONSTRUCTION_BUILDINGS = new Set([
-  "THE_SUPPORT_CENTER",
+// Display order matters: Today lists projects building by building in this order.
+const UNDER_CONSTRUCTION_BUILDING_ORDER = [
   "THE_LIBRARY",
   "THE_PRESS",
   "THE_MERCANTILE",
-]);
+  "THE_SUPPORT_CENTER",
+];
+const UNDER_CONSTRUCTION_BUILDINGS = new Set(UNDER_CONSTRUCTION_BUILDING_ORDER);
+const buildingRank = (key: string) =>
+  UNDER_CONSTRUCTION_BUILDING_ORDER.indexOf(key);
 
 export type UnderConstructionTask = {
   taskId: string;
@@ -42,6 +49,8 @@ export function underConstructionGroups(
         p.phase === "building" && UNDER_CONSTRUCTION_BUILDINGS.has(p.building),
     )
     .sort((a, b) => {
+      const byBuilding = buildingRank(a.building) - buildingRank(b.building);
+      if (byBuilding !== 0) return byBuilding;
       if (a.taskGroupOrder != null && b.taskGroupOrder != null) {
         return a.taskGroupOrder - b.taskGroupOrder;
       }
