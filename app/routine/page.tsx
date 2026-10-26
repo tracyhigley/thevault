@@ -13,10 +13,15 @@ import {
   ROUTINE_SLOTS,
   addDaysYmd,
   averageScores,
+  countUnloggedDays,
   isRoutineSlot,
   type RoutineSlot,
 } from "@/lib/routine";
-import { getRoutineDay, getRoutineRange } from "@/lib/routine-data";
+import {
+  getFirstRoutineDate,
+  getRoutineDay,
+  getRoutineRange,
+} from "@/lib/routine-data";
 import { RoutineChecklist } from "@/components/routine-checklist";
 
 function dateLabel(ymd: string): string {
@@ -43,14 +48,18 @@ export default async function RoutinePage({
       : today;
   const slotInfo = ROUTINE_SLOTS.find((s) => s.key === slot)!;
 
-  const [checked, last30] = await Promise.all([
+  const [checked, last30, firstLogged] = await Promise.all([
     getRoutineDay(date),
     getRoutineRange(addDaysYmd(today, -29), today),
+    getFirstRoutineDate(),
   ]);
   const week = averageScores(
     last30.filter((d) => d.date >= addDaysYmd(today, -6)).map((d) => d.checked),
   );
   const month = averageScores(last30.map((d) => d.checked));
+  const loggedDates = last30.map((d) => d.date);
+  const weekSkipped = countUnloggedDays(loggedDates, today, 7, firstLogged);
+  const monthSkipped = countUnloggedDays(loggedDates, today, 30, firstLogged);
 
   const prev = addDaysYmd(date, -1);
   const next = addDaysYmd(date, 1);
@@ -150,6 +159,11 @@ export default async function RoutinePage({
               <td className="py-2">Days logged</td>
               <td className="py-2 text-right tabular-nums">{week.days}</td>
               <td className="py-2 text-right tabular-nums">{month.days}</td>
+            </tr>
+            <tr className="border-paper-line/60 text-ink-mute border-t font-mono text-[11px]">
+              <td className="py-2">Days not logged</td>
+              <td className="py-2 text-right tabular-nums">{weekSkipped}</td>
+              <td className="py-2 text-right tabular-nums">{monthSkipped}</td>
             </tr>
           </tbody>
         </table>

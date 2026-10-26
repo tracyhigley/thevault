@@ -45,3 +45,18 @@ export async function getRoutineRange(
     }))
     .filter((r) => r.checked.length > 0);
 }
+
+/** The earliest day with anything logged, or null if nothing ever was. */
+export async function getFirstRoutineDate(): Promise<string | null> {
+  if (!envReady()) return null;
+  const sb = await supabaseServer();
+  const { data } = await sb
+    .from("routine_days")
+    .select("date, checked")
+    .order("date", { ascending: true })
+    .limit(60);
+  const first = (data ?? []).find(
+    (r: any) => Array.isArray(r.checked) && r.checked.length > 0,
+  );
+  return first ? String(first.date) : null;
+}

@@ -247,6 +247,30 @@ export function averageScores(days: string[][]): {
   return { days: days.length, scores: total };
 }
 
+/**
+ * How many days in the last `windowDays` (ending today) had nothing logged
+ * at all. Days before the first-ever logged day don't count (tracking
+ * hadn't started), and today never counts — it's still in progress, so it
+ * can't be "skipped" yet. `loggedDates` are YYYY-MM-DD strings of days with
+ * at least one item checked.
+ */
+export function countUnloggedDays(
+  loggedDates: string[],
+  today: string,
+  windowDays: number,
+  firstLoggedDate: string | null,
+): number {
+  if (!firstLoggedDate) return 0;
+  const logged = new Set(loggedDates);
+  let start = addDaysYmd(today, -(windowDays - 1));
+  if (firstLoggedDate > start) start = firstLoggedDate;
+  let count = 0;
+  for (let d = start; d < today; d = addDaysYmd(d, 1)) {
+    if (!logged.has(d)) count++;
+  }
+  return count;
+}
+
 /** Shift a YYYY-MM-DD date by whole days (calendar math, no time zones). */
 export function addDaysYmd(ymd: string, delta: number): string {
   const [y, m, d] = ymd.split("-").map((p) => parseInt(p, 10));

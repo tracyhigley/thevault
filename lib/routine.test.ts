@@ -5,6 +5,7 @@ import {
   scoreDay,
   averageScores,
   addDaysYmd,
+  countUnloggedDays,
 } from "./routine";
 
 describe("routine checklist", () => {
@@ -63,5 +64,24 @@ describe("routine checklist", () => {
   it("shifts dates across month boundaries", () => {
     expect(addDaysYmd("2026-10-01", -1)).toBe("2026-09-30");
     expect(addDaysYmd("2026-12-31", 1)).toBe("2027-01-01");
+  });
+});
+
+describe("countUnloggedDays", () => {
+  it("counts skipped days, ignoring today and days before tracking began", () => {
+    const today = "2026-10-26";
+    const logged = ["2026-10-22", "2026-10-23", "2026-10-24"];
+    // 22-25 are in range before today; only the 25th is missing.
+    expect(countUnloggedDays(logged, today, 7, "2026-10-22")).toBe(1);
+    expect(countUnloggedDays(logged, today, 30, "2026-10-22")).toBe(1);
+  });
+  it("clips to the window when tracking started earlier", () => {
+    // Window of 7 ending 10-26 starts 10-20; 20..25 = 6 days, 2 logged.
+    expect(
+      countUnloggedDays(["2026-10-21", "2026-10-24"], "2026-10-26", 7, "2026-09-01"),
+    ).toBe(4);
+  });
+  it("is zero when nothing has ever been logged", () => {
+    expect(countUnloggedDays([], "2026-10-26", 30, null)).toBe(0);
   });
 });
