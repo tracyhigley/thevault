@@ -2,11 +2,9 @@
 import { useState, useTransition } from "react";
 import { addCustomBlock } from "@/lib/actions";
 
-// Quick-add for an ad-hoc Today task that isn't sourced from Maint Tasks
-// or Project Tasks. Lands in the Maint Tasks card (same box, same shape —
-// just tagged CUSTOM_BLOCK so it never lands on the Maint Tasks page
-// itself). No time-of-day pinning anymore — Today is three cards, not a
-// timed schedule.
+// Quick-add for an ad-hoc Today task. Creates a regular Maint Task that's
+// already on today's plan, so it also appears on the Maint Tasks page and
+// persists there if it isn't completed today (see addCustomBlock).
 export function CustomBlockForm() {
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");

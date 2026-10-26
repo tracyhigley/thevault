@@ -838,11 +838,14 @@ export async function applyAtmBoxBudgets(
   revalidatePath("/build");
 }
 
-// Custom block on the Docket — creates a Today-only item. Lives in the
-// COUNTER box (that's what Today's schedule reads), but tagged CUSTOM_BLOCK
-// and excluded on Maint Tasks (see the `all` filter there) so it never shows
-// up as an Maint Tasks obligation — it's Today-only scratch, same idea as
-// how Project Task pulls are excluded there via sourceTaskId.
+// Custom task from Today's "+ ADD A CUSTOM TASK". Creates a regular Maint
+// Task (COUNTER box, no tag, no building -> General Life) that's already
+// placed on today's plan. Because it's an ordinary Maint Task row, it also
+// shows on the Maint Tasks page, so if it isn't finished today it persists
+// there after the next rebuild clears today_order. Completing it on Today
+// marks the same row done, which drops it from Maint Tasks too.
+// (Older custom blocks were tagged CUSTOM_BLOCK and stay Today-only; the
+// CUSTOM_BLOCK exclusions elsewhere are kept for those legacy rows.)
 export async function addCustomBlock(opts: {
   title: string;
   minutes: number;
@@ -869,7 +872,7 @@ export async function addCustomBlock(opts: {
     vault_id: vaultId,
     user_id: user.id,
     box: "COUNTER",
-    tag: "CUSTOM_BLOCK",
+    tag: null,
     title: opts.title.trim(),
     minutes: opts.minutes,
     urgent: false,
